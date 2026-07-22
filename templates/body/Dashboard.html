@@ -1,14 +1,33 @@
 {% extends "base.html" %}
 {% block title %}All Dash{% endblock %}
 
-
 {% block content %}
 {% include 'header/navbar.html' %}
 
+<div id="NepCal" class="container-fluid">
+    <div class="container">
+        <div class="dashboard-card">
+            <div class="dashboard-hero">
+                <span class="dashboard-chip">dashboard</span>
+                <h1 class="dashboard-title">Nepali Calendar</h1>
+                <p class="dashboard-subtitle">A modern dashboard layout with elevated surfaces, soft depth, and a material-inspired visual system for a cleaner browsing experience.</p>
+            </div>
 
-    <h1>Welcome to the Dashboard</h1>
-    <p1>Make this thing work!</p1>
-
-
-
+            <div class="dashboard-grid">
+                <div class="dashboard-tile">
+                    <span class="tile-label">Quick access</span>
+                    <span class="tile-value">12 items</span>
+                </div>
+                <div class="dashboard-tile">
+                    <span class="tile-label">Today</span>
+                    <span class="tile-value">12 Jul</span>
+                </div>
+                <div class="dashboard-tile">
+                    <span class="tile-label">Focus</span>
+                    <span class="tile-value">Live data</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
