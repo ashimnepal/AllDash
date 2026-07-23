@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="f1-dashboard-card">
+            <div class="f1-dashboard-header">
+                <div class="dashboard-chip">MotoGP</div>
+                <div class="f1-live-pill">Next GP: Valencia</div>
+            </div>
+
+            <div class="f1-dashboard-grid">
+                <div class="f1-feature-card">
+                    <div class="f1-feature-label">Current Leader</div>
+                    <h3 class="f1-feature-title">Jorge Martin</h3>
+                    <div class="f1-feature-meta">+18 pts lead • 1st overall</div>
+                    <div class="f1-feature-chart">
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">345</div>
+                            <div class="f1-chart-bar bar-1"></div>
+                            <div class="f1-chart-name">Martin</div>
+                        </div>
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">327</div>
+                            <div class="f1-chart-bar bar-2"></div>
+                            <div class="f1-chart-name">Bagnaia</div>
+                        </div>
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">303</div>
+                            <div class="f1-chart-bar bar-3"></div>
+                            <div class="f1-chart-name">Marquez</div>
+                        </div>
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">281</div>
+                            <div class="f1-chart-bar bar-4"></div>
+                            <div class="f1-chart-name">Rins</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="f1-racers-grid">
+                    <div class="f1-racer-card">
+                        <div class="f1-racer-rank">1</div>
+                        <div class="f1-racer-name">Jorge Martin</div>
+                        <div class="f1-racer-team">Pramac Racing</div>
+                    </div>
+                    <div class="f1-racer-card">
+                        <div class="f1-racer-rank">2</div>
+                        <div class="f1-racer-name">Francesco Bagnaia</div>
+                        <div class="f1-racer-team">Ducati</div>
+                    </div>
+                    <div class="f1-racer-card">
+                        <div class="f1-racer-rank">3</div>
+                        <div class="f1-racer-name">Marc Marquez</div>
+                        <div class="f1-racer-team">Gresini</div>
+                    </div>
+                </div>
+
+                <div class="f1-event-card">
+                    <div class="f1-event-label">Incoming Event</div>
+                    <h4 class="f1-event-title">MotoGP Valencia</h4>
+                    <div class="f1-countdown-row">
+                        <div class="f1-countdown-box">
+                            <div class="f1-countdown-value">03</div>
+                            <div class="f1-countdown-label">Days</div>
+                        </div>
+                        <div class="f1-countdown-box">
+                            <div class="f1-countdown-value">08</div>
+                            <div class="f1-countdown-label">Hours</div>
+                        </div>
+                        <div class="f1-countdown-box">
+                            <div class="f1-countdown-value">42</div>
+                            <div class="f1-countdown-label">Mins</div>
+                        </div>
+                    </div>
+                    <div class="f1-event-meta">Location: Valencia, Spain</div>
+                    <div class="f1-event-meta">Saturday practice at 13:00 • Sunday race at 14:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

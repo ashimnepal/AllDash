@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="f1-dashboard-card">
+            <div class="f1-dashboard-header">
+                <div class="dashboard-chip">Formula 1</div>
+                <div class="f1-live-pill">Next GP: Monaco</div>
+            </div>
+
+            <div class="f1-dashboard-grid">
+                <div class="f1-feature-card">
+                    <div class="f1-feature-label">Current Leader</div>
+                    <h3 class="f1-feature-title">Max Verstappen</h3>
+                    <div class="f1-feature-meta">+12 pts lead • 1st overall</div>
+                    <div class="f1-feature-chart">
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">289</div>
+                            <div class="f1-chart-bar bar-1"></div>
+                            <div class="f1-chart-name">Verstappen</div>
+                        </div>
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">277</div>
+                            <div class="f1-chart-bar bar-2"></div>
+                            <div class="f1-chart-name">Leclerc</div>
+                        </div>
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">261</div>
+                            <div class="f1-chart-bar bar-3"></div>
+                            <div class="f1-chart-name">Norris</div>
+                        </div>
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">248</div>
+                            <div class="f1-chart-bar bar-4"></div>
+                            <div class="f1-chart-name">Piastri</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="f1-racers-grid">
+                    <div class="f1-racer-card">
+                        <div class="f1-racer-rank">1</div>
+                        <div class="f1-racer-name">Max Verstappen</div>
+                        <div class="f1-racer-team">Red Bull</div>
+                    </div>
+                    <div class="f1-racer-card">
+                        <div class="f1-racer-rank">2</div>
+                        <div class="f1-racer-name">Charles Leclerc</div>
+                        <div class="f1-racer-team">Ferrari</div>
+                    </div>
+                    <div class="f1-racer-card">
+                        <div class="f1-racer-rank">3</div>
+                        <div class="f1-racer-name">Lando Norris</div>
+                        <div class="f1-racer-team">McLaren</div>
+                    </div>
+                </div>
+
+                <div class="f1-event-card">
+                    <div class="f1-event-label">Incoming Event</div>
+                    <h4 class="f1-event-title">Monaco Grand Prix</h4>
+                    <div class="f1-countdown-row">
+                        <div class="f1-countdown-box">
+                            <div class="f1-countdown-value">03</div>
+                            <div class="f1-countdown-label">Days</div>
+                        </div>
+                        <div class="f1-countdown-box">
+                            <div class="f1-countdown-value">08</div>
+                            <div class="f1-countdown-label">Hours</div>
+                        </div>
+                        <div class="f1-countdown-box">
+                            <div class="f1-countdown-value">42</div>
+                            <div class="f1-countdown-label">Mins</div>
+                        </div>
+                    </div>
+                    <div class="f1-event-meta">Location: Monte Carlo, Monaco</div>
+                    <div class="f1-event-meta">Saturday qualifying at 15:00 • Sunday lights out at 14:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

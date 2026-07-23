@@ -19,6 +19,8 @@
 
 body {
   min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at top left, rgba(79, 70, 229, 0.18), transparent 30%),
     radial-gradient(circle at top right, rgba(236, 72, 153, 0.13), transparent 28%),
@@ -72,7 +74,7 @@ body::before {
   padding: 0.4rem 0.85rem;
   border-radius: 999px;
   background: rgba(79, 70, 229, 0.12);
-  color: var(--primary);
+  color: #ffffff;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -412,6 +414,392 @@ body::before {
   box-shadow: 0 18px 38px rgba(79, 70, 229, 0.18);
 }
 
+.stock-market-card {
+  max-width: 100%;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  box-shadow: 0 18px 45px rgba(31, 41, 55, 0.14);
+  background: linear-gradient(135deg, rgba(14, 22, 38, 0.98), rgba(25, 31, 48, 0.96));
+}
+
+.stock-market-body {
+  padding: 1rem;
+  color: #ffffff;
+}
+
+.stock-market-trend {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1.25rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
+  border-left: 3px solid rgba(255, 255, 255, 0.75);
+}
+
+.stock-market-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.stock-market-tile {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  background: #ffffff;
+  color: #111827;
+  padding: 1rem;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.12);
+}
+
+@media (max-width: 991px) {
+  .stock-market-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.f1-dashboard-card {
+  max-width: 100%;
+  overflow: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, rgba(14, 22, 38, 0.98), rgba(25, 31, 48, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.34);
+  padding: 1.15rem;
+  color: #ffffff;
+}
+
+.f1-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.f1-live-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.f1-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.9fr;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.f1-feature-card,
+.f1-racer-card,
+.f1-event-card {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+}
+
+.f1-feature-label,
+.f1-event-label {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.f1-feature-title,
+.f1-event-title {
+  margin: 0.35rem 0 0.25rem;
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.f1-feature-meta,
+.f1-event-meta,
+.f1-racer-team,
+.f1-event-text {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.88rem;
+}
+
+.cricket-result-status {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(74, 222, 128, 0.14);
+  color: #86efac;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cricket-match-score {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.8rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.cricket-team {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.cricket-team-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cricket-team strong {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.cricket-vs {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.cricket-result-footer {
+  margin-top: 0.9rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.f1-feature-chart {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  min-height: 200px;
+}
+
+.f1-chart-item {
+  display: grid;
+  gap: 0.35rem;
+  align-items: end;
+  min-width: 0;
+}
+
+.f1-chart-value {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #f8fafc;
+  text-align: center;
+}
+
+.f1-chart-bar {
+  width: 100%;
+  border-radius: 14px 14px 4px 4px;
+  min-height: 38px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.bar-1 {
+  min-height: 120px;
+  background: linear-gradient(180deg, #facc15, #f97316);
+}
+
+.bar-2 {
+  min-height: 98px;
+  background: linear-gradient(180deg, #38bdf8, #2563eb);
+}
+
+.bar-3 {
+  min-height: 82px;
+  background: linear-gradient(180deg, #60a5fa, #2563eb);
+}
+
+.bar-4 {
+  min-height: 64px;
+  background: linear-gradient(180deg, #4ade80, #16a34a);
+}
+
+.f1-chart-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.f1-racers-grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.f1-racer-card {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.f1-racer-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #f97316;
+  color: #111827;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.f1-racer-name {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.f1-event-card {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.f1-event-title {
+  font-size: 1.35rem;
+}
+
+.premier-club-feature {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 1rem;
+}
+
+.premier-club-banner {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.85rem;
+}
+
+.premier-club-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.premier-club-card {
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 0.9rem;
+}
+
+.premier-club-tag {
+  color: #facc15;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.45rem;
+}
+
+.premier-club-name {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.premier-club-meta {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.82rem;
+}
+
+.f1-countdown-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.f1-countdown-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 0.6rem 0.5rem;
+  text-align: center;
+}
+
+.f1-countdown-value {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #f8fafc;
+  line-height: 1;
+}
+
+.f1-countdown-label {
+  margin-top: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.78);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 991px) {
+  .f1-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .f1-dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .tile-label {
   display: block;
   margin-bottom: 0.6rem;
@@ -448,3 +836,12 @@ body::before {
   opacity: 0.9;
 }
 
+.text-market
+{
+  color: rgb(71, 233, 158) !important;
+}
+
+.text-topmarket
+{
+  color: rgb(255, 255, 255) !important;
+}
