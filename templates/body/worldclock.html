@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<div id="WorldClock" class="container-fluid">
+    <div class="container">
+        <div class="worldclock-card">
+            <div class="worldclock-hero">
+                <span class="dashboard-chip">Global Time</span>
+                <h1 class="dashboard-title">World Clock</h1>
+            </div>
+
+            <div class="worldclock-grid">
+                <div class="worldclock-tile" data-timezone="Asia/Kathmandu" data-label="Nepal">
+                    <span class="worldclock-country">Nepal</span>
+                    <span class="worldclock-city">Kathmandu</span>
+                    <span class="worldclock-time" id="time-Asia/Kathmandu">--:--:--</span>
+                    <span class="worldclock-date" id="date-Asia/Kathmandu">--</span>
+                </div>
+                
+
+                <div class="worldclock-tile" data-timezone="Europe/London" data-label="London">
+                    <span class="worldclock-country">Manitoba</span>
+                    <span class="worldclock-city">Winnipeg</span>
+                    <span class="worldclock-time" id="time-Europe/London">--:--:--</span>
+                    <span class="worldclock-date" id="date-Europe/London">--</span>
+                </div>
+
+                <div class="worldclock-tile" data-timezone="America/New_York" data-label="New York">
+                    <span class="worldclock-country">Australia</span>
+                    <span class="worldclock-city">Darwin</span>
+                    <span class="worldclock-time" id="time-America/New_York">--:--:--</span>
+                    <span class="worldclock-date" id="date-America/New_York">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

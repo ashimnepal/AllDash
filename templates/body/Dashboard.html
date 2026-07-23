@@ -10,35 +10,17 @@
             {% include 'body/leftsidebar_socials.html' %}
 
 
-            <div class="col-md-8">
-                <div class="dashboard-card">
-                    <div class="dashboard-hero dashboard-calendar-shell">
-                        <div class="dashboard-calendar-top">
-                            <span class="dashboard-chip">Today</span>
-                            <span class="dashboard-date-pill">22 July 2026</span>
-                        </div>
-
-                        <div class="dashboard-calendar-body">
-                            <div class="dashboard-calendar-date">
-                                <span class="dashboard-calendar-weekday">Wednesday</span>
-                                <span class="dashboard-calendar-day">22</span>
-                                <span class="dashboard-calendar-month">July</span>
-                            </div>
-
-                            <div class="dashboard-calendar-detail">
-                                <span class="dashboard-special-label">Special Today</span>
-                                <h2 class="dashboard-calendar-title">Hariyali Teej</h2>
-                                <p class="dashboard-calendar-text">A festive day celebrated with vibrant rituals, prayers, and traditions across Nepal.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% include 'body/calander.html' %}              
 
 
 
             {% include 'body/rightsidebar_events.html' %}
+
+
+            
         </div>
     </div>
 </div>
+
+
 {% endblock %}
