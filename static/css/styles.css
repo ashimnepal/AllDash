@@ -376,10 +376,11 @@ body::before {
   background: var(--surface-strong);
   border: 1px solid rgba(79, 70, 229, 0.1);
   box-shadow: var(--shadow-soft);
+  color: #64748b;
   font-size: 15px;
-  line-height: 1.1;
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: 0;
 }
 
 .dashboard-subtitle {
