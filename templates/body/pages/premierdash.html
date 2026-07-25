@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+<div class="container py-4">
+    <div class="container">
+        <div class="premier-dashboard-card">
+            <div class="premier-dashboard-hero">
+                <div class="premier-dashboard-top">
+                    <span class="dashboard-chip">Premier League</span>
+                    <span class="dashboard-date-pill">Matchday 34 • Live</span>
+                </div>
+                <h1 class="dashboard-title">A complete view of the title race</h1>
+                <p class="dashboard-calendar-text">Stay on top of the form table, fixtures, and standout performances in one clean dashboard.</p>
+            </div>
+
+            <div class="premier-dashboard-grid">
+                <div class="premier-panel premier-match-panel">
+                    <div class="premier-panel-header">
+                        <span>Next Match</span>
+                        <span class="premier-pill">Saturday • 5:30 PM</span>
+                    </div>
+                    <div class="premier-match-teams">
+                        <div class="premier-team-block">
+                            <span class="premier-team-name">Arsenal</span>
+                            <span class="premier-team-tag">Home</span>
+                        </div>
+                        <div class="premier-vs">VS</div>
+                        <div class="premier-team-block">
+                            <span class="premier-team-name">Liverpool</span>
+                            <span class="premier-team-tag">Away</span>
+                        </div>
+                    </div>
+                    <div class="premier-match-meta">
+                        <span>Emirates Stadium</span>
+                        <span>Premier League</span>
+                    </div>
+                </div>
+
+                <div class="premier-panel premier-standings-panel">
+                    <div class="premier-panel-header">
+                        <span>Standings</span>
+                        <span class="premier-pill">Top 5</span>
+                    </div>
+                    <div class="premier-standings-list">
+                        <div class="premier-standings-row"><span>1. Arsenal</span><span>84 pts</span></div>
+                        <div class="premier-standings-row"><span>2. Man City</span><span>78 pts</span></div>
+                        <div class="premier-standings-row"><span>3. Liverpool</span><span>75 pts</span></div>
+                        <div class="premier-standings-row"><span>4. Tottenham</span><span>70 pts</span></div>
+                        <div class="premier-standings-row"><span>5. Aston Villa</span><span>68 pts</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="premier-dashboard-grid secondary">
+                <div class="premier-stat-card">
+                    <span class="premier-stat-label">Top Scorer</span>
+                    <h3>Erling Haaland</h3>
+                    <p>27 goals • 4 assists</p>
+                </div>
+                <div class="premier-stat-card">
+                    <span class="premier-stat-label">Form</span>
+                    <h3>W W W L W</h3>
+                    <p>Last 5 matches</p>
+                </div>
+                <div class="premier-stat-card">
+                    <span class="premier-stat-label">Clean Sheets</span>
+                    <h3>14</h3>
+                    <p>Most in the league</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

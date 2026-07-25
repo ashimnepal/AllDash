@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Premier League{% endblock %}
+
+{% block content %}
+{% include 'header/navbar.html' %}
+
+<div id="NepCal" class="container-fluid">
+    <div class="container-fluid">
+        <div class="row">
+            {% include 'body/pages/leftsidebar_champions.html' %}
+
+
+            {% include 'body/pages/premierdash.html' %}
+
+
+            {% include 'body/pages/rightsidebar_league.html' %}
+        </div>
+
+
+        
+
+    </div>
+
+</div>
+
+
+
+
+{% endblock %}

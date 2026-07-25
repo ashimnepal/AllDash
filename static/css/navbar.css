@@ -9,11 +9,11 @@
     z-index: 10;
     width: 100%;
     padding: 0.9rem 1rem;
-    background: rgba(255, 255, 255, 0.78);
+    background: linear-gradient(135deg, rgba(2, 6, 23, 1), rgba(2, 8, 23, 0.98));
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-    border-bottom: 1px solid rgba(79, 70, 229, 0.08);
+    box-shadow: 0 16px 36px rgba(2, 6, 23, 0.52);
+    border-bottom: 1px solid rgba(129, 140, 248, 0.24);
 }
 
 .navbar .container {
@@ -26,8 +26,8 @@
 }
 
 .navbar-brand {
-    color: #475569 !important;
-    font-weight: 500;
+    color: #f8fafc !important;
+    font-weight: 600;
     font-size: 1.25rem;
     letter-spacing: 0.02em;
     text-decoration: none;
@@ -36,7 +36,7 @@
 
 .navbar-brand:hover,
 .navbar-brand:focus {
-    color: #4f46e5 !important;
+    color: #c7d2fe !important;
 }
 
 .navbar-collapse {
@@ -56,8 +56,8 @@
 }
 
 .nav-link {
-    color: #64748b !important;
-    font-weight: 400;
+    color: #e2e8f0 !important;
+    font-weight: 500;
     font-size: 0.9rem;
     padding: 0.55rem 0.85rem !important;
     border-radius: 999px;
@@ -68,18 +68,18 @@
 .nav-link:focus,
 .nav-link.active {
     color: #ffffff !important;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    box-shadow: 0 10px 24px rgba(79, 70, 229, 0.22);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    box-shadow: 0 10px 24px rgba(99, 102, 241, 0.28);
 }
 
 .navbar-toggler {
-    border: 1px solid rgba(79, 70, 229, 0.22);
+    border: 1px solid rgba(129, 140, 248, 0.24);
     border-radius: 0.8rem;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(15, 23, 42, 0.9);
 }
 
 .navbar-toggler-icon {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(79,70,229,1)' stroke-linecap='round' stroke-width='2.5' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(248,250,252,1)' stroke-linecap='round' stroke-width='2.5' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
 }
 
 @media (max-width: 991px) {

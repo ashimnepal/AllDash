@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}All Dash{% endblock %}
+
+{% block content %}
+{% include 'header/navbar.html' %}
+
+<div id="NepCal" class="container-fluid">
+    <div class="container-fluid">
+        <div class="row">
+            {% include 'body/Dashboard/leftsidebar_socials.html' %}
+
+
+            {% include 'body/Dashboard/calander.html' %}
+
+
+            {% include 'body/Dashboard/rightsidebar_events.html' %}
+        </div>
+
+
+        {% include 'body/Dashboard/stockmarket.html' %}
+
+    </div>
+
+</div>
+
+{% include 'body/Dashboard/f1_dashboard_index.html' %}
+{% include 'body/Dashboard/motogp_dashboard_index.html' %}
+
+{% include 'body/Dashboard/premier_dashboard_index.html' %}
+{% include 'body/Dashboard/champions_dashboard_index.html' %}
+
+{% include 'body/Dashboard/nepal_cricket.html' %}
+
+
+{% endblock %}
