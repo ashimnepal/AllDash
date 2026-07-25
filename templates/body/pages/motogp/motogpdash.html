@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="col-md-8">
+    <div class="f1-dashboard-card">
+        <div class="f1-dashboard-header">
+            <div class="dashboard-chip">MotoGP</div>
+                <div class="f1-live-pill">Next GP: Valencia</div>
+            </div>
+
+            <div class="f1-dashboard-grid">
+                <div class="f1-feature-card">
+                    <div class="f1-feature-label">Current Leader</div>
+                    <h3 class="f1-feature-title">Jorge Martin</h3>
+                    <div class="f1-feature-meta">+18 pts lead • 1st overall</div>
+                    <div class="f1-feature-chart">
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">345</div>
+                            <div class="f1-chart-bar bar-1"></div>
+                            <div class="f1-chart-name">Martin</div>
+                        </div>
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">327</div>
+                            <div class="f1-chart-bar bar-2"></div>
+                            <div class="f1-chart-name">Bagnaia</div>
+                        </div>
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">303</div>
+                            <div class="f1-chart-bar bar-3"></div>
+                            <div class="f1-chart-name">Marquez</div>
+                        </div>
+                        <div class="f1-chart-item">
+                            <div class="f1-chart-value">281</div>
+                            <div class="f1-chart-bar bar-4"></div>
+                            <div class="f1-chart-name">Rins</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="f1-circuit-card">
+                    <div class="f1-circuit-label">Next Circuit</div>
+                    <h3 class="f1-circuit-name">Circuito Ricardo Tormo</h3>
+                    <div class="f1-circuit-meta">Valencia, Spain • 4.005 km • 14 turns</div>
+                    <div class="f1-circuit-diagram">
+                        <svg viewBox="0 0 240 140" class="f1-circuit-track" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20,90 C10,40 60,15 110,20 C150,24 150,55 130,60 C105,66 95,50 75,55 C55,60 60,85 85,90 C120,98 160,80 190,95 C215,108 210,130 180,130 C130,130 40,130 25,115 C12,102 15,100 20,90 Z"
+                                  fill="none" stroke="#818cf8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="20" cy="90" r="4.5" fill="#f8fafc"/>
+                        </svg>
+                    </div>
+                </div>
+
+            <div class="f1-event-card">
+                <div class="f1-event-label">Incoming Event</div>
+                <h4 class="f1-event-title">MotoGP Valencia</h4>
+                <div class="f1-countdown-row">
+                    <div class="f1-countdown-box">
+                        <div class="f1-countdown-value">03</div>
+                        <div class="f1-countdown-label">Days</div>
+                    </div>
+                    <div class="f1-countdown-box">
+                        <div class="f1-countdown-value">08</div>
+                        <div class="f1-countdown-label">Hours</div>
+                    </div>
+                    <div class="f1-countdown-box">
+                        <div class="f1-countdown-value">42</div>
+                        <div class="f1-countdown-label">Mins</div>
+                    </div>
+                </div>
+                <div class="f1-event-meta">Location: Valencia, Spain</div>
+                <div class="f1-event-meta">Saturday practice at 13:00 • Sunday race at 14:00</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

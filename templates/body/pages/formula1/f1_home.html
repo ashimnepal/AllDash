@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Formula 1{% endblock %}
+
+{% block content %}
+{% include 'header/navbar.html' %}
+
+<div id="NepCal" class="container-fluid">
+    <div class="container-fluid">
+        <div class="row">
+            {% include 'body/pages/formula1/sidebarleft_f1.html' %}
+
+            {% include 'body/pages/formula1/f1dash.html' %}
+
+            {% include 'body/pages/formula1/rightsidebar_league.html' %}
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                {% include 'body/pages/formula1/upcoming_matches.html' %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

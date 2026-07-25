@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+<div class="container py-4">
+    <div class="container">
+        <div class="premier-dashboard-card">
+            <div class="premier-dashboard-hero">
+                <div class="premier-dashboard-top">
+                    <span class="dashboard-chip">Club Focus</span>
+                    <span class="dashboard-date-pill">Matchday 34 • Live</span>
+                </div>
+                <h1 class="dashboard-title">Manchester United &amp; Barcelona Watch</h1>
+                <p class="dashboard-calendar-text">Track each club's current form, next fixture, and a live countdown to kickoff.</p>
+            </div>
+
+            <div class="teams-grid">
+                <!-- Manchester United Section -->
+                <div class="premier-panel team-focus-card">
+                    <div class="premier-panel-header">
+                        <span>Manchester United</span>
+                        <span class="premier-pill">Premier League</span>
+                    </div>
+
+                    <div class="premier-match-teams">
+                        <div class="premier-team-block">
+                            <span class="premier-team-name">Man United</span>
+                            <span class="premier-team-tag">Home</span>
+                        </div>
+                        <div class="premier-vs">VS</div>
+                        <div class="premier-team-block">
+                            <span class="premier-team-name">Tottenham</span>
+                            <span class="premier-team-tag">Away</span>
+                        </div>
+                    </div>
+                    <div class="premier-match-meta">
+                        <span>Old Trafford</span>
+                        <span>Saturday • 20:00</span>
+                    </div>
+
+                    <div class="premier-stat-card team-form-card">
+                        <span class="premier-stat-label">Form</span>
+                        <h3>W W D W L</h3>
+                        <p>Last 5 matches</p>
+                    </div>
+
+                    <div class="f1-event-card team-countdown" data-kickoff="2026-07-26T20:00:00">
+                        <div class="f1-event-label">Kickoff In</div>
+                        <div class="f1-countdown-row cols-4">
+                            <div class="f1-countdown-box">
+                                <div class="f1-countdown-value" data-unit="days">00</div>
+                                <div class="f1-countdown-label">Days</div>
+                            </div>
+                            <div class="f1-countdown-box">
+                                <div class="f1-countdown-value" data-unit="hours">00</div>
+                                <div class="f1-countdown-label">Hours</div>
+                            </div>
+                            <div class="f1-countdown-box">
+                                <div class="f1-countdown-value" data-unit="mins">00</div>
+                                <div class="f1-countdown-label">Mins</div>
+                            </div>
+                            <div class="f1-countdown-box">
+                                <div class="f1-countdown-value" data-unit="secs">00</div>
+                                <div class="f1-countdown-label">Secs</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barcelona Section -->
+                <div class="premier-panel team-focus-card">
+                    <div class="premier-panel-header">
+                        <span>Barcelona</span>
+                        <span class="premier-pill">La Liga</span>
+                    </div>
+
+                    <div class="premier-match-teams">
+                        <div class="premier-team-block">
+                            <span class="premier-team-name">Barcelona</span>
+                            <span class="premier-team-tag">Home</span>
+                        </div>
+                        <div class="premier-vs">VS</div>
+                        <div class="premier-team-block">
+                            <span class="premier-team-name">Real Madrid</span>
+                            <span class="premier-team-tag">Away</span>
+                        </div>
+                    </div>
+                    <div class="premier-match-meta">
+                        <span>Camp Nou</span>
+                        <span>Sunday • 21:00</span>
+                    </div>
+
+                    <div class="premier-stat-card team-form-card">
+                        <span class="premier-stat-label">Form</span>
+                        <h3>W W W D W</h3>
+                        <p>Last 5 matches</p>
+                    </div>
+
+                    <div class="f1-event-card team-countdown" data-kickoff="2026-07-28T21:00:00">
+                        <div class="f1-event-label">Kickoff In</div>
+                        <div class="f1-countdown-row cols-4">
+                            <div class="f1-countdown-box">
+                                <div class="f1-countdown-value" data-unit="days">00</div>
+                                <div class="f1-countdown-label">Days</div>
+                            </div>
+                            <div class="f1-countdown-box">
+                                <div class="f1-countdown-value" data-unit="hours">00</div>
+                                <div class="f1-countdown-label">Hours</div>
+                            </div>
+                            <div class="f1-countdown-box">
+                                <div class="f1-countdown-value" data-unit="mins">00</div>
+                                <div class="f1-countdown-label">Mins</div>
+                            </div>
+                            <div class="f1-countdown-box">
+                                <div class="f1-countdown-value" data-unit="secs">00</div>
+                                <div class="f1-countdown-label">Secs</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
