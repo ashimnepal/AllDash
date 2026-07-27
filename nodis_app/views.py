@@ -12,3 +12,6 @@ def motogp(request):
 
 def formula1(request):
     return render(request, 'body/pages/formula1/f1_home.html')
+    
+def expensetracking(request):
+    return render(request, 'body/pages/expense_tracking/expensetracking_dash.html')
