@@ -1264,9 +1264,9 @@ body::before {
   color: rgb(255, 255, 255) !important;
 }
 
-
-.pts-pad {
-  padding-left: 1.5rem;
+.thisiswhite
+{
+  color: rgb(255, 255, 255) !important;
 }
 
 .expense-page {
@@ -1780,4 +1780,604 @@ color: #f8fafc !important;
 @media (max-width: 767px) {
   .expense-page .stat-card { flex-direction: column; align-items: flex-start; }
   .expense-page .page-header { text-align: left; }
+}
+
+/* ==========================================================================
+   Stock Exchange (NEPSE) Dashboard — Material design
+   ========================================================================== */
+.stockex-page {
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(180deg, #060a14 0%, #0e1626 100%);
+  padding: 2.8rem 0 4rem;
+  overflow-x: hidden;
+}
+.stockex-page .container-fluid {
+  max-width: 100%;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+.stockex-page .row > [class*="col-"] {
+  min-width: 0;
+}
+.stockex-page .stock-sidebar-card:first-of-type {
+  margin-top: 0;
+}
+.stockex-page .card,
+.stockex-page .stock-hero-card {
+  background: rgba(10, 18, 39, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 32px;
+  box-shadow: 0 42px 100px rgba(0, 0, 0, 0.24);
+}
+.stockex-page .stock-hero-card .card-body {
+  padding: 2rem 2rem 2.25rem;
+}
+.stockex-page .page-header h1 {
+  font-size: clamp(2rem, 2.4vw, 3rem);
+  margin-bottom: 0.5rem;
+  color: #f8fafc;
+}
+.stockex-page .eyebrow {
+  letter-spacing: 0.22em;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  color: #6ee7b7;
+  font-weight: 800;
+}
+.stockex-page .stock-sub {
+  color: rgba(203, 213, 225, 0.72) !important;
+}
+.stockex-page .lead {
+  max-width: 640px;
+  color: #cbd5e1;
+  line-height: 1.75;
+}
+.stockex-page .header-actions {
+  flex-wrap: wrap;
+}
+.stockex-page .market-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #e2e8f0;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.stockex-page .status-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: #64748b;
+  box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.5);
+}
+.stockex-page .status-dot.is-open {
+  background: #34d399;
+  animation: stockex-pulse 1.8s infinite;
+}
+@keyframes stockex-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+.stockex-page .btn-fab {
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  border: none;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: #06120c;
+  box-shadow: 0 20px 44px rgba(16, 185, 129, 0.28);
+  transition: transform 0.18s ease;
+}
+.stockex-page .btn-fab:hover { transform: translateY(-1px); }
+.stockex-page .btn-fab.spinning { animation: stockex-spin 0.6s linear; }
+@keyframes stockex-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Stat cards */
+.stockex-page .material-card {
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 28px;
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.26);
+  padding: 1.6rem 1.7rem;
+}
+.stockex-page .material-card h5,
+.stockex-page .material-card h6 {
+  color: #f8fafc;
+}
+.stockex-page .stat-card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 1.4rem 1.5rem;
+}
+.stockex-page .stat-card > div {
+  min-width: 0;
+}
+.stockex-page .stat-card h3 {
+  font-size: 1.4rem;
+  overflow-wrap: break-word;
+  margin-bottom: 0.35rem;
+}
+.stockex-page .stat-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  box-shadow: 0 12px 24px rgba(16, 185, 129, 0.18);
+}
+.stockex-page .bg-emerald { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+.stockex-page .bg-indigo { background: linear-gradient(135deg, #5b70e6 0%, #8b8cf3 100%); }
+.stockex-page .bg-amber { background: linear-gradient(135deg, #facc15 0%, #fbbf24 100%); }
+.stockex-page .bg-violet { background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%); }
+.stockex-page .stat-label {
+  margin-bottom: 0.3rem;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+.stockex-page .stat-value {
+  color: #f8fafc;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.stockex-page .soft-badge {
+  display: inline-flex;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.16);
+  color: #d1fae5;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+.stockex-page .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+.stockex-page .chip-soft-success { background: rgba(16, 185, 129, 0.14); color: #86efac; }
+.stockex-page .chip-soft-danger { background: rgba(244, 63, 94, 0.14); color: #fda4af; }
+.stockex-page .chip-soft-secondary { background: rgba(148, 163, 184, 0.14); color: #cbd5e1; }
+
+/* Chart card */
+.stockex-page .chart-price {
+  color: #f8fafc;
+  font-weight: 800;
+  font-size: 2.1rem;
+}
+.stockex-page .timeframe-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+.stockex-page .chart-card .d-flex {
+  flex-wrap: wrap;
+  row-gap: 0.6rem;
+}
+.stockex-page .timeframe-pill {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.stockex-page .timeframe-pill:hover {
+  color: #e2e8f0;
+}
+.stockex-page .timeframe-pill.active {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: #052e1f;
+}
+.stockex-page .chart-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  margin-top: 0.75rem;
+}
+.stockex-page .chart-canvas-wrap canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.stockex-page .chart-stats {
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  padding-top: 1rem;
+}
+
+/* Movers card */
+.stockex-page .movers-tabs .movers-tab {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: transparent;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+}
+.stockex-page .movers-tabs .movers-tab.active {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #6ee7b7;
+}
+.stockex-page .mover-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+.stockex-page .mover-row:last-child { border-bottom: none; }
+.stockex-page .mover-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.stockex-page .mover-info strong { color: #f8fafc; }
+.stockex-page .mover-info span {
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stockex-page .mover-figures { flex: none; max-width: 45%; }
+.stockex-page .mover-price {
+  color: #f8fafc;
+  font-weight: 700;
+  font-size: 0.9rem;
+  overflow-wrap: break-word;
+}
+.stockex-page .sparkline {
+  width: 64px;
+  height: 24px;
+  flex: none;
+}
+
+/* Watchlist table */
+.stockex-page .watchlist-search {
+  min-width: 200px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  color: #e2e8f0;
+}
+.stockex-page .watchlist-search::placeholder {
+  color: #e2e8f0;
+  opacity: 0.65;
+}
+.stockex-page .table {
+  color: #e2e8f0;
+}
+.stockex-page .table thead th {
+  color: #94a3b8;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+.stockex-page .table tbody tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+.stockex-page .table tbody tr:last-child { border-bottom: none; }
+.stockex-page .table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.stockex-page .table td,
+.stockex-page .table th {
+  background: transparent !important;
+}
+.stockex-page .live-price {
+  font-weight: 700;
+  color: #f8fafc;
+  transition: color 0.3s ease;
+}
+.stockex-page .live-price.flash-up { color: #34d399; }
+.stockex-page .live-price.flash-down { color: #fb7185; }
+.stockex-page .watch-star {
+  border: none;
+  background: transparent;
+  color: rgba(148, 163, 184, 0.5);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+.stockex-page .watch-star:hover { transform: scale(1.15); }
+.stockex-page .watch-star.active { color: #facc15; }
+
+/* Sector performance */
+.stockex-page .sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.85rem;
+}
+.stockex-page .sector-chip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+.stockex-page .sector-chip span {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.stockex-page .sector-chip.is-up strong { color: #34d399; }
+.stockex-page .sector-chip.is-down strong { color: #fb7185; }
+
+/* News & alerts */
+.stockex-page .news-item {
+  display: flex;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  color: #cbd5e1;
+}
+.stockex-page .news-item:last-child { border-bottom: none; }
+.stockex-page .news-item p {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.stockex-page .news-time {
+  flex: none;
+  width: 4.2rem;
+  color: #6ee7b7;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+.stockex-page .alert-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+.stockex-page .alert-row:last-child { border-bottom: none; }
+.stockex-page .alert-row strong { color: #f8fafc; }
+.stockex-page .alert-row > div {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+/* Sidebar cards */
+.stockex-page .stock-sidebar-card .dashboard-chip {
+  background: rgba(16, 185, 129, 0.16);
+  color: #d1fae5;
+}
+.stockex-page .portfolio-value h3 {
+  color: #f8fafc;
+  font-size: 1.5rem;
+  overflow-wrap: break-word;
+}
+.stockex-page .portfolio-sparkline {
+  width: 100%;
+  height: 40px;
+  margin: 0.6rem 0;
+}
+.stockex-page .portfolio-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+.stockex-page .portfolio-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.2rem;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+.stockex-page .portfolio-row strong {
+  overflow-wrap: break-word;
+  text-align: right;
+}
+.stockex-page .text-up { color: #34d399; }
+.stockex-page .text-down { color: #fb7185; }
+
+/* Holdings list */
+.stockex-page .holdings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.stockex-page .holding-item {
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-left: 3px solid rgba(148, 163, 184, 0.4);
+}
+.stockex-page .holding-item.is-up {
+  border-left-color: #34d399;
+}
+.stockex-page .holding-item.is-down {
+  border-left-color: #fb7185;
+}
+.stockex-page .holding-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 0.3rem;
+  gap: 0.5rem;
+}
+.stockex-page .holding-top strong {
+  color: #f8fafc;
+  font-size: 0.95rem;
+}
+.stockex-page .holding-sub {
+  margin: 0.2rem 0 0.6rem;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  overflow-wrap: break-word;
+}
+.stockex-page .holding-prices {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 0.2rem;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.16);
+}
+.stockex-page .holding-prices strong {
+  color: #e2e8f0;
+  font-weight: 700;
+}
+.stockex-page .holding-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 0.2rem;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+}
+.stockex-page .holding-date {
+  color: #94a3b8;
+}
+.stockex-page .holding-profit {
+  font-weight: 700;
+  overflow-wrap: break-word;
+}
+.stockex-page .quick-trade-form .form-label {
+  color: #94a3b8;
+}
+.stockex-page .quick-trade-form .form-select,
+.stockex-page .quick-trade-form .form-control {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  color: #e2e8f0;
+}
+.stockex-page .btn-buy {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  border: none;
+  color: #052e1f;
+  font-weight: 700;
+}
+.stockex-page .btn-sell {
+  background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+  border: none;
+  color: #2c0410;
+  font-weight: 700;
+}
+.stockex-page .people-pill {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.4rem;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+.stockex-page .people-pill > .chip {
+  flex: none;
+  margin-left: auto;
+}
+.stockex-page .people-avatar {
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.2);
+  color: #d1fae5;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+.stockex-page .people-pill div { flex: 1; min-width: 0; }
+.stockex-page .people-pill strong {
+  display: block;
+  color: #f8fafc;
+  font-size: 0.85rem;
+}
+.stockex-page .people-pill p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+.stockex-page .mini-notice-list li {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  overflow-wrap: break-word;
+}
+.stockex-page .mini-notice-list li:last-child { border-bottom: none; }
+
+.stockex-page .stock-sidebar-card {
+  overflow: hidden;
+}
+.stockex-page .stock-sidebar-card .chip {
+  white-space: nowrap;
+}
+
+@media (max-width: 1199px) {
+  .stockex-page .stock-sidebar-card,
+  .stockex-page .col-md-2 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .stockex-page .col-md-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+@media (max-width: 991px) {
+  .stockex-page .stock-hero-card .card-body { padding: 1.5rem; }
+  .stockex-page .header-actions { width: 100%; justify-content: space-between; }
+}
+@media (max-width: 767px) {
+  .stockex-page .stat-card { flex-direction: column; align-items: flex-start; }
+  .stockex-page .mover-row { flex-wrap: wrap; }
+  .stockex-page .mover-figures { max-width: 100%; }
+  .stockex-page .sparkline { order: 3; width: 100%; height: 20px; }
 }

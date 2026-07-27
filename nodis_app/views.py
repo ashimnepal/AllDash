@@ -15,3 +15,6 @@ def formula1(request):
     
 def expensetracking(request):
     return render(request, 'body/pages/expense_tracking/expensetracking_dash.html')
+
+def stockex(request):
+    return render(request, 'body/pages/stockex/stockex_dash.html')

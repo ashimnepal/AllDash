@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% include 'header/navbar.html' %}
+
+    <div class="stockex-page">
+    <div class="container-fluid">
+        <div class="row">
+            {% include 'body/pages/stockex/sidebarleft_stock.html' %}
+            <div class="col-md-8">
+                {% include 'body/pages/stockex/stockex_mid.html' %}
+            </div>
+            {% include 'body/pages/stockex/sidebarright_stock.html' %}
+        </div>
+    </div>
+    </div>
+{% endblock %}

@@ -4,7 +4,7 @@
             class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-1 mb-4">
             <div>
                 <p class="eyebrow">Expense Tracking</p>
-                <h1>Material-style expense dashboard</h1>
+                
                 <p class="lead recent_expense">Monitor budgets, track spending categories, and add new expense entries with a
                     clean, elevated interface.</p>
             </div>
@@ -17,7 +17,7 @@
             <div class="stat-icon bg-indigo text-white">$</div>
             <div>
                 <p class="stat-label">Monthly budget</p>
-                <h3>Rs 85,000</h3>
+                <h3>CAD 85,000</h3>
             </div>
         </article>
     </div>
@@ -26,7 +26,7 @@
             <div class="stat-icon bg-warning text-dark">↑</div>
             <div>
                 <p class="stat-label">Spent so far</p>
-                <h3>Rs 48,250</h3>
+                <h3>CAD 48,250</h3>
             </div>
         </article>
     </div>
@@ -35,7 +35,7 @@
             <div class="stat-icon bg-success text-white">✓</div>
             <div>
                 <p class="stat-label">Remaining</p>
-                <h3>Rs 36,750</h3>
+                <h3>CAD 36,750</h3>
             </div>
         </article>
     </div>
@@ -76,39 +76,7 @@
                     </select>
                 </div>
             </div>
-            <div class="people-bar mb-3">
-                <span class="people-bar-label">Ask money from</span>
-                <div class="people-list d-flex flex-wrap gap-3">
-                    <div class="people-pill">
-                        <span class="people-avatar">AJ</span>
-                        <div>
-                            <strong>Aashim</strong>
-                            <p>Owes Rs 1,250</p>
-                        </div>
-                    </div>
-                    <div class="people-pill">
-                        <span class="people-avatar">SK</span>
-                        <div>
-                            <strong>Samira</strong>
-                            <p>Owes Rs 920</p>
-                        </div>
-                    </div>
-                    <div class="people-pill">
-                        <span class="people-avatar">RC</span>
-                        <div>
-                            <strong>Rohit</strong>
-                            <p>Owes Rs 2,500</p>
-                        </div>
-                    </div>
-                    <div class="people-pill">
-                        <span class="people-avatar">NP</span>
-                        <div>
-                            <strong>Nisha</strong>
-                            <p>Owes Rs 760</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+           
             <div class="table-responsive">
                 <table class="table table-borderless align-middle mb-0">
                     <thead>
@@ -123,31 +91,31 @@
                         <tr>
                             <td>Groceries</td>
                             <td><span class="chip chip-soft-success">Food</span></td>
-                            <td>Rs 5,450</td>
+                            <td>CAD 5,450</td>
                             <td>Jul 25</td>
                         </tr>
                         <tr>
                             <td>Electricity bill</td>
                             <td><span class="chip chip-soft-warning">Utilities</span></td>
-                            <td>Rs 3,100</td>
+                            <td>CAD 3,100</td>
                             <td>Jul 24</td>
                         </tr>
                         <tr>
                             <td>Mobile recharge</td>
                             <td><span class="chip chip-soft-info">Subscriptions</span></td>
-                            <td>Rs 899</td>
+                            <td>CAD 899</td>
                             <td>Jul 23</td>
                         </tr>
                         <tr>
                             <td>Dining out</td>
                             <td><span class="chip chip-soft-danger">Leisure</span></td>
-                            <td>Rs 2,750</td>
+                            <td>CAD 2,750</td>
                             <td>Jul 22</td>
                         </tr>
                         <tr>
                             <td>Fuel</td>
                             <td><span class="chip chip-soft-secondary">Transport</span></td>
-                            <td>Rs 4,200</td>
+                            <td>CAD 4,200</td>
                             <td>Jul 21</td>
                         </tr>
                     </tbody>
@@ -166,9 +134,9 @@
                     </div>
                     <div class="mb-3 form-floating">
                         <input type="number" class="form-control" id="expense-amount" placeholder="Amount">
-                        <label for="expense-amount">Amount (Rs)</label>
+                        <label for="expense-amount">Amount (CAD)</label>
                     </div>
-                    <div class="mb-3 form-floating">
+                    <div class="mb-3">
                         <select class="form-select" id="expense-category" aria-label="Category">
                             <option selected>Select category</option>
                             <option value="food">Food</option>
@@ -176,8 +144,7 @@
                             <option value="transport">Transport</option>
                             <option value="leisure">Leisure</option>
                             <option value="subscriptions">Subscriptions</option>
-                        </select>
-                        <label for="expense-category">Category</label>
+                        </select>                       
                     </div>
                     <div class="mb-4 form-floating">
                         <input type="date" class="form-control" id="expense-date" placeholder="Date">

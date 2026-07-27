@@ -1,0 +1,388 @@
+<section class="card stock-hero-card">
+    <div class="card-body p-4">
+        <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
+            <div>
+                <p class="eyebrow">Market Pulse · NEPSE</p>
+                <h1>Nepal Stock Exchange Dashboard</h1>
+                <p class="lead stock-sub">Real-time index tracking, portfolio performance, and curated market intelligence, all in one elevated view.</p>
+            </div>
+            <div class="d-flex align-items-center gap-3 header-actions">
+                <span class="market-status-pill" id="market-status-pill">
+                    <span class="status-dot" id="market-status-dot"></span>
+                    <span id="market-status-text">Checking market…</span>
+                </span>
+                <button class="btn btn-primary btn-fab" id="refresh-btn" type="button">⟳ Refresh</button>
+            </div>
+        </div>
+
+        <div class="row gx-4 gy-4 stats-grid">
+            <div class="col-md-6 col-xl-3">
+                <article class="card material-card stat-card">
+                    <div class="stat-icon bg-emerald text-white">N</div>
+                    <div>
+                        <p class="stat-label">NEPSE Index</p>
+                        <h3>2,187.42</h3>
+                        <span class="chip chip-soft-success">▲ 0.86%</span>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <article class="card material-card stat-card">
+                    <div class="stat-icon bg-indigo text-white">₨</div>
+                    <div>
+                        <p class="stat-label">Today's Turnover</p>
+                        <h3>Rs 4.82 Arba</h3>
+                        <span class="chip chip-soft-success">▲ 12.4%</span>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <article class="card material-card stat-card">
+                    <div class="stat-icon bg-amber text-dark">⇅</div>
+                    <div>
+                        <p class="stat-label">Advance / Decline</p>
+                        <h3>182 / 96</h3>
+                        <span class="chip chip-soft-secondary">41 unchanged</span>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <article class="card material-card stat-card">
+                    <div class="stat-icon bg-violet text-white">Σ</div>
+                    <div>
+                        <p class="stat-label">Market Cap</p>
+                        <h3>Rs 42.6 Kharba</h3>
+                        <span class="chip chip-soft-success">▲ 0.64%</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="row gx-4 gy-4 mt-1">
+            <div class="col-lg-8">
+                <section class="card material-card chart-card">
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-2">
+                        <div>
+                            <p class="text-muted mb-1 stock-sub">Nepal Stock Exchange · Live</p>
+                            <div class="d-flex align-items-baseline gap-2">
+                                <h2 class="chart-price mb-0">2,187.42</h2>
+                                <span class="chip chip-soft-success">+18.64 (0.86%)</span>
+                            </div>
+                        </div>
+                        <div class="timeframe-group" role="group" aria-label="Chart timeframe">
+                            <button type="button" class="timeframe-pill active" data-frame="1D">1D</button>
+                            <button type="button" class="timeframe-pill" data-frame="1W">1W</button>
+                            <button type="button" class="timeframe-pill" data-frame="1M">1M</button>
+                            <button type="button" class="timeframe-pill" data-frame="3M">3M</button>
+                            <button type="button" class="timeframe-pill" data-frame="1Y">1Y</button>
+                            <button type="button" class="timeframe-pill" data-frame="ALL">ALL</button>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="nepseChart"></canvas>
+                    </div>
+                    <div class="row gx-3 gy-2 chart-stats mt-3">
+                        <div class="col-6 col-md-3">
+                            <p class="stat-label mb-1">Open</p>
+                            <p class="stat-value mb-0">2,171.80</p>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <p class="stat-label mb-1">High</p>
+                            <p class="stat-value mb-0">2,193.55</p>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <p class="stat-label mb-1">Low</p>
+                            <p class="stat-value mb-0">2,168.20</p>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <p class="stat-label mb-1">Prev. Close</p>
+                            <p class="stat-value mb-0">2,168.78</p>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-0 mt-2 stock-sub small" id="last-updated">Updated just now</p>
+                </section>
+            </div>
+
+            <div class="col-lg-4">
+                <section class="card material-card movers-card h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="mb-0">Top Movers</h5>
+                        <span class="badge soft-badge">Live</span>
+                    </div>
+                    <div class="movers-tabs d-flex gap-2 mb-3">
+                        <button type="button" class="movers-tab active" data-target="gainers-list">Gainers</button>
+                        <button type="button" class="movers-tab" data-target="losers-list">Losers</button>
+                    </div>
+
+                    <ul class="movers-list list-unstyled mb-0" id="gainers-list">
+                        <li class="mover-row">
+                            <div class="mover-info">
+                                <strong>SHIVM</strong>
+                                <span class="text-muted stock-sub">Shivam Cements</span>
+                            </div>
+                            <svg class="sparkline" viewBox="0 0 100 32" data-points="4,6,5,9,8,12,10,16,20,24,30"></svg>
+                            <div class="mover-figures text-end">
+                                <p class="mb-0 mover-price">Rs 812.00</p>
+                                <span class="chip chip-soft-success">▲ 6.42%</span>
+                            </div>
+                        </li>
+                        <li class="mover-row">
+                            <div class="mover-info">
+                                <strong>HIDCL</strong>
+                                <span class="text-muted stock-sub">Hydroelectricity Inv. &amp; Dev.</span>
+                            </div>
+                            <svg class="sparkline" viewBox="0 0 100 32" data-points="10,9,12,11,15,18,16,22,24,26,28"></svg>
+                            <div class="mover-figures text-end">
+                                <p class="mb-0 mover-price">Rs 298.40</p>
+                                <span class="chip chip-soft-success">▲ 4.87%</span>
+                            </div>
+                        </li>
+                        <li class="mover-row">
+                            <div class="mover-info">
+                                <strong>NHPC</strong>
+                                <span class="text-muted stock-sub">National Hydro Power</span>
+                            </div>
+                            <svg class="sparkline" viewBox="0 0 100 32" data-points="14,13,16,15,17,20,19,23,22,25,27"></svg>
+                            <div class="mover-figures text-end">
+                                <p class="mb-0 mover-price">Rs 512.60</p>
+                                <span class="chip chip-soft-success">▲ 3.95%</span>
+                            </div>
+                        </li>
+                        <li class="mover-row">
+                            <div class="mover-info">
+                                <strong>UPPER</strong>
+                                <span class="text-muted stock-sub">Upper Tamakoshi Hydropower</span>
+                            </div>
+                            <svg class="sparkline" viewBox="0 0 100 32" data-points="18,17,19,18,20,22,21,23,25,24,27"></svg>
+                            <div class="mover-figures text-end">
+                                <p class="mb-0 mover-price">Rs 401.20</p>
+                                <span class="chip chip-soft-success">▲ 3.28%</span>
+                            </div>
+                        </li>
+                        <li class="mover-row">
+                            <div class="mover-info">
+                                <strong>CHCL</strong>
+                                <span class="text-muted stock-sub">Chilime Hydropower</span>
+                            </div>
+                            <svg class="sparkline" viewBox="0 0 100 32" data-points="20,19,21,20,22,23,22,24,25,26,27"></svg>
+                            <div class="mover-figures text-end">
+                                <p class="mb-0 mover-price">Rs 1,245.00</p>
+                                <span class="chip chip-soft-success">▲ 2.74%</span>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <ul class="movers-list list-unstyled mb-0 d-none" id="losers-list">
+                        <li class="mover-row">
+                            <div class="mover-info">
+                                <strong>NLIC</strong>
+                                <span class="text-muted stock-sub">Nepal Life Insurance</span>
+                            </div>
+                            <svg class="sparkline" viewBox="0 0 100 32" data-points="28,26,24,22,20,18,16,15,13,11,9"></svg>
+                            <div class="mover-figures text-end">
+                                <p class="mb-0 mover-price">Rs 985.00</p>
+                                <span class="chip chip-soft-danger">▼ 3.62%</span>
+                            </div>
+                        </li>
+                        <li class="mover-row">
+                            <div class="mover-info">
+                                <strong>SBI</strong>
+                                <span class="text-muted stock-sub">Nepal SBI Bank</span>
+                            </div>
+                            <svg class="sparkline" viewBox="0 0 100 32" data-points="24,23,21,20,18,17,15,14,12,11,10"></svg>
+                            <div class="mover-figures text-end">
+                                <p class="mb-0 mover-price">Rs 412.30</p>
+                                <span class="chip chip-soft-danger">▼ 2.91%</span>
+                            </div>
+                        </li>
+                        <li class="mover-row">
+                            <div class="mover-info">
+                                <strong>ADBL</strong>
+                                <span class="text-muted stock-sub">Agriculture Dev. Bank</span>
+                            </div>
+                            <svg class="sparkline" viewBox="0 0 100 32" data-points="22,21,20,19,18,17,16,15,14,13,12"></svg>
+                            <div class="mover-figures text-end">
+                                <p class="mb-0 mover-price">Rs 322.10</p>
+                                <span class="chip chip-soft-danger">▼ 2.45%</span>
+                            </div>
+                        </li>
+                        <li class="mover-row">
+                            <div class="mover-info">
+                                <strong>NICA</strong>
+                                <span class="text-muted stock-sub">NIC Asia Bank</span>
+                            </div>
+                            <svg class="sparkline" viewBox="0 0 100 32" data-points="20,19,19,18,17,17,16,15,15,14,13"></svg>
+                            <div class="mover-figures text-end">
+                                <p class="mb-0 mover-price">Rs 890.50</p>
+                                <span class="chip chip-soft-danger">▼ 1.98%</span>
+                            </div>
+                        </li>
+                        <li class="mover-row">
+                            <div class="mover-info">
+                                <strong>NABIL</strong>
+                                <span class="text-muted stock-sub">Nabil Bank</span>
+                            </div>
+                            <svg class="sparkline" viewBox="0 0 100 32" data-points="18,17,17,16,16,15,15,14,14,13,13"></svg>
+                            <div class="mover-figures text-end">
+                                <p class="mb-0 mover-price">Rs 1,102.00</p>
+                                <span class="chip chip-soft-danger">▼ 1.34%</span>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+
+        <div class="row gx-4 gy-4 mt-1">
+            <div class="col-12">
+                <section class="card material-card watchlist-card">
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-3">
+                        <div>
+                            <h5 class="mb-1 thisiswhite">My Watchlist</h5>
+                            <p class="text-muted mb-0 stock-sub">Live prices refresh automatically every few seconds.</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="search" class="form-control form-control-sm watchlist-search" placeholder="Search symbol…">
+                            <button type="button" class="btn btn-secondary btn-sm">+ Add stock</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Symbol</th>
+                                    <th scope="col">Company</th>
+                                    <th scope="col">LTP</th>
+                                    <th scope="col">Change</th>
+                                    <th scope="col">Volume</th>
+                                    <th scope="col">7D Trend</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-base-price="1102.00">
+                                    <td><strong class="thisiswhite">NABIL</strong></td>
+                                    <td class="text-muted stock-sub">Nabil Bank Ltd.</td>
+                                    <td class="live-price">Rs 1,102.00</td>
+                                    <td class="live-change"><span class="chip chip-soft-danger">▼ 1.34%</span></td>
+                                    <td class="thisiswhite">184,320</td>
+                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="20,19,21,18,17,19,16,15,17,14,13"></svg></td>
+                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
+                                </tr>
+                                <tr data-base-price="890.50">
+                                    <td><strong class="thisiswhite">NICA</strong></td>
+                                    <td class="text-muted stock-sub">NIC Asia Bank Ltd.</td>
+                                    <td class="live-price">Rs 890.50</td>
+                                    <td class="live-change"><span class="chip chip-soft-danger">▼ 1.98%</span></td>
+                                    <td class="thisiswhite">96,150</td>
+                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="18,20,17,19,16,18,15,17,14,16,13"></svg></td>
+                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
+                                </tr>
+                                <tr data-base-price="298.40">
+                                    <td><strong class="thisiswhite">HIDCL</strong></td>
+                                    <td class="text-muted stock-sub">Hydroelectricity Inv. &amp; Dev.</td>
+                                    <td class="live-price">Rs 298.40</td>
+                                    <td class="live-change"><span class="chip chip-soft-success">▲ 4.87%</span></td>
+                                    <td class="thisiswhite">412,680</td>
+                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="10,12,11,14,16,15,18,20,19,22,24"></svg></td>
+                                    <td class="text-end"><button type="button" class="watch-star active" aria-label="Toggle watch">★</button></td>
+                                </tr>
+                                <tr data-base-price="512.60">
+                                    <td><strong class="thisiswhite">NHPC</strong></td>
+                                    <td class="text-muted stock-sub">National Hydro Power Co.</td>
+                                    <td class="live-price">Rs 512.60</td>
+                                    <td class="live-change"><span class="chip chip-soft-success">▲ 3.95%</span></td>
+                                    <td class="thisiswhite">268,940</td>
+                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="13,14,16,15,18,17,20,19,22,21,24"></svg></td>
+                                    <td class="text-end"><button type="button" class="watch-star active" aria-label="Toggle watch">★</button></td>
+                                </tr>
+                                <tr data-base-price="401.20">
+                                    <td><strong class="thisiswhite">UPPER</strong></td>
+                                    <td class="text-muted stock-sub">Upper Tamakoshi Hydropower</td>
+                                    <td class="live-price">Rs 401.20</td>
+                                    <td class="live-change"><span class="chip chip-soft-success">▲ 3.28%</span></td>
+                                    <td class="thisiswhite">150,410</td>
+                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="17,18,17,19,20,19,21,22,21,23,24"></svg></td>
+                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
+                                </tr>
+                                <tr data-base-price="1245.00">
+                                    <td><strong class="thisiswhite">CHCL</strong></td>
+                                    <td class="text-muted stock-sub">Chilime Hydropower Co.</td>
+                                    <td class="live-price">Rs 1,245.00</td>
+                                    <td class="live-change"><span class="chip chip-soft-success">▲ 2.74%</span></td>
+                                    <td class="thisiswhite">72,860</td>
+                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="19,20,19,21,20,22,21,23,22,24,25"></svg></td>
+                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
+                                </tr>
+                                <tr data-base-price="812.00">
+                                    <td><strong class="thisiswhite">SHIVM</strong></td>
+                                    <td class="text-muted stock-sub">Shivam Cements Ltd.</td>
+                                    <td class="live-price">Rs 812.00</td>
+                                    <td class="live-change"><span class="chip chip-soft-success">▲ 6.42%</span></td>
+                                    <td class="thisiswhite">324,720</td>
+                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="6,9,12,16,20,18,22,24,26,28,30"></svg></td>
+                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="row gx-4 gy-4 mt-1">
+            <div class="col-12">
+                <section class="card material-card sector-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="mb-0">Sector Performance</h5>
+                        <span class="badge soft-badge">Today</span>
+                    </div>
+                    <div class="sector-grid">
+                        <div class="sector-chip is-up"><span>Hydropower</span><strong>▲ 2.4%</strong></div>
+                        <div class="sector-chip is-up"><span>Manufacturing</span><strong>▲ 1.9%</strong></div>
+                        <div class="sector-chip is-up"><span>Microfinance</span><strong>▲ 1.1%</strong></div>
+                        <div class="sector-chip is-up"><span>Hotels &amp; Tourism</span><strong>▲ 0.7%</strong></div>
+                        <div class="sector-chip is-up"><span>Investment</span><strong>▲ 0.4%</strong></div>
+                        <div class="sector-chip is-down"><span>Banking</span><strong>▼ 0.3%</strong></div>
+                        <div class="sector-chip is-down"><span>Life Insurance</span><strong>▼ 0.6%</strong></div>
+                        <div class="sector-chip is-down"><span>Non-Life Insurance</span><strong>▼ 1.2%</strong></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="row gx-4 gy-4 mt-1">
+            <div class="col-lg-8">
+                <section class="card material-card news-card h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="mb-0">Market News</h5>
+                        <span class="badge soft-badge">Updated hourly</span>
+                    </div>
+                    <ul class="news-list list-unstyled mb-0">
+                        <li class="news-item">
+                            <span class="news-time">2h ago</span>
+                            <p class="mb-0">NRB holds policy rate steady; banking stocks rally on liquidity relief.</p>
+                        </li>
+                        <li class="news-item">
+                            <span class="news-time">4h ago</span>
+                            <p class="mb-0">Hydropower sector gains on strong monsoon generation reports across major plants.</p>
+                        </li>
+                        <li class="news-item">
+                            <span class="news-time">6h ago</span>
+                            <p class="mb-0">NEPSE turnover crosses Rs 4.8 Arba for the third straight session.</p>
+                        </li>
+                        <li class="news-item">
+                            <span class="news-time">1d ago</span>
+                            <p class="mb-0">Q4 earnings season begins; insurance majors expected to report next week.</p>
+                        </li>
+                        <li class="news-item">
+                            <span class="news-time">1d ago</span>
+                            <p class="mb-0">SEBON tightens margin lending rules ahead of festive-season trading rush.</p>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+            
+        </div>
+    </div>
+</section>
