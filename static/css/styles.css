@@ -1278,21 +1278,21 @@ body::before {
   max-width: 1180px;
 }
 .expense-page .page-header {
-  padding: 1.5rem 1.25rem;
-  border-radius: 28px;
-  background: rgba(15, 23, 42, 0.92);
-  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.35);
+  padding: 1.75rem 1.5rem;
+  border-radius: 32px;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.26);
 }
 .expense-page .page-header h1 {
-  font-size: clamp(2rem, 2.35vw, 2.75rem);
-  margin-bottom: 0.65rem;
+  font-size: clamp(2rem, 2.3vw, 3rem);
+  margin-bottom: 0.5rem;
   color: #f8fafc;
 }
 .expense-page .eyebrow {
-  text-transform: uppercase;
   letter-spacing: 0.22em;
-  font-size: 0.78rem;
-  margin-bottom: 0.65rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
   color: #93c5fd;
   font-weight: 800;
 }
@@ -1508,6 +1508,15 @@ color: #f8fafc !important;
 .expense-page .form-card .card-body {
   padding: 2rem 1.6rem;
 }
+.expense-page .expense-card {
+  background: rgba(10, 18, 39, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 32px;
+  box-shadow: 0 42px 100px rgba(0, 0, 0, 0.24);
+}
+.expense-page .expense-card .card-body {
+  padding: 2rem 2rem 2.25rem;
+}
 .expense-page .form-card .form-floating .form-control,
 .expense-page .form-card .form-floating .form-select {
   border-radius: 18px;
@@ -1542,6 +1551,218 @@ color: #f8fafc !important;
 .expense-page .form-card .form-select:focus-visible {
   outline: none;
 }
+
+/* Expense page material design overrides */
+.expense-page {
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(180deg, #0e1726 0%, #121d3a 100%);
+  padding: 2.8rem 0 4rem;
+}
+.expense-page .page-header {
+  padding: 1.75rem 1.5rem;
+  border-radius: 32px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.98);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.25);
+}
+.expense-page .page-header h1 {
+  font-size: clamp(2rem, 2.5vw, 3rem);
+  margin-bottom: 0.5rem;
+  color: #f8fafc;
+}
+.expense-page .eyebrow {
+  letter-spacing: 0.22em;
+  font-size: 0.8rem;
+  color: #93c5fd;
+  font-weight: 800;
+}
+.expense-page .lead,
+.expense-page .page-header .text-muted {
+  color: rgba(203, 213, 225, 0.78);
+}
+.expense-page .btn-fab {
+  padding: 1rem 1.75rem;
+  border-radius: 999px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.24);
+}
+.expense-page .material-card,
+.expense-page .dashboard-card,
+.expense-page .summary-card,
+.expense-page .form-card {
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.14);
+}
+.expense-page .material-card {
+  padding: 1.75rem 1.75rem;
+}
+.expense-page .stat-card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.5rem;
+}
+.expense-page .stat-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  font-size: 1.15rem;
+}
+.expense-page .people-bar {
+  gap: 1rem;
+  padding: 1.3rem 1.35rem;
+  border-radius: 26px;
+}
+.expense-page .people-pill {
+  min-width: 190px;
+  padding: 1rem 1.1rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.expense-page .people-avatar {
+  width: 2.8rem;
+  height: 2.8rem;
+  background: rgba(99, 102, 241, 0.24);
+}
+.expense-page .table-toolbar {
+  border-color: rgba(148, 163, 184, 0.12);
+}
+.expense-page .table-toolbar .btn-group .btn {
+  color: #f8fafc;
+}
+.expense-page .table-toolbar .form-select {
+  background: rgba(15, 23, 42, 0.94);
+}
+.expense-page .table-toolbar .form-select:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+}
+.expense-page .summary-bar {
+  height: 0.95rem;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.expense-page .summary-fill {
+  background-image: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+.expense-page .dashboard-hero,
+.expense-page .material-card .table-responsive,
+.expense-page .material-card .table,
+.expense-page .league-table-header,
+.expense-page .league-table-row {
+  width: 100%;
+}
+.expense-page .dashboard-card .dashboard-chip,
+.expense-page .soft-badge {
+  background: rgba(79, 70, 229, 0.16);
+}
+.expense-page .form-card .form-floating .form-control,
+.expense-page .form-card .form-floating .form-select {
+  border-radius: 18px;
+  padding: 1.3rem 1rem 0.8rem;
+  background: rgba(15, 23, 42, 0.92);
+}
+.expense-page .form-card .form-floating label {
+  color: rgba(203, 213, 225, 0.7);
+}
+.expense-page .form-card .btn-primary {
+  border-radius: 18px;
+  box-shadow: 0 18px 34px rgba(91, 112, 230, 0.22);
+}
+@media (max-width: 991px) {
+  .expense-page .page-header { padding: 1.35rem 1rem; }
+  .expense-page .btn-fab { width: 100%; justify-content: center; }
+}
+@media (max-width: 767px) {
+  .expense-page .stat-card { flex-direction: column; align-items: flex-start; }
+}
+
+/* Dark-mode spacing and contrast cleanup for expense card */
+.expense-page .table-responsive {
+  margin-top: 1rem;
+  border-radius: 24px;
+  overflow: hidden;
+}
+.expense-page .table {
+  background: rgba(15, 23, 42, 0.88) !important;
+  border-collapse: separate;
+  border-spacing: 0 0.65rem;
+}
+.expense-page .table thead th {
+  background: rgba(15, 23, 42, 0.92) !important;
+  color: #cbd5e1 !important;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-bottom: none;
+  padding: 1rem 1rem;
+}
+.expense-page .table tbody tr {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+.expense-page .table tbody tr td {
+  border: none !important;
+  background: transparent !important;
+  color: #f8fafc !important;
+  padding: 1rem 1rem;
+}
+.expense-page .table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.expense-page .table tbody tr + tr {
+  margin-top: 0.5rem;
+}
+.expense-page .people-bar {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  padding: 1.25rem 1.3rem;
+  border-radius: 26px;
+}
+.expense-page .people-list {
+  gap: 1rem;
+}
+.expense-page .people-pill {
+  min-width: 220px;
+  padding: 1.05rem 1.2rem;
+  background: rgba(255, 255, 255, 0.05);
+}
+.expense-page .people-pill strong,
+.expense-page .people-pill p {
+  color: #e2e8f0;
+}
+.expense-page .people-pill p {
+  opacity: 0.8;
+}
+.expense-page .soft-badge {
+  background: rgba(79, 70, 229, 0.18);
+  color: #dbeafe;
+}
+.expense-page .summary-card {
+  margin-top: 1.5rem;
+}
+.expense-page .summary-list li {
+  padding: 0.95rem 0;
+}
+.expense-page .summary-list li + li {
+  margin-top: 0.35rem;
+}
+.expense-page .balance-card,
+.expense-page .summary-card,
+.expense-page .material-card,
+.expense-page .expense-card {
+  border-color: rgba(148, 163, 184, 0.18);
+}
+.expense-page .expense-card {
+  padding: 2.2rem 2rem 2.4rem;
+}
+
+
 .expense-page .form-card .btn-primary {
   background: linear-gradient(135deg, #5b70e6 0%, #8b8cf3 100%);
   border: none;
