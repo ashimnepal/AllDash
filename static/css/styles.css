@@ -1552,6 +1552,38 @@ color: #f8fafc !important;
   outline: none;
 }
 
+.expense-page .currency-converter-card,
+.expense-page .currency-converter-card h5,
+.expense-page .currency-converter-card p,
+.expense-page .currency-converter-card label,
+.expense-page .currency-converter-card span,
+.expense-page .currency-converter-card .form-select,
+.expense-page .currency-converter-card .form-control,
+.expense-page .currency-converter-card .text-muted,
+.expense-page .currency-converter-card .soft-badge {
+  color: #ffffff !important;
+}
+.expense-page .currency-converter-card .form-select,
+.expense-page .currency-converter-card .form-control {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+.expense-page .currency-converter-card .form-select option {
+  background: rgba(15, 23, 42, 0.96);
+  color: #ffffff;
+}
+.expense-page .currency-converter-card .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+.expense-page .currency-converter-card .form-select:focus,
+.expense-page .currency-converter-card .form-control:focus {
+  box-shadow: 0 0 0 0.3rem rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.expense-page .currency-converter-card .soft-badge {
+  background: rgba(255, 255, 255, 0.14);
+}
+
 /* Expense page material design overrides */
 .expense-page {
   min-height: calc(100vh - 80px);

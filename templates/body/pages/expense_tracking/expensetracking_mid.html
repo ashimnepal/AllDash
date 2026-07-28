@@ -4,176 +4,256 @@
             class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-1 mb-4">
             <div>
                 <p class="eyebrow">Expense Tracking</p>
-                
-                <p class="lead recent_expense">Monitor budgets, track spending categories, and add new expense entries with a
+
+                <p class="lead recent_expense">Monitor budgets, track spending categories, and add new expense entries
+                    with a
                     clean, elevated interface.</p>
             </div>
-            <button class="btn btn-primary btn-fab">Add expense</button>
+            <button class="btn btn-primary btn-fab" data-bs-toggle="modal" data-bs-target="#addIncomeModal">Add
+                Income</button>
         </div>
 
-<div class="row gx-4 gy-4 stats-grid">
-    <div class="col-md-6 col-xl-3">
-        <article class="card material-card stat-card">
-            <div class="stat-icon bg-indigo text-white">$</div>
-            <div>
-                <p class="stat-label">Monthly budget</p>
-                <h3>CAD 85,000</h3>
+        <div class="modal fade" id="addIncomeModal" tabindex="-1" aria-labelledby="addIncomeModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-white" id="addIncomeModalLabel">Add Income</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="add-income-form">
+                            <div class="mb-3 form-floating">
+                                <input type="number" class="form-control" id="income-amount" placeholder="Amount">
+                                <label for="income-amount" class="text-white">Amount (CAD)</label>
+                            </div>
+                            <div class="mb-3 form-floating">
+                                <input type="text" class="form-control" id="income-source" placeholder="Source">
+                                <label for="income-source" class="text-white">Source (optional)</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" form="add-income-form" class="btn btn-primary">Add Income</button>
+                    </div>
+                </div>
             </div>
-        </article>
-    </div>
-    <div class="col-md-6 col-xl-3">
-        <article class="card material-card stat-card">
-            <div class="stat-icon bg-warning text-dark">↑</div>
-            <div>
-                <p class="stat-label">Spent so far</p>
-                <h3>CAD 48,250</h3>
-            </div>
-        </article>
-    </div>
-    <div class="col-md-6 col-xl-3">
-        <article class="card material-card stat-card">
-            <div class="stat-icon bg-success text-white">✓</div>
-            <div>
-                <p class="stat-label">Remaining</p>
-                <h3>CAD 36,750</h3>
-            </div>
-        </article>
-    </div>
-    <div class="col-md-6 col-xl-3">
-        <article class="card material-card stat-card">
-            <div class="stat-icon bg-secondary text-white">★</div>
-            <div>
-                <p class="stat-label">Savings goal</p>
-                <h3>52%</h3>
-            </div>
-        </article>
-    </div>
-</div>
+        </div>
 
-<div class="row gx-4 gy-4 mt-4">
-    <div class="col-lg-7">
-        <section class="card material-card">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <div>
-                    <h5 class="mb-1">Recent expenses</h5>
-                    <p class="text-muted mb-0 recent_expense">Most recent transactions by category.</p>
-                </div>
-                <span class="badge soft-badge">Auto-updated</span>
-            </div>
-            <div
-                class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 mb-3 table-toolbar">
-                <div class="btn-group btn-group-sm" role="group" aria-label="Month navigation">
-                    <button type="button" class="btn btn-secondary">‹ Previous</button>
-                    <button type="button" class="btn btn-secondary">Next ›</button>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <label class="mb-0 text-muted recent_expense" for="month-filter">View:</label>
-                    <select id="month-filter" class="form-select form-select-sm">
-                        <option selected>All months</option>
-                        <option>July 2026</option>
-                        <option>June 2026</option>
-                        <option>May 2026</option>
-                    </select>
-                </div>
-            </div>
-           
-            <div class="table-responsive">
-                <table class="table table-borderless align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th scope="col">Item</th>
-                            <th scope="col">Category</th>
-                            <th scope="col">Amount</th>
-                            <th scope="col">Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Groceries</td>
-                            <td><span class="chip chip-soft-success">Food</span></td>
-                            <td>CAD 5,450</td>
-                            <td>Jul 25</td>
-                        </tr>
-                        <tr>
-                            <td>Electricity bill</td>
-                            <td><span class="chip chip-soft-warning">Utilities</span></td>
-                            <td>CAD 3,100</td>
-                            <td>Jul 24</td>
-                        </tr>
-                        <tr>
-                            <td>Mobile recharge</td>
-                            <td><span class="chip chip-soft-info">Subscriptions</span></td>
-                            <td>CAD 899</td>
-                            <td>Jul 23</td>
-                        </tr>
-                        <tr>
-                            <td>Dining out</td>
-                            <td><span class="chip chip-soft-danger">Leisure</span></td>
-                            <td>CAD 2,750</td>
-                            <td>Jul 22</td>
-                        </tr>
-                        <tr>
-                            <td>Fuel</td>
-                            <td><span class="chip chip-soft-secondary">Transport</span></td>
-                            <td>CAD 4,200</td>
-                            <td>Jul 21</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </div>
-    <div class="col-lg-5">
-        <section class="card material-card form-card">
-            <div class="card-body p-4">
-                <h5 class="mb-3">Add a new expense</h5>
-                <form>
-                    <div class="mb-3 form-floating">
-                        <input type="text" class="form-control" id="expense-name" placeholder="Expense name">
-                        <label for="expense-name">Expense name</label>
-                    </div>
-                    <div class="mb-3 form-floating">
-                        <input type="number" class="form-control" id="expense-amount" placeholder="Amount">
-                        <label for="expense-amount">Amount (CAD)</label>
-                    </div>
-                    <div class="mb-3">
-                        <select class="form-select" id="expense-category" aria-label="Category">
-                            <option selected>Select category</option>
-                            <option value="food">Food</option>
-                            <option value="utilities">Utilities</option>
-                            <option value="transport">Transport</option>
-                            <option value="leisure">Leisure</option>
-                            <option value="subscriptions">Subscriptions</option>
-                        </select>                       
-                    </div>
-                    <div class="mb-4 form-floating">
-                        <input type="date" class="form-control" id="expense-date" placeholder="Date">
-                        <label for="expense-date">Date</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Save expense</button>
-                </form>
-            </div>
-        </section>
-
-        <section class="card material-card summary-card mt-4">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="row gx-4 gy-4 stats-grid">
+            <div class="col-md-6 col-xl-3">
+                <article class="card material-card stat-card">
+                    <div class="stat-icon bg-indigo text-white">$</div>
                     <div>
-                        <h6 class="mb-1">Spending distribution</h6>
-                        <p class="text-muted mb-0 recent_expense">Category breakdown for July.</p>
+                        <p class="stat-label">Monthly budget</p>
+                        <h3>CAD 85,000</h3>
                     </div>
-                    <span class="badge soft-badge">75% goal</span>
-                </div>
-                <div class="summary-bar mb-3">
-                    <div class="summary-fill" style="width: 68%;"></div>
-                </div>
-                <ul class="summary-list list-unstyled mb-0">
-                    <li><span class="legend legend-primary"></span>Food <strong>33%</strong></li>
-                    <li><span class="legend legend-warning"></span>Utilities <strong>18%</strong></li>
-                    <li><span class="legend legend-success"></span>Transport <strong>14%</strong></li>
-                    <li><span class="legend legend-danger"></span>Leisure <strong>12%</strong></li>
-                </ul>
+                </article>
             </div>
-        </section>
+            <div class="col-md-6 col-xl-3">
+                <article class="card material-card stat-card">
+                    <div class="stat-icon bg-warning text-dark">↑</div>
+                    <div>
+                        <p class="stat-label">Spent so far</p>
+                        <h3>CAD 48,250</h3>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <article class="card material-card stat-card">
+                    <div class="stat-icon bg-success text-white">✓</div>
+                    <div>
+                        <p class="stat-label">Remaining</p>
+                        <h3>CAD 36,750</h3>
+                    </div>
+                </article>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <article class="card material-card stat-card">
+                    <div class="stat-icon bg-secondary text-white">★</div>
+                    <div>
+                        <p class="stat-label">Savings goal</p>
+                        <h3>52%</h3>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="row gx-4 gy-4 mt-4">
+            <div class="col-lg-7">
+                <section class="card material-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div>
+                            <h5 class="mb-1">Recent expenses</h5>
+                            <p class="text-muted mb-0 recent_expense">Most recent transactions by category.</p>
+                        </div>
+                        <span class="badge soft-badge">Auto-updated</span>
+                    </div>
+                    <div
+                        class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 mb-3 table-toolbar">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Month navigation">
+                            <button type="button" class="btn btn-secondary">‹ Previous</button>
+                            <button type="button" class="btn btn-secondary">Next ›</button>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="mb-0 text-muted recent_expense" for="month-filter">View:</label>
+                            <select id="month-filter" class="form-select form-select-sm">
+                                <option selected>All months</option>
+                                <option>July 2026</option>
+                                <option>June 2026</option>
+                                <option>May 2026</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Item</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Groceries</td>
+                                    <td><span class="chip chip-soft-success">Food</span></td>
+                                    <td>CAD 5,450</td>
+                                    <td>Jul 25</td>
+                                </tr>
+                                <tr>
+                                    <td>Electricity bill</td>
+                                    <td><span class="chip chip-soft-warning">Utilities</span></td>
+                                    <td>CAD 3,100</td>
+                                    <td>Jul 24</td>
+                                </tr>
+                                <tr>
+                                    <td>Mobile recharge</td>
+                                    <td><span class="chip chip-soft-info">Subscriptions</span></td>
+                                    <td>CAD 899</td>
+                                    <td>Jul 23</td>
+                                </tr>
+                                <tr>
+                                    <td>Dining out</td>
+                                    <td><span class="chip chip-soft-danger">Leisure</span></td>
+                                    <td>CAD 2,750</td>
+                                    <td>Jul 22</td>
+                                </tr>
+                                <tr>
+                                    <td>Fuel</td>
+                                    <td><span class="chip chip-soft-secondary">Transport</span></td>
+                                    <td>CAD 4,200</td>
+                                    <td>Jul 21</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <div class="mt-4">
+                    <section class="card material-card currency-converter-card">
+                        <div class="mb-3">
+                            <h5 class="mb-1">Currency converter</h5>
+                            <p class="text-muted mb-0 recent_expense">Convert amounts between currencies.</p>
+                        </div>
+                        <form class="row gx-3 gy-3 align-items-end" id="currency-converter-form">
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="converter-amount" placeholder="Amount"
+                                        value="1">
+                                    <label for="converter-amount"><span class="thisiswhite">Amount</span></label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label mb-1" for="converter-from">From</label>
+                                <select id="converter-from" class="form-select">
+                                    <option value="CAD" selected>CAD</option>
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="INR">INR</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1 text-center d-none d-md-block">
+                                <span class="text-muted">→</span>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label mb-1" for="converter-to">To</label>
+                                <select id="converter-to" class="form-select">
+                                    <option value="CAD">CAD</option>
+                                    <option value="USD" selected>USD</option>
+                                    <option value="INR">NPR</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-primary w-100">Go</button>
+                            </div>
+                        </form>
+                        <div class="mt-3">
+                            <span class="badge soft-badge" id="converter-result">Converted amount will appear
+                                here</span>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <section class="card material-card form-card">
+                    <div class="card-body p-4">
+                        <h5 class="mb-3">Add a new expense</h5>
+                        <form>
+                            <div class="mb-3 form-floating">
+                                <input type="text" class="form-control" id="expense-name" placeholder="Expense name">
+                                <label for="expense-name">Expense name</label>
+                            </div>
+                            <div class="mb-3 form-floating">
+                                <input type="number" class="form-control" id="expense-amount" placeholder="Amount">
+                                <label for="expense-amount">Amount (CAD)</label>
+                            </div>
+                            <div class="mb-3">
+                                <select class="form-select" id="expense-category" aria-label="Category">
+                                    <option selected>Select category</option>
+                                    <option value="food">Food</option>
+                                    <option value="utilities">Utilities</option>
+                                    <option value="transport">Transport</option>
+                                    <option value="leisure">Leisure</option>
+                                    <option value="subscriptions">Subscriptions</option>
+                                </select>
+                            </div>
+                            <div class="mb-4 form-floating">
+                                <input type="date" class="form-control" id="expense-date" placeholder="Date">
+                                <label for="expense-date">Date</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Save expense</button>
+                        </form>
+                    </div>
+                </section>
+
+                <section class="card material-card summary-card mt-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <h6 class="mb-1">Spending distribution</h6>
+                                <p class="text-muted mb-0 recent_expense">Category breakdown for July.</p>
+                            </div>
+                            <span class="badge soft-badge">75% goal</span>
+                        </div>
+                        <div class="summary-bar mb-3">
+                            <div class="summary-fill" style="width: 68%;"></div>
+                        </div>
+                        <ul class="summary-list list-unstyled mb-0">
+                            <li><span class="legend legend-primary"></span>Food <strong>33%</strong></li>
+                            <li><span class="legend legend-warning"></span>Utilities <strong>18%</strong></li>
+                            <li><span class="legend legend-success"></span>Transport <strong>14%</strong></li>
+                            <li><span class="legend legend-danger"></span>Leisure <strong>12%</strong></li>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+
     </div>
 </section>
