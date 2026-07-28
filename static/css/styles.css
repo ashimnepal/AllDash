@@ -758,6 +758,118 @@ body::before {
   text-align: right;
 }
 
+.money-bar-card .money-bar-header {
+  grid-template-columns: 1fr auto;
+}
+
+.money-bar-card .money-bar-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+
+.money-bar-card .money-bar-row .league-table-team {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: unset;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.money-bar-amount-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.money-bar-amount-group .league-table-points {
+  text-align: left;
+}
+
+.money-owed-card .money-owed-header {
+  grid-template-columns: 1fr auto;
+}
+
+.money-owed-card .money-owed-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+
+.money-owed-card .money-owed-row .league-table-team {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: unset;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.money-owed-amount-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.money-owed-amount-group .league-table-points {
+  text-align: left;
+}
+
+.money-owed-total,
+.money-bar-total {
+  font-weight: 800;
+  border-color: rgba(129, 140, 248, 0.3);
+}
+
+.money-bar-actions,
+.money-owed-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.row-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.row-icon-btn:hover,
+.row-icon-btn:focus-visible {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+  outline: none;
+}
+
+.edit-amount-btn:hover,
+.edit-amount-btn:focus-visible {
+  background: rgba(91, 112, 230, 0.35);
+  border-color: rgba(91, 112, 230, 0.6);
+}
+
+.delete-amount-btn:hover,
+.delete-amount-btn:focus-visible {
+  background: rgba(239, 68, 68, 0.35);
+  border-color: rgba(239, 68, 68, 0.6);
+}
+
 .dashboard-subtitle {
   margin: 0;
   max-width: 720px;
@@ -1452,6 +1564,47 @@ color: #f8fafc !important;
 .expense-page .chip-soft-info { background: rgba(59, 130, 246, 0.14); color: #bfdbfe; }
 .expense-page .chip-soft-danger { background: rgba(244, 114, 182, 0.14); color: #f9a8d4; }
 .expense-page .chip-soft-secondary { background: rgba(148, 163, 184, 0.14); color: #cbd5e1; }
+
+.expense-page .btn-fab-danger {
+  padding: 1rem 1.6rem;
+  border-radius: 999px;
+  font-weight: 700;
+  border: none;
+  background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+  color: #ffffff;
+  box-shadow: 0 24px 48px rgba(244, 63, 94, 0.24);
+}
+.expense-page .btn-fab-danger:hover {
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.expense-page .total-savings-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding: 2.2rem 1.6rem;
+}
+.expense-page .total-savings-amount {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 800;
+  color: #86efac;
+}
+.expense-page .total-savings-amount.is-negative {
+  color: #fda4af;
+}
+.expense-page .amount-added {
+  color: #86efac;
+  font-weight: 700;
+}
+.expense-page .amount-used {
+  color: #fda4af;
+  font-weight: 700;
+}
 .expense-page .summary-bar {
   height: 0.9rem;
   border-radius: 999px;

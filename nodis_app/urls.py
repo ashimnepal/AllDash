@@ -7,5 +7,6 @@ urlpatterns = [
     path('motogp/', views.motogp, name='motogppage'),
     path('formula1/', views.formula1, name='formula1page'),
     path('expense_tracking/', views.expensetracking, name='expensetrackingpage'),
+    path('nepal_savings/', views.nepalsavings, name='nepalsavingspage'),
     path('stockex_dash/', views.stockex, name='stockexpage'),
 ]
