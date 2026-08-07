@@ -23,20 +23,21 @@
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="add-income-form">
+                        <form id="add-income-form" method="post" action="{% url 'expensetrackingpage' %}">
+                            {% csrf_token %}
                             <div class="mb-3 form-floating">
-                                <input type="number" class="form-control" id="income-amount" placeholder="Amount">
+                                {{ income_form.amount }}
                                 <label for="income-amount" class="text-white">Amount (CAD)</label>
                             </div>
                             <div class="mb-3 form-floating">
-                                <input type="text" class="form-control" id="income-source" placeholder="Source">
+                                {{ income_form.source }}
                                 <label for="income-source" class="text-white">Source (optional)</label>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" form="add-income-form" class="btn btn-primary">Add Income</button>
+                        <button type="submit" form="add-income-form" name="income_submit" class="btn btn-primary">Add Income</button>
                     </div>
                 </div>
             </div>
@@ -162,31 +163,20 @@
                         <form class="row gx-3 gy-3 align-items-end" id="currency-converter-form">
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="number" class="form-control" id="converter-amount" placeholder="Amount"
-                                        value="1">
+                                    {{ converter_form.amount }}
                                     <label for="converter-amount"><span class="thisiswhite">Amount</span></label>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label mb-1" for="converter-from">From</label>
-                                <select id="converter-from" class="form-select">
-                                    <option value="CAD" selected>CAD</option>
-                                    <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="GBP">GBP</option>
-                                    <option value="INR">INR</option>
-                                </select>
+                                {{ converter_form.from_currency }}
                             </div>
                             <div class="col-md-1 text-center d-none d-md-block">
                                 <span class="text-muted">→</span>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label mb-1" for="converter-to">To</label>
-                                <select id="converter-to" class="form-select">
-                                    <option value="CAD">CAD</option>
-                                    <option value="USD" selected>USD</option>
-                                    <option value="INR">NPR</option>
-                                </select>
+                                {{ converter_form.to_currency }}
                             </div>
                             <div class="col-md-12">
                                 <button type="submit" class="btn btn-primary w-100">Go</button>
@@ -203,30 +193,24 @@
                 <section class="card material-card form-card">
                     <div class="card-body p-4">
                         <h5 class="mb-3">Add a new expense</h5>
-                        <form>
+                        <form method="post" action="{% url 'expensetrackingpage' %}">
+                            {% csrf_token %}
                             <div class="mb-3 form-floating">
-                                <input type="text" class="form-control" id="expense-name" placeholder="Expense name">
+                                {{ expense_form.name }}
                                 <label for="expense-name">Expense name</label>
                             </div>
                             <div class="mb-3 form-floating">
-                                <input type="number" class="form-control" id="expense-amount" placeholder="Amount">
+                                {{ expense_form.amount }}
                                 <label for="expense-amount">Amount (CAD)</label>
                             </div>
                             <div class="mb-3">
-                                <select class="form-select" id="expense-category" aria-label="Category">
-                                    <option selected>Select category</option>
-                                    <option value="food">Food</option>
-                                    <option value="utilities">Utilities</option>
-                                    <option value="transport">Transport</option>
-                                    <option value="leisure">Leisure</option>
-                                    <option value="subscriptions">Subscriptions</option>
-                                </select>
+                                {{ expense_form.category }}
                             </div>
                             <div class="mb-4 form-floating">
-                                <input type="date" class="form-control" id="expense-date" placeholder="Date">
+                                {{ expense_form.date }}
                                 <label for="expense-date">Date</label>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Save expense</button>
+                            <button type="submit" name="expense_submit" class="btn btn-primary w-100">Save expense</button>
                         </form>
                     </div>
                 </section>

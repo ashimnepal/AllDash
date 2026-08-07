@@ -27,8 +27,7 @@
                     <input type="hidden" id="edit-money-to-get-id">
                     <p class="text-muted mb-3" id="edit-money-to-get-name"></p>
                     <div class="mb-3 form-floating">
-                        <input type="number" class="form-control" id="edit-money-to-get-amount" placeholder="Amount"
-                            min="0.01" step="0.01" required>
+                        {{ money_to_pay_form.amount }}
                         <label for="edit-money-to-get-amount" class="text-white">Amount (CAD)</label>
                     </div>
                 </form>
