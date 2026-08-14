@@ -1638,6 +1638,8 @@ color: #f8fafc !important;
 .expense-page .legend-warning { background: #facc15; }
 .expense-page .legend-success { background: #22c55e; }
 .expense-page .legend-danger { background: #ec4899; }
+.expense-page .legend-info { background: #3b82f6; }
+.expense-page .legend-secondary { background: #94a3b8; }
 .expense-page .table {
   color: #e2e8f0;
 }
@@ -1735,6 +1737,55 @@ color: #f8fafc !important;
 }
 .expense-page .currency-converter-card .soft-badge {
   background: rgba(255, 255, 255, 0.14);
+}
+
+.expense-page .currency-converter-card .converter-result-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.expense-page .currency-converter-card .converter-result-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 1.15rem;
+}
+.expense-page .currency-converter-card .converter-result-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+.expense-page .currency-converter-card .converter-result-value {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.expense-page .currency-converter-card .converter-result-panel.is-loading .converter-result-value {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+.expense-page .currency-converter-card .converter-result-panel.is-success {
+  background: rgba(46, 204, 113, 0.14);
+  border-color: rgba(46, 204, 113, 0.4);
+}
+.expense-page .currency-converter-card .converter-result-panel.is-success .converter-result-icon {
+  background: rgba(46, 204, 113, 0.25);
+}
+.expense-page .currency-converter-card .converter-result-panel.is-error {
+  background: rgba(231, 76, 60, 0.14);
+  border-color: rgba(231, 76, 60, 0.45);
+}
+.expense-page .currency-converter-card .converter-result-panel.is-error .converter-result-icon {
+  background: rgba(231, 76, 60, 0.25);
 }
 
 /* Expense page material design overrides */

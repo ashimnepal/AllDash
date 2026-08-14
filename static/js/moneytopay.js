@@ -1,34 +1,25 @@
 (function () {
-    const STORAGE_KEY = 'moneyToPayData';
-
-    function loadEntries() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed)) {
-                    return parsed;
-                }
-            }
-        } catch (err) {
-            console.warn('Could not read Money To Pay data', err);
-        }
-        return [
-            { id: 'rita', name: 'Rita', amount: 1200 },
-            { id: 'suresh', name: 'Suresh', amount: 930 },
-            { id: 'niraj', name: 'Niraj', amount: 2050 },
-            { id: 'maya', name: 'Maya', amount: 640 },
-            { id: 'anjali', name: 'Anjali', amount: 1320 }
-        ];
-    }
-
-    function saveEntries(entries) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-    }
-
     function formatCAD(amount) {
         const rounded = Math.round(amount * 100) / 100;
         return 'CAD ' + rounded.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    function getCsrfToken() {
+        const input = document.querySelector('[name=csrfmiddlewaretoken]');
+        return input ? input.value : '';
+    }
+
+    function clearFieldErrors(form) {
+        form.querySelectorAll('[data-error-for]').forEach(function (el) {
+            el.textContent = '';
+        });
+    }
+
+    function showFieldErrors(form, errors) {
+        Object.keys(errors || {}).forEach(function (field) {
+            const el = form.querySelector('[data-error-for="' + field + '"]');
+            if (el) el.textContent = errors[field].join(' ');
+        });
     }
 
     function hideModal(modalEl) {
@@ -41,37 +32,18 @@
         const listEl = document.getElementById('money-to-pay-list');
         if (!listEl) return; // Not on a page with this sidebar
 
-        let entries = loadEntries();
-
         const totalEl = document.getElementById('money-to-pay-total');
+        const addForm = document.getElementById('add-money-to-pay-form');
+        const addModalEl = document.getElementById('addMoneyToPayModal');
         const editModalEl = document.getElementById('editMoneyToPayModal');
         const editForm = document.getElementById('edit-money-to-pay-form');
         const editIdInput = document.getElementById('edit-money-to-pay-id');
         const editNameLabel = document.getElementById('edit-money-to-pay-name');
         const editAmountInput = document.getElementById('edit-money-to-pay-amount');
 
-        function openEditModal(id) {
-            const entry = entries.find(function (e) { return e.id === id; });
-            if (!entry || !editModalEl || !window.bootstrap) return;
-            editIdInput.value = entry.id;
-            editNameLabel.textContent = entry.name;
-            editAmountInput.value = entry.amount;
-            window.bootstrap.Modal.getOrCreateInstance(editModalEl).show();
-        }
-
-        function deleteEntry(id) {
-            const entry = entries.find(function (e) { return e.id === id; });
-            if (!entry) return;
-            const confirmed = window.confirm('Remove ' + entry.name + ' (' + formatCAD(entry.amount) + ') from this list?');
-            if (!confirmed) return;
-            entries = entries.filter(function (e) { return e.id !== id; });
-            saveEntries(entries);
-            render();
-        }
-
-        function render() {
+        function render(data) {
             listEl.innerHTML = '';
-            entries.forEach(function (entry) {
+            (data.entries || []).forEach(function (entry) {
                 const row = document.createElement('div');
                 row.className = 'league-table-row money-owed-row';
                 row.setAttribute('data-id', entry.id);
@@ -96,9 +68,6 @@
                 editBtn.title = 'Edit amount';
                 editBtn.setAttribute('aria-label', 'Edit amount for ' + entry.name);
                 editBtn.textContent = '\u270E';
-                editBtn.addEventListener('click', function () {
-                    openEditModal(entry.id);
-                });
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.type = 'button';
@@ -106,9 +75,6 @@
                 deleteBtn.title = 'Delete entry';
                 deleteBtn.setAttribute('aria-label', 'Delete entry for ' + entry.name);
                 deleteBtn.textContent = '\u2715';
-                deleteBtn.addEventListener('click', function () {
-                    deleteEntry(entry.id);
-                });
 
                 actions.appendChild(editBtn);
                 actions.appendChild(deleteBtn);
@@ -119,31 +85,84 @@
                 listEl.appendChild(row);
             });
 
-            if (totalEl) {
-                const total = entries.reduce(function (sum, e) { return sum + e.amount; }, 0);
-                totalEl.textContent = formatCAD(total);
+            if (totalEl && typeof data.total === 'number') {
+                totalEl.textContent = formatCAD(data.total);
             }
+        }
+
+        function postJson(url, body) {
+            return fetch(url, {
+                method: 'POST',
+                body: body,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            }).then(function (response) {
+                return response.json().then(function (data) {
+                    return { ok: response.ok, data: data };
+                });
+            });
+        }
+
+        function openEditModal(id, name, amount) {
+            if (!editModalEl || !window.bootstrap) return;
+            editIdInput.value = id;
+            editNameLabel.value = name;
+            editAmountInput.value = amount;
+            window.bootstrap.Modal.getOrCreateInstance(editModalEl).show();
+        }
+
+        // Event delegation: rows are (re)rendered dynamically, so bind on the container.
+        listEl.addEventListener('click', function (e) {
+            const row = e.target.closest('.money-owed-row');
+            if (!row) return;
+            const id = row.getAttribute('data-id');
+            const name = row.querySelector('.league-table-team').textContent;
+
+            if (e.target.closest('.edit-amount-btn')) {
+                const amountText = row.querySelector('.league-table-points').textContent.replace(/[^\d.]/g, '');
+                openEditModal(id, name, amountText);
+            } else if (e.target.closest('.delete-amount-btn')) {
+                const confirmed = window.confirm('Remove ' + name + ' from this list?');
+                if (!confirmed) return;
+                const formData = new FormData();
+                formData.set('csrfmiddlewaretoken', getCsrfToken());
+                postJson('/expense_tracking/money-to-pay/' + id + '/delete/', formData).then(function (result) {
+                    if (result.ok && result.data.success) render(result.data);
+                });
+            }
+        });
+
+        if (addForm) {
+            addForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                clearFieldErrors(addForm);
+                const formData = new FormData(addForm);
+                postJson('/expense_tracking/money-to-pay/add/', formData).then(function (result) {
+                    if (result.ok && result.data.success) {
+                        render(result.data);
+                        addForm.reset();
+                        hideModal(addModalEl);
+                    } else {
+                        showFieldErrors(addForm, result.data.errors);
+                    }
+                });
+            });
         }
 
         if (editForm) {
             editForm.addEventListener('submit', function (e) {
                 e.preventDefault();
+                clearFieldErrors(editForm);
                 const id = editIdInput.value;
-                const amount = parseFloat(editAmountInput.value);
-                if (!amount || amount <= 0) {
-                    editAmountInput.focus();
-                    return;
-                }
-                const entry = entries.find(function (e2) { return e2.id === id; });
-                if (entry) {
-                    entry.amount = amount;
-                    saveEntries(entries);
-                    render();
-                }
-                hideModal(editModalEl);
+                const formData = new FormData(editForm);
+                postJson('/expense_tracking/money-to-pay/' + id + '/update/', formData).then(function (result) {
+                    if (result.ok && result.data.success) {
+                        render(result.data);
+                        hideModal(editModalEl);
+                    } else {
+                        showFieldErrors(editForm, result.data.errors);
+                    }
+                });
             });
         }
-
-        render();
     });
 })();

@@ -1,3 +1,4 @@
+{% load humanize %}
 <section class="card expense-card">
     <div class="card-body p-4">
         <div
@@ -11,6 +12,16 @@
             </div>
             <button class="btn btn-primary btn-fab" data-bs-toggle="modal" data-bs-target="#addIncomeModal">Add
                 Income</button>
+        </div>
+
+        <div id="expense-tracking-alerts">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
         </div>
 
         <div class="modal fade" id="addIncomeModal" tabindex="-1" aria-labelledby="addIncomeModalLabel"
@@ -28,10 +39,12 @@
                             <div class="mb-3 form-floating">
                                 {{ income_form.amount }}
                                 <label for="income-amount" class="text-white">Amount (CAD)</label>
+                                <div class="text-danger small mt-1" data-error-for="amount"></div>
                             </div>
                             <div class="mb-3 form-floating">
                                 {{ income_form.source }}
                                 <label for="income-source" class="text-white">Source (optional)</label>
+                                <div class="text-danger small mt-1" data-error-for="source"></div>
                             </div>
                         </form>
                     </div>
@@ -49,7 +62,7 @@
                     <div class="stat-icon bg-indigo text-white">$</div>
                     <div>
                         <p class="stat-label">Monthly budget</p>
-                        <h3>CAD 85,000</h3>
+                        <h3 id="stat-budget-amount">CAD {{ budget_amount|floatformat:0|intcomma }}</h3>
                     </div>
                 </article>
             </div>
@@ -58,7 +71,7 @@
                     <div class="stat-icon bg-warning text-dark">↑</div>
                     <div>
                         <p class="stat-label">Spent so far</p>
-                        <h3>CAD 48,250</h3>
+                        <h3 id="stat-spent-so-far">CAD {{ spent_so_far|floatformat:0|intcomma }}</h3>
                     </div>
                 </article>
             </div>
@@ -67,7 +80,7 @@
                     <div class="stat-icon bg-success text-white">✓</div>
                     <div>
                         <p class="stat-label">Remaining</p>
-                        <h3>CAD 36,750</h3>
+                        <h3 id="stat-remaining">CAD {{ remaining|floatformat:0|intcomma }}</h3>
                     </div>
                 </article>
             </div>
@@ -76,7 +89,7 @@
                     <div class="stat-icon bg-secondary text-white">★</div>
                     <div>
                         <p class="stat-label">Savings goal</p>
-                        <h3>52%</h3>
+                        <h3 id="stat-savings-goal">{{ savings_goal_percent }}%</h3>
                     </div>
                 </article>
             </div>
@@ -90,21 +103,20 @@
                             <h5 class="mb-1">Recent expenses</h5>
                             <p class="text-muted mb-0 recent_expense">Most recent transactions by category.</p>
                         </div>
-                        <span class="badge soft-badge">Auto-updated</span>
+                        <span class="badge soft-badge" id="recent-expenses-badge">Auto-updated</span>
                     </div>
                     <div
                         class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 mb-3 table-toolbar">
                         <div class="btn-group btn-group-sm" role="group" aria-label="Month navigation">
-                            <button type="button" class="btn btn-secondary">‹ Previous</button>
-                            <button type="button" class="btn btn-secondary">Next ›</button>
+                            <button type="button" class="btn btn-secondary" id="month-prev-btn">‹ Previous</button>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <label class="mb-0 text-muted recent_expense" for="month-filter">View:</label>
                             <select id="month-filter" class="form-select form-select-sm">
-                                <option selected>All months</option>
-                                <option>July 2026</option>
-                                <option>June 2026</option>
-                                <option>May 2026</option>
+                                <option value="all" selected>All months</option>
+                                {% for month in available_months %}
+                                <option value="{{ month.value }}">{{ month.label }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
@@ -119,37 +131,19 @@
                                     <th scope="col">Date</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="recent-expenses-body">
+                                {% for expense in expenses %}
                                 <tr>
-                                    <td>Groceries</td>
-                                    <td><span class="chip chip-soft-success">Food</span></td>
-                                    <td>CAD 5,450</td>
-                                    <td>Jul 25</td>
+                                    <td>{{ expense.name }}</td>
+                                    <td><span class="chip {{ expense.chip_class }}">{{ expense.category_name }}</span></td>
+                                    <td>CAD {{ expense.amount|floatformat:2|intcomma }}</td>
+                                    <td>{{ expense.date|date:"M j" }}</td>
                                 </tr>
+                                {% empty %}
                                 <tr>
-                                    <td>Electricity bill</td>
-                                    <td><span class="chip chip-soft-warning">Utilities</span></td>
-                                    <td>CAD 3,100</td>
-                                    <td>Jul 24</td>
+                                    <td colspan="4" class="text-muted text-center">No expenses yet. Add your first expense to get started.</td>
                                 </tr>
-                                <tr>
-                                    <td>Mobile recharge</td>
-                                    <td><span class="chip chip-soft-info">Subscriptions</span></td>
-                                    <td>CAD 899</td>
-                                    <td>Jul 23</td>
-                                </tr>
-                                <tr>
-                                    <td>Dining out</td>
-                                    <td><span class="chip chip-soft-danger">Leisure</span></td>
-                                    <td>CAD 2,750</td>
-                                    <td>Jul 22</td>
-                                </tr>
-                                <tr>
-                                    <td>Fuel</td>
-                                    <td><span class="chip chip-soft-secondary">Transport</span></td>
-                                    <td>CAD 4,200</td>
-                                    <td>Jul 21</td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -160,7 +154,9 @@
                             <h5 class="mb-1">Currency converter</h5>
                             <p class="text-muted mb-0 recent_expense">Convert amounts between currencies.</p>
                         </div>
-                        <form class="row gx-3 gy-3 align-items-end" id="currency-converter-form">
+                        <form class="row gx-3 gy-3 align-items-end" id="currency-converter-form"
+                            method="post" action="{% url 'convert_currency' %}">
+                            {% csrf_token %}
                             <div class="col-md-4">
                                 <div class="form-floating">
                                     {{ converter_form.amount }}
@@ -182,9 +178,12 @@
                                 <button type="submit" class="btn btn-primary w-100">Go</button>
                             </div>
                         </form>
-                        <div class="mt-3">
-                            <span class="badge soft-badge" id="converter-result">Converted amount will appear
-                                here</span>
+                        <div class="converter-result-panel mt-3" id="converter-result-panel">
+                            <span class="converter-result-icon" id="converter-result-icon">💱</span>
+                            <div class="converter-result-text">
+                                <p class="converter-result-label mb-0">Converted amount</p>
+                                <p class="converter-result-value mb-0" id="converter-result">Fill in the form and press Go</p>
+                            </div>
                         </div>
                     </section>
                 </div>
@@ -193,22 +192,26 @@
                 <section class="card material-card form-card">
                     <div class="card-body p-4">
                         <h5 class="mb-3">Add a new expense</h5>
-                        <form method="post" action="{% url 'expensetrackingpage' %}">
+                        <form method="post" action="{% url 'expensetrackingpage' %}" id="add-expense-form">
                             {% csrf_token %}
                             <div class="mb-3 form-floating">
                                 {{ expense_form.name }}
                                 <label for="expense-name">Expense name</label>
+                                <div class="text-danger small mt-1" data-error-for="name"></div>
                             </div>
                             <div class="mb-3 form-floating">
                                 {{ expense_form.amount }}
                                 <label for="expense-amount">Amount (CAD)</label>
+                                <div class="text-danger small mt-1" data-error-for="amount"></div>
                             </div>
                             <div class="mb-3">
                                 {{ expense_form.category }}
+                                <div class="text-danger small mt-1" data-error-for="category"></div>
                             </div>
                             <div class="mb-4 form-floating">
                                 {{ expense_form.date }}
                                 <label for="expense-date">Date</label>
+                                <div class="text-danger small mt-1" data-error-for="date"></div>
                             </div>
                             <button type="submit" name="expense_submit" class="btn btn-primary w-100">Save expense</button>
                         </form>
@@ -222,16 +225,17 @@
                                 <h6 class="mb-1">Spending distribution</h6>
                                 <p class="text-muted mb-0 recent_expense">Category breakdown for July.</p>
                             </div>
-                            <span class="badge soft-badge">75% goal</span>
+                            <span class="badge soft-badge" id="stat-budget-used-badge">{{ budget_used_percent }}% used</span>
                         </div>
                         <div class="summary-bar mb-3">
-                            <div class="summary-fill" style="width: 68%;"></div>
+                            <div class="summary-fill" id="summary-fill-bar" data-percent="{{ budget_used_percent }}"></div>
                         </div>
-                        <ul class="summary-list list-unstyled mb-0">
-                            <li><span class="legend legend-primary"></span>Food <strong>33%</strong></li>
-                            <li><span class="legend legend-warning"></span>Utilities <strong>18%</strong></li>
-                            <li><span class="legend legend-success"></span>Transport <strong>14%</strong></li>
-                            <li><span class="legend legend-danger"></span>Leisure <strong>12%</strong></li>
+                        <ul class="summary-list list-unstyled mb-0" id="spending-distribution-list">
+                            {% for item in distribution %}
+                            <li><span class="legend {{ item.legend_class }}"></span>{{ item.name }} <strong>{{ item.percent }}%</strong></li>
+                            {% empty %}
+                            <li class="text-muted">No spending recorded this month yet.</li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </section>

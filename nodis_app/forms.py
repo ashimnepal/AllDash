@@ -120,7 +120,7 @@ class MoneyToGetForm(forms.ModelForm):
 
 
 class MoneyToPayForm(forms.ModelForm):
-    """Matches the 'Edit Amount' modal on the Money To Pay sidebar."""
+    """Matches the 'Add' modal on the Money To Pay sidebar."""
 
     class Meta:
         model = MoneyToPay
@@ -133,7 +133,7 @@ class MoneyToPayForm(forms.ModelForm):
             }),
             "amount": forms.NumberInput(attrs={
                 "class": "form-control",
-                "id": "edit-money-to-pay-amount",
+                "id": "money-to-pay-amount",
                 "placeholder": "Amount",
                 "step": "0.01",
                 "min": "0.01",
@@ -225,7 +225,7 @@ class CurrencyConverterForm(forms.Form):
     TO_CURRENCY_CHOICES = [
         ("CAD", "CAD"),
         ("USD", "USD"),
-        ("INR", "NPR"),
+        ("NPR", "NPR"),
     ]
 
     amount = forms.DecimalField(
