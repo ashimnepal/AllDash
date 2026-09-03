@@ -1,0 +1,263 @@
+(function () {
+    function formatRs(amount) {
+        const rounded = Math.round((Number(amount) + Number.EPSILON) * 100) / 100;
+        return 'Rs ' + rounded.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    function getCsrfToken() {
+        const cookie = document.cookie.split('; ').find(function (part) {
+            return part.indexOf('csrftoken=') === 0;
+        });
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+    }
+
+    function clearFieldErrors(form) {
+        form.querySelectorAll('[data-error-for]').forEach(function (el) {
+            el.textContent = '';
+        });
+    }
+
+    function showFieldErrors(form, errors) {
+        Object.keys(errors || {}).forEach(function (field) {
+            const el = form.querySelector('[data-error-for="' + field + '"]');
+            if (el) el.textContent = errors[field].join(' ');
+        });
+    }
+
+    function hideModal(modalEl) {
+        if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+            window.bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const listEl = document.getElementById('price-alerts-list');
+        if (!listEl) return; // Not on a page with this sidebar
+
+        const activeBadgeEl = document.getElementById('price-alerts-active-badge');
+        const toastContainerEl = document.getElementById('price-alert-toast-container');
+
+        const addForm = document.getElementById('add-price-alert-form');
+        const addModalEl = document.getElementById('addPriceAlertModal');
+        const addSymbolSelect = document.getElementById('price-alert-add-symbol');
+        const addCompanyNameInput = document.getElementById('price-alert-add-company-name');
+
+        const editForm = document.getElementById('edit-price-alert-form');
+        const editModalEl = document.getElementById('editPriceAlertModal');
+        const editIdInput = document.getElementById('edit-price-alert-id');
+        const editSymbolSelect = document.getElementById('price-alert-edit-symbol');
+        const editCompanyNameInput = document.getElementById('price-alert-edit-company-name');
+        const editTargetPriceInput = document.getElementById('price-alert-edit-target-price');
+
+        function populateSymbolSelect(selectEl, symbols) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '<option value="">Select a stock…</option>';
+            symbols.forEach(function (item) {
+                const option = document.createElement('option');
+                option.value = item.symbol;
+                option.setAttribute('data-name', item.name || '');
+                option.textContent = item.name ? (item.symbol + ' — ' + item.name) : item.symbol;
+                selectEl.appendChild(option);
+            });
+        }
+
+        // Reuse the same tradable symbol list the portfolio card fetches.
+        const symbolsPromise = fetch('/stockex_dash/portfolio/symbols/', { credentials: 'same-origin' })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                const symbols = data.symbols || [];
+                populateSymbolSelect(addSymbolSelect, symbols);
+                populateSymbolSelect(editSymbolSelect, symbols);
+                return symbols;
+            })
+            .catch(function () {
+                const fallback = '<option value="">Stock list unavailable</option>';
+                if (addSymbolSelect) addSymbolSelect.innerHTML = fallback;
+                if (editSymbolSelect) editSymbolSelect.innerHTML = fallback;
+                return [];
+            });
+
+        function syncCompanyName(selectEl, hiddenInput) {
+            if (!selectEl || !hiddenInput) return;
+            selectEl.addEventListener('change', function () {
+                const option = selectEl.options[selectEl.selectedIndex];
+                hiddenInput.value = option ? (option.getAttribute('data-name') || '') : '';
+            });
+        }
+        syncCompanyName(addSymbolSelect, addCompanyNameInput);
+        syncCompanyName(editSymbolSelect, editCompanyNameInput);
+
+        function buildAlertRow(alert) {
+            const row = document.createElement('li');
+            row.className = 'alert-row';
+            row.setAttribute('data-id', alert.id);
+            row.setAttribute('data-symbol', alert.symbol);
+            row.setAttribute('data-target-price', alert.target_price);
+
+            const chipClass = alert.is_triggered ? 'chip-soft-warning' : 'chip-soft-secondary';
+            const chipText = alert.is_triggered ? 'Triggered' : 'Watching';
+
+            row.innerHTML =
+                '<div>' +
+                    '<strong></strong>' +
+                    '<p class="mb-0 text-muted stock-sub"></p>' +
+                '</div>' +
+                '<span class="chip ' + chipClass + '">' + chipText + '</span>' +
+                '<div class="holding-actions">' +
+                    '<button type="button" class="row-icon-btn edit-amount-btn" title="Edit alert">\u270E</button>' +
+                    '<button type="button" class="row-icon-btn delete-amount-btn" title="Delete alert">\u2715</button>' +
+                '</div>';
+
+            row.querySelector('strong').textContent = alert.symbol;
+            row.querySelector('.stock-sub').textContent = alert.status_text;
+            return row;
+        }
+
+        function render(data) {
+            listEl.innerHTML = '';
+            const alerts = data.price_alerts || [];
+            if (!alerts.length) {
+                const empty = document.createElement('li');
+                empty.className = 'text-muted stock-sub mb-0';
+                empty.textContent = "No alerts yet — create one to watch a stock's price.";
+                listEl.appendChild(empty);
+            } else {
+                alerts.forEach(function (alert) {
+                    listEl.appendChild(buildAlertRow(alert));
+                });
+            }
+            if (activeBadgeEl && typeof data.price_alerts_active_count === 'number') {
+                activeBadgeEl.textContent = data.price_alerts_active_count + ' active';
+            }
+        }
+
+        function showToast(alert) {
+            if (!toastContainerEl) return;
+            const toast = document.createElement('div');
+            toast.className = 'price-alert-toast' + (alert.direction === 'down' ? ' is-down' : '');
+
+            const body = document.createElement('div');
+            const title = document.createElement('strong');
+            title.textContent = '\uD83D\uDD14 ' + alert.symbol + ' price alert';
+            const message = document.createElement('span');
+            message.textContent = alert.status_text + ' (now ' + formatRs(alert.current_price) + ')';
+            body.appendChild(title);
+            body.appendChild(message);
+
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'price-alert-toast-close';
+            closeBtn.setAttribute('aria-label', 'Dismiss');
+            closeBtn.textContent = '\u2715';
+            closeBtn.addEventListener('click', function () { toast.remove(); });
+
+            toast.appendChild(body);
+            toast.appendChild(closeBtn);
+            toastContainerEl.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 8000);
+        }
+
+        function postJson(url, body) {
+            const csrfToken = getCsrfToken();
+            return fetch(url, {
+                method: 'POST',
+                body: body,
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken,
+                },
+            }).then(function (response) {
+                return response.json().then(function (data) {
+                    return { ok: response.ok, data: data };
+                });
+            });
+        }
+
+        function openEditModal(row) {
+            if (!editModalEl || !window.bootstrap) return;
+            const symbol = row.getAttribute('data-symbol');
+
+            editIdInput.value = row.getAttribute('data-id');
+            editTargetPriceInput.value = row.getAttribute('data-target-price');
+            editCompanyNameInput.value = '';
+
+            symbolsPromise.then(function () {
+                if (editSymbolSelect) editSymbolSelect.value = symbol;
+            });
+
+            window.bootstrap.Modal.getOrCreateInstance(editModalEl).show();
+        }
+
+        listEl.addEventListener('click', function (e) {
+            const row = e.target.closest('.alert-row');
+            if (!row) return;
+            const id = row.getAttribute('data-id');
+            const symbol = row.getAttribute('data-symbol');
+            if (!id) return;
+
+            if (e.target.closest('.edit-amount-btn')) {
+                openEditModal(row);
+            } else if (e.target.closest('.delete-amount-btn')) {
+                const confirmed = window.confirm('Remove the alert for ' + symbol + '?');
+                if (!confirmed) return;
+                const formData = new FormData();
+                formData.set('csrfmiddlewaretoken', getCsrfToken());
+                postJson('/stockex_dash/alerts/' + id + '/delete/', formData).then(function (result) {
+                    if (result.ok && result.data.success) {
+                        render(result.data);
+                    }
+                });
+            }
+        });
+
+        if (addForm) {
+            addForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                clearFieldErrors(addForm);
+                const formData = new FormData(addForm);
+                formData.set('csrfmiddlewaretoken', getCsrfToken());
+                postJson('/stockex_dash/alerts/add/', formData).then(function (result) {
+                    if (result.ok && result.data.success) {
+                        render(result.data);
+                        addForm.reset();
+                        if (addSymbolSelect) addSymbolSelect.selectedIndex = 0;
+                        hideModal(addModalEl);
+                    } else {
+                        showFieldErrors(addForm, result.data.errors);
+                    }
+                });
+            });
+        }
+
+        if (editForm) {
+            editForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                clearFieldErrors(editForm);
+                const id = editIdInput.value;
+                const formData = new FormData(editForm);
+                formData.set('csrfmiddlewaretoken', getCsrfToken());
+                postJson('/stockex_dash/alerts/' + id + '/update/', formData).then(function (result) {
+                    if (result.ok && result.data.success) {
+                        render(result.data);
+                        hideModal(editModalEl);
+                    } else {
+                        showFieldErrors(editForm, result.data.errors);
+                    }
+                });
+            });
+        }
+
+        const CHECK_POLL_MS = 15000;
+        function checkAlerts() {
+            fetch('/stockex_dash/alerts/check/', { credentials: 'same-origin' })
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    render(data);
+                    (data.triggered || []).forEach(showToast);
+                })
+                .catch(function () { /* silently retry on the next poll */ });
+        }
+        setInterval(checkAlerts, CHECK_POLL_MS);
+    });
+})();

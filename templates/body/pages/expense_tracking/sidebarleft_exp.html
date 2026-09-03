@@ -1,29 +1,100 @@
+{% load humanize %}
 <div class="dashboard-card money-bar-card expense-sidebar-card col-md-2">
         <div class="dashboard-hero">
-            <span class="dashboard-chip">Money To Get</span>
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="dashboard-chip">Money To Get</span>
+                <button type="button" class="row-icon-btn add-entry-btn px-3" title="Add entry" aria-label="Add money to get entry"
+                    data-bs-toggle="modal" data-bs-target="#addMoneyToGetModal">+ Add</button>
+            </div>
             <div class="league-table-header money-bar-header">
                 <span>Who owes you</span>
                 <span class="pts-pad">Amount</span>
             </div>
-            <div class="league-table-row money-bar-row">
-                <span class="league-table-team">Aashim</span>
-                <span class="league-table-points">CAD 1,250</span>
+            <div id="money-to-get-list">
+                {% for entry in money_to_get_entries %}
+                <div class="league-table-row money-bar-row" data-id="{{ entry.id }}">
+                    <span class="league-table-team">{{ entry.name }}</span>
+                    <div class="money-bar-amount-group">
+                        <span class="league-table-points">CAD {{ entry.amount|floatformat:0|intcomma }}</span>
+                        <div class="money-bar-actions">
+                            <button type="button" class="row-icon-btn edit-amount-btn" title="Edit amount"
+                                aria-label="Edit amount for {{ entry.name }}">&#9998;</button>
+                            <button type="button" class="row-icon-btn delete-amount-btn" title="Delete entry"
+                                aria-label="Delete entry for {{ entry.name }}">&#10007;</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-            <div class="league-table-row money-bar-row">
-                <span class="league-table-team">Samira</span>
-                <span class="league-table-points">CAD 920</span>
-            </div>
-            <div class="league-table-row money-bar-row">
-                <span class="league-table-team">Rohit</span>
-                <span class="league-table-points">CAD 2,500</span>
-            </div>
-            <div class="league-table-row money-bar-row">
-                <span class="league-table-team">Nisha</span>
-                <span class="league-table-points">CAD 760</span>
-            </div>
-            <div class="league-table-row money-bar-row">
-                <span class="league-table-team">Priya</span>
-                <span class="league-table-points">CAD 1,100</span>
+            <div class="league-table-row money-bar-total">
+                <span class="league-table-team">Total to get</span>
+                <span class="league-table-points" id="money-to-get-total">CAD {{ money_to_get_total|floatformat:0|intcomma }}</span>
             </div>
         </div>
     </div>
+
+<div class="modal fade" id="addMoneyToGetModal" tabindex="-1" aria-labelledby="addMoneyToGetModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white">
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="addMoneyToGetModalLabel">Add Money To Get</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-money-to-get-form">
+                    {% csrf_token %}
+                    <div class="mb-3 form-floating">
+                        <input type="text" class="form-control" id="money-to-get-add-name" name="name" placeholder="Name">
+                        <label for="money-to-get-add-name" class="text-white">Person name</label>
+                        <div class="text-danger small mt-1" data-error-for="name"></div>
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="number" class="form-control" id="money-to-get-add-amount" name="amount" step="0.01" min="0.01" placeholder="Amount">
+                        <label for="money-to-get-add-amount" class="text-white">Amount (CAD)</label>
+                        <div class="text-danger small mt-1" data-error-for="amount"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="add-money-to-get-form" class="btn btn-primary">Add Entry</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editMoneyToGetModal" tabindex="-1" aria-labelledby="editMoneyToGetModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white">
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="editMoneyToGetModalLabel">Edit Entry</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-money-to-get-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit-money-to-get-id">
+                    <div class="mb-3 form-floating">
+                        <input type="text" class="form-control" id="edit-money-to-get-name" name="name" placeholder="Name">
+                        <label for="edit-money-to-get-name" class="text-white">Person name</label>
+                        <div class="text-danger small mt-1" data-error-for="name"></div>
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="number" step="0.01" min="0.01" class="form-control"
+                            id="edit-money-to-get-amount" name="amount" placeholder="Amount">
+                        <label for="edit-money-to-get-amount" class="text-white">Amount (CAD)</label>
+                        <div class="text-danger small mt-1" data-error-for="amount"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="edit-money-to-get-form" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

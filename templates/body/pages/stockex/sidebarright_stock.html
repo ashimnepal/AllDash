@@ -3,32 +3,26 @@
                 <section class="card material-card alerts-card w-100">
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         <h5 class="mb-0">Price Alerts</h5>
-                        <span class="badge soft-badge">3 active</span>
+                        <span class="badge soft-badge" id="price-alerts-active-badge">{{ price_alerts_active_count }} active</span>
                     </div>
-                    <ul class="alerts-list list-unstyled mb-3">
-                        <li class="alert-row">
+                    <ul class="alerts-list list-unstyled mb-3" id="price-alerts-list">
+                        {% for alert in price_alerts %}
+                        <li class="alert-row" data-id="{{ alert.id }}" data-symbol="{{ alert.symbol }}" data-target-price="{{ alert.target_price }}">
                             <div>
-                                <strong>NABIL</strong>
-                                <p class="mb-0 text-muted stock-sub">Alert when price crosses Rs 1,150</p>
+                                <strong>{{ alert.symbol }}</strong>
+                                <p class="mb-0 text-muted stock-sub">{{ alert.status_text }}</p>
                             </div>
-                            <span class="chip chip-soft-secondary">Watching</span>
-                        </li>
-                        <li class="alert-row">
-                            <div>
-                                <strong>HIDCL</strong>
-                                <p class="mb-0 text-muted stock-sub">Alert when price drops below Rs 280</p>
+                            <span class="chip {% if alert.is_triggered %}chip-soft-warning{% else %}chip-soft-secondary{% endif %}">{% if alert.is_triggered %}Triggered{% else %}Watching{% endif %}</span>
+                            <div class="holding-actions">
+                                <button type="button" class="row-icon-btn edit-amount-btn" title="Edit alert" aria-label="Edit alert for {{ alert.symbol }}">&#9998;</button>
+                                <button type="button" class="row-icon-btn delete-amount-btn" title="Delete alert" aria-label="Delete alert for {{ alert.symbol }}">&#10007;</button>
                             </div>
-                            <span class="chip chip-soft-secondary">Watching</span>
                         </li>
-                        <li class="alert-row">
-                            <div>
-                                <strong>NEPSE Index</strong>
-                                <p class="mb-0 text-muted stock-sub">Alert when index crosses 2,200</p>
-                            </div>
-                            <span class="chip chip-soft-secondary">Watching</span>
-                        </li>
+                        {% empty %}
+                        <li class="text-muted stock-sub mb-0">No alerts yet — create one to watch a stock's price.</li>
+                        {% endfor %}
                     </ul>
-                    <button type="button" class="btn btn-primary w-100">+ Create alert</button>
+                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addPriceAlertModal">+ Create alert</button>
                 </section>
             </div>
 
@@ -48,3 +42,72 @@
     </div>
 
 </div>
+
+<div class="modal fade" id="addPriceAlertModal" tabindex="-1" aria-labelledby="addPriceAlertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white">
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="addPriceAlertModalLabel">Create Price Alert</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-price-alert-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="price-alert-add-symbol" class="form-label text-white">Stock</label>
+                        <select class="form-select" id="price-alert-add-symbol" name="symbol">
+                            <option value="">Loading symbols…</option>
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="symbol"></div>
+                        <input type="hidden" id="price-alert-add-company-name" name="company_name">
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="number" class="form-control" id="price-alert-add-target-price" name="target_price" step="0.01" min="0.01" placeholder="Target price">
+                        <label for="price-alert-add-target-price" class="text-white">Alert me when price hits (Rs)</label>
+                        <div class="text-danger small mt-1" data-error-for="target_price"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="add-price-alert-form" class="btn btn-primary">Create Alert</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editPriceAlertModal" tabindex="-1" aria-labelledby="editPriceAlertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white">
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="editPriceAlertModalLabel">Edit Price Alert</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-price-alert-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit-price-alert-id">
+                    <div class="mb-3">
+                        <label for="price-alert-edit-symbol" class="form-label text-white">Stock</label>
+                        <select class="form-select" id="price-alert-edit-symbol" name="symbol">
+                            <option value="">Loading symbols…</option>
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="symbol"></div>
+                        <input type="hidden" id="price-alert-edit-company-name" name="company_name">
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="number" class="form-control" id="price-alert-edit-target-price" name="target_price" step="0.01" min="0.01" placeholder="Target price">
+                        <label for="price-alert-edit-target-price" class="text-white">Alert me when price hits (Rs)</label>
+                        <div class="text-danger small mt-1" data-error-for="target_price"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="edit-price-alert-form" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="price-alert-toast-container" id="price-alert-toast-container" aria-live="polite"></div>

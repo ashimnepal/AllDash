@@ -171,6 +171,33 @@
     });
   });
 
+  /* ---------------- Watchlist category + search filter ---------------- */
+  const watchlistSearchInput = document.querySelector('.watchlist-search');
+  let watchlistCategory = 'all';
+
+  function applyWatchlistFilters() {
+    const query = (watchlistSearchInput?.value || '').trim().toLowerCase();
+    document.querySelectorAll('.watchlist-card tbody tr[data-symbol]').forEach((row) => {
+      const matchesCategory = watchlistCategory === 'all' || row.dataset.category === watchlistCategory;
+      const company = row.querySelector('.stock-sub')?.textContent || '';
+      const matchesSearch = !query
+        || row.dataset.symbol.toLowerCase().includes(query)
+        || company.toLowerCase().includes(query);
+      row.classList.toggle('is-hidden', !(matchesCategory && matchesSearch));
+    });
+  }
+
+  document.querySelectorAll('.watchlist-category-pill').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.watchlist-category-pill').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      watchlistCategory = btn.dataset.category;
+      applyWatchlistFilters();
+    });
+  });
+
+  watchlistSearchInput?.addEventListener('input', applyWatchlistFilters);
+
   /* ---------------- Sparklines (mini SVG) ---------------- */
   function drawSparkline(svg, points) {
     const w = 100;
@@ -224,17 +251,18 @@
   }
   let simInterval = setInterval(tick, 4000);
 
-  /* ---------------- Live data feed via WebSocket (Mac mini broadcaster) ---------------- */
-  // Point this at the LAN address of the machine streaming market data.
-  const WS_URL = 'ws://192.168.5.182:5555';
+  /* ---------------- Live data feed via Django NEPSE proxy (polling) ---------------- */
+  // Django view `nepse_live_data` proxies the LAN NEPSE REST API (192.168.5.182:8000)
+  // and reshapes it into the payload consumed below.
+  const LIVE_DATA_URL = '/stockex_dash/live-data/';
+  const LIVE_DATA_POLL_MS = 15000;
   /*
-    Expected JSON message shape - every top-level key is optional; only the
+    Expected JSON payload shape - every top-level key is optional; only the
     fields that are present get applied to the dashboard:
     {
       "index":   { "value": 2187.42, "change": 18.64, "changePercent": 0.86,
-                   "open": 2171.80, "high": 2193.55, "low": 2168.20, "prevClose": 2168.78 },
-      "market":  { "turnover": "Rs 4.82 Arba", "turnoverChangePercent": 12.4,
-                   "marketCap": "Rs 42.6 Kharba", "marketCapChangePercent": 0.64,
+                   "high": 2193.55, "low": 2168.20, "prevClose": 2168.78 },
+      "market":  { "turnover": "Rs 4.82 Arba", "marketCap": "Rs 42.6 Kharba",
                    "advances": 182, "declines": 96, "unchanged": 41 },
       "gainers": [{ "symbol": "SHIVM", "company": "Shivam Cements", "price": 812.00, "changePercent": 6.42 }],
       "losers":  [{ "symbol": "NLIC", "company": "Nepal Life Insurance", "price": 985.00, "changePercent": -3.62 }],
@@ -390,61 +418,41 @@
   }
 
   let liveFeedEngaged = false;
-  let wsReconnectDelay = 2000;
 
-  function connectWebSocket() {
-    setFeedStatus(liveFeedEngaged ? 'offline' : 'connecting');
-    let socket;
-    try {
-      socket = new WebSocket(WS_URL);
-    } catch (err) {
-      scheduleReconnect();
-      return;
+  function applyLivePayload(payload) {
+    if (!liveFeedEngaged) {
+      liveFeedEngaged = true;
+      if (simInterval) {
+        clearInterval(simInterval);
+        simInterval = null;
+      }
     }
-
-    socket.addEventListener('open', () => {
-      wsReconnectDelay = 2000;
-      setFeedStatus('live');
-    });
-
-    socket.addEventListener('message', (event) => {
-      let payload;
-      try {
-        payload = JSON.parse(event.data);
-      } catch (err) {
-        return; // ignore malformed frames
-      }
-      if (!liveFeedEngaged) {
-        liveFeedEngaged = true;
-        if (simInterval) {
-          clearInterval(simInterval);
-          simInterval = null;
-        }
-      }
-      setFeedStatus('live');
-      applyIndexUpdate(payload.index);
-      applyMarketUpdate(payload.market);
-      applyMoversUpdate(payload.gainers, payload.losers);
-      applyWatchlistUpdate(payload.watchlist);
-      updateTimestamp();
-    });
-
-    socket.addEventListener('close', () => {
-      setFeedStatus('offline');
-      scheduleReconnect();
-    });
-
-    socket.addEventListener('error', () => {
-      socket.close();
-    });
+    setFeedStatus('live');
+    applyIndexUpdate(payload.index);
+    applyMarketUpdate(payload.market);
+    applyMoversUpdate(payload.gainers, payload.losers);
+    applyWatchlistUpdate(payload.watchlist);
+    updateTimestamp();
   }
 
-  function scheduleReconnect() {
-    setTimeout(connectWebSocket, wsReconnectDelay);
-    wsReconnectDelay = Math.min(wsReconnectDelay * 1.5, 15000);
+  function fetchLiveData() {
+    if (!liveFeedEngaged) setFeedStatus('connecting');
+    return fetch(LIVE_DATA_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error('Live data request failed');
+        return res.json();
+      })
+      .then((payload) => {
+        if (payload.error) throw new Error(payload.error);
+        applyLivePayload(payload);
+      })
+      .catch(() => {
+        setFeedStatus('offline');
+      });
   }
 
-  connectWebSocket();
+  fetchLiveData();
+  setInterval(fetchLiveData, LIVE_DATA_POLL_MS);
 
   /* ---------------- Movers tabs ---------------- */
   const moversTabs = document.querySelectorAll('.movers-tab');
@@ -468,7 +476,7 @@
   const refreshBtn = document.getElementById('refresh-btn');
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
-      tick();
+      fetchLiveData();
       renderChart();
       refreshBtn.classList.add('spinning');
       setTimeout(() => refreshBtn.classList.remove('spinning'), 600);

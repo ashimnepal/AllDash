@@ -245,9 +245,14 @@
                             <p class="text-muted mb-0 stock-sub">Live prices refresh automatically every few seconds.</p>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <input type="search" class="form-control form-control-sm watchlist-search" placeholder="Search symbol…">
-                            <button type="button" class="btn btn-secondary btn-sm">+ Add stock</button>
+                            <input type="search" class="form-control form-control-sm watchlist-search" placeholder="Search symbol or company…">
                         </div>
+                    </div>
+                    <div class="watchlist-category-group mb-3" role="group" aria-label="Watchlist category">
+                        <button type="button" class="watchlist-category-pill active" data-category="all">All</button>
+                        {% for cat in watchlist_categories %}
+                        <button type="button" class="watchlist-category-pill" data-category="{{ cat }}">{{ cat }}</button>
+                        {% endfor %}
                     </div>
                     <div class="table-responsive">
                         <table class="table table-borderless align-middle mb-0">
@@ -263,69 +268,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr data-base-price="1102.00" data-symbol="NABIL">
-                                    <td><strong class="thisiswhite">NABIL</strong></td>
-                                    <td class="text-muted stock-sub">Nabil Bank Ltd.</td>
-                                    <td class="live-price">Rs 1,102.00</td>
-                                    <td class="live-change"><span class="chip chip-soft-danger">▼ 1.34%</span></td>
-                                    <td class="thisiswhite">184,320</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="20,19,21,18,17,19,16,15,17,14,13"></svg></td>
+                                {% for row in watchlist %}
+                                <tr data-base-price="{{ row.price|default_if_none:'0'|floatformat:2 }}" data-symbol="{{ row.symbol }}" data-category="{{ row.category }}">
+                                    <td><strong class="thisiswhite">{{ row.symbol }}</strong></td>
+                                    <td class="text-muted stock-sub">{{ row.company }}</td>
+                                    <td class="live-price">{% if row.price is not None %}Rs {{ row.price|floatformat:2 }}{% else %}—{% endif %}</td>
+                                    <td class="live-change">
+                                        {% if row.change_percent is not None %}
+                                        <span class="chip {% if row.change_percent >= 0 %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{% if row.change_percent >= 0 %}▲{% else %}▼{% endif %} {{ row.change_percent|floatformat:2 }}%</span>
+                                        {% else %}
+                                        <span class="chip chip-soft-secondary">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="thisiswhite">{% if row.volume is not None %}{{ row.volume }}{% else %}—{% endif %}</td>
+                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="{{ row.sparkline }}"></svg></td>
                                     <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
                                 </tr>
-                                <tr data-base-price="890.50" data-symbol="NICA">
-                                    <td><strong class="thisiswhite">NICA</strong></td>
-                                    <td class="text-muted stock-sub">NIC Asia Bank Ltd.</td>
-                                    <td class="live-price">Rs 890.50</td>
-                                    <td class="live-change"><span class="chip chip-soft-danger">▼ 1.98%</span></td>
-                                    <td class="thisiswhite">96,150</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="18,20,17,19,16,18,15,17,14,16,13"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
-                                </tr>
-                                <tr data-base-price="298.40" data-symbol="HIDCL">
-                                    <td><strong class="thisiswhite">HIDCL</strong></td>
-                                    <td class="text-muted stock-sub">Hydroelectricity Inv. &amp; Dev.</td>
-                                    <td class="live-price">Rs 298.40</td>
-                                    <td class="live-change"><span class="chip chip-soft-success">▲ 4.87%</span></td>
-                                    <td class="thisiswhite">412,680</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="10,12,11,14,16,15,18,20,19,22,24"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star active" aria-label="Toggle watch">★</button></td>
-                                </tr>
-                                <tr data-base-price="512.60" data-symbol="NHPC">
-                                    <td><strong class="thisiswhite">NHPC</strong></td>
-                                    <td class="text-muted stock-sub">National Hydro Power Co.</td>
-                                    <td class="live-price">Rs 512.60</td>
-                                    <td class="live-change"><span class="chip chip-soft-success">▲ 3.95%</span></td>
-                                    <td class="thisiswhite">268,940</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="13,14,16,15,18,17,20,19,22,21,24"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star active" aria-label="Toggle watch">★</button></td>
-                                </tr>
-                                <tr data-base-price="401.20" data-symbol="UPPER">
-                                    <td><strong class="thisiswhite">UPPER</strong></td>
-                                    <td class="text-muted stock-sub">Upper Tamakoshi Hydropower</td>
-                                    <td class="live-price">Rs 401.20</td>
-                                    <td class="live-change"><span class="chip chip-soft-success">▲ 3.28%</span></td>
-                                    <td class="thisiswhite">150,410</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="17,18,17,19,20,19,21,22,21,23,24"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
-                                </tr>
-                                <tr data-base-price="1245.00" data-symbol="CHCL">
-                                    <td><strong class="thisiswhite">CHCL</strong></td>
-                                    <td class="text-muted stock-sub">Chilime Hydropower Co.</td>
-                                    <td class="live-price">Rs 1,245.00</td>
-                                    <td class="live-change"><span class="chip chip-soft-success">▲ 2.74%</span></td>
-                                    <td class="thisiswhite">72,860</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="19,20,19,21,20,22,21,23,22,24,25"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
-                                </tr>
-                                <tr data-base-price="812.00" data-symbol="SHIVM">
-                                    <td><strong class="thisiswhite">SHIVM</strong></td>
-                                    <td class="text-muted stock-sub">Shivam Cements Ltd.</td>
-                                    <td class="live-price">Rs 812.00</td>
-                                    <td class="live-change"><span class="chip chip-soft-success">▲ 6.42%</span></td>
-                                    <td class="thisiswhite">324,720</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="6,9,12,16,20,18,22,24,26,28,30"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
