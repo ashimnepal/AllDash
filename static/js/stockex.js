@@ -222,7 +222,229 @@
       }
     });
   }
-  setInterval(tick, 4000);
+  let simInterval = setInterval(tick, 4000);
+
+  /* ---------------- Live data feed via WebSocket (Mac mini broadcaster) ---------------- */
+  // Point this at the LAN address of the machine streaming market data.
+  const WS_URL = 'ws://192.168.5.182:5555';
+  /*
+    Expected JSON message shape - every top-level key is optional; only the
+    fields that are present get applied to the dashboard:
+    {
+      "index":   { "value": 2187.42, "change": 18.64, "changePercent": 0.86,
+                   "open": 2171.80, "high": 2193.55, "low": 2168.20, "prevClose": 2168.78 },
+      "market":  { "turnover": "Rs 4.82 Arba", "turnoverChangePercent": 12.4,
+                   "marketCap": "Rs 42.6 Kharba", "marketCapChangePercent": 0.64,
+                   "advances": 182, "declines": 96, "unchanged": 41 },
+      "gainers": [{ "symbol": "SHIVM", "company": "Shivam Cements", "price": 812.00, "changePercent": 6.42 }],
+      "losers":  [{ "symbol": "NLIC", "company": "Nepal Life Insurance", "price": 985.00, "changePercent": -3.62 }],
+      "watchlist": [{ "symbol": "NABIL", "price": 1102.00, "changePercent": -1.34, "volume": 184320 }]
+    }
+  */
+  const feedStatusEl = document.getElementById('ws-feed-status');
+  function setFeedStatus(state) {
+    if (!feedStatusEl) return;
+    const config = {
+      connecting: ['Connecting…', 'chip chip-soft-secondary'],
+      live: ['● Live feed', 'chip chip-soft-success'],
+      offline: ['○ Feed offline — retrying…', 'chip chip-soft-danger'],
+    };
+    const [text, className] = config[state] || config.connecting;
+    feedStatusEl.textContent = text;
+    feedStatusEl.className = className;
+  }
+
+  function fmtNum(value) {
+    return Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtRs(value) {
+    return 'Rs ' + fmtNum(value);
+  }
+  function chipText(changePercent) {
+    const up = Number(changePercent) >= 0;
+    return `${up ? '▲' : '▼'} ${Math.abs(changePercent).toFixed(2)}%`;
+  }
+
+  function applyIndexUpdate(index) {
+    if (!index) return;
+    const priceEl = document.getElementById('chart-price-value');
+    const statValueEl = document.getElementById('stat-index-value');
+    const statChipEl = document.getElementById('stat-index-chip');
+    const chartChipEl = document.getElementById('chart-change-chip');
+
+    if (index.value != null) {
+      const formatted = fmtNum(index.value);
+      if (priceEl) priceEl.textContent = formatted;
+      if (statValueEl) statValueEl.textContent = formatted;
+    }
+    if (index.changePercent != null) {
+      const up = Number(index.changePercent) >= 0;
+      if (statChipEl) {
+        statChipEl.textContent = chipText(index.changePercent);
+        statChipEl.className = 'chip ' + (up ? 'chip-soft-success' : 'chip-soft-danger');
+      }
+      if (chartChipEl) {
+        chartChipEl.textContent = index.change != null
+          ? `${up ? '+' : '-'}${Math.abs(index.change).toFixed(2)} (${Math.abs(index.changePercent).toFixed(2)}%)`
+          : chipText(index.changePercent);
+        chartChipEl.className = 'chip ' + (up ? 'chip-soft-success' : 'chip-soft-danger');
+      }
+    }
+
+    const openEl = document.getElementById('stat-open');
+    const highEl = document.getElementById('stat-high');
+    const lowEl = document.getElementById('stat-low');
+    const prevEl = document.getElementById('stat-prevclose');
+    if (openEl && index.open != null) openEl.textContent = fmtNum(index.open);
+    if (highEl && index.high != null) highEl.textContent = fmtNum(index.high);
+    if (lowEl && index.low != null) lowEl.textContent = fmtNum(index.low);
+    if (prevEl && index.prevClose != null) prevEl.textContent = fmtNum(index.prevClose);
+
+    if (index.value != null && currentFrame === '1D') {
+      const series = datasets['1D'];
+      series.shift();
+      series.push(Number(index.value));
+      renderChart();
+    }
+  }
+
+  function applyMarketUpdate(market) {
+    if (!market) return;
+    const turnoverEl = document.getElementById('stat-turnover');
+    const turnoverChipEl = document.getElementById('stat-turnover-chip');
+    const marketCapEl = document.getElementById('stat-marketcap');
+    const marketCapChipEl = document.getElementById('stat-marketcap-chip');
+    const advDecEl = document.getElementById('stat-advdec');
+    const unchangedEl = document.getElementById('stat-unchanged');
+
+    if (turnoverEl && market.turnover != null) turnoverEl.textContent = market.turnover;
+    if (turnoverChipEl && market.turnoverChangePercent != null) {
+      turnoverChipEl.textContent = chipText(market.turnoverChangePercent);
+      turnoverChipEl.className = 'chip ' + (market.turnoverChangePercent >= 0 ? 'chip-soft-success' : 'chip-soft-danger');
+    }
+    if (marketCapEl && market.marketCap != null) marketCapEl.textContent = market.marketCap;
+    if (marketCapChipEl && market.marketCapChangePercent != null) {
+      marketCapChipEl.textContent = chipText(market.marketCapChangePercent);
+      marketCapChipEl.className = 'chip ' + (market.marketCapChangePercent >= 0 ? 'chip-soft-success' : 'chip-soft-danger');
+    }
+    if (advDecEl && market.advances != null && market.declines != null) {
+      advDecEl.textContent = `${market.advances} / ${market.declines}`;
+    }
+    if (unchangedEl && market.unchanged != null) unchangedEl.textContent = `${market.unchanged} unchanged`;
+  }
+
+  function moverRowHTML(item) {
+    const up = Number(item.changePercent) >= 0;
+    return `<li class="mover-row">
+      <div class="mover-info">
+        <strong>${item.symbol}</strong>
+        <span class="text-muted stock-sub">${item.company || ''}</span>
+      </div>
+      <svg class="sparkline" viewBox="0 0 100 32" data-points="${item.sparkline || '10,12,14,16,18,20,22'}"></svg>
+      <div class="mover-figures text-end">
+        <p class="mb-0 mover-price">${fmtRs(item.price)}</p>
+        <span class="chip ${up ? 'chip-soft-success' : 'chip-soft-danger'}">${chipText(item.changePercent)}</span>
+      </div>
+    </li>`;
+  }
+
+  function applyMoversUpdate(gainers, losers) {
+    const gainersList = document.getElementById('gainers-list');
+    const losersList = document.getElementById('losers-list');
+    if (gainersList && Array.isArray(gainers)) {
+      gainersList.innerHTML = gainers.map(moverRowHTML).join('');
+    }
+    if (losersList && Array.isArray(losers)) {
+      losersList.innerHTML = losers.map(moverRowHTML).join('');
+    }
+    if (Array.isArray(gainers) || Array.isArray(losers)) renderAllSparklines();
+  }
+
+  function applyWatchlistUpdate(watchlist) {
+    if (!Array.isArray(watchlist)) return;
+    watchlist.forEach((item) => {
+      const row = document.querySelector(`[data-symbol="${item.symbol}"]`);
+      if (!row) return;
+      if (item.price != null) {
+        row.dataset.basePrice = item.price;
+        const priceCell = row.querySelector('.live-price');
+        if (priceCell) {
+          priceCell.textContent = fmtRs(item.price);
+          priceCell.classList.remove('flash-up', 'flash-down');
+          void priceCell.offsetWidth;
+          priceCell.classList.add(item.changePercent >= 0 ? 'flash-up' : 'flash-down');
+        }
+      }
+      if (item.changePercent != null) {
+        const changeCell = row.querySelector('.live-change');
+        if (changeCell) {
+          const up = Number(item.changePercent) >= 0;
+          changeCell.innerHTML = `<span class="chip ${up ? 'chip-soft-success' : 'chip-soft-danger'}">${chipText(item.changePercent)}</span>`;
+        }
+      }
+      if (item.volume != null) {
+        const volumeCell = row.querySelectorAll('td')[4];
+        if (volumeCell) volumeCell.textContent = Number(item.volume).toLocaleString('en-US');
+      }
+    });
+  }
+
+  let liveFeedEngaged = false;
+  let wsReconnectDelay = 2000;
+
+  function connectWebSocket() {
+    setFeedStatus(liveFeedEngaged ? 'offline' : 'connecting');
+    let socket;
+    try {
+      socket = new WebSocket(WS_URL);
+    } catch (err) {
+      scheduleReconnect();
+      return;
+    }
+
+    socket.addEventListener('open', () => {
+      wsReconnectDelay = 2000;
+      setFeedStatus('live');
+    });
+
+    socket.addEventListener('message', (event) => {
+      let payload;
+      try {
+        payload = JSON.parse(event.data);
+      } catch (err) {
+        return; // ignore malformed frames
+      }
+      if (!liveFeedEngaged) {
+        liveFeedEngaged = true;
+        if (simInterval) {
+          clearInterval(simInterval);
+          simInterval = null;
+        }
+      }
+      setFeedStatus('live');
+      applyIndexUpdate(payload.index);
+      applyMarketUpdate(payload.market);
+      applyMoversUpdate(payload.gainers, payload.losers);
+      applyWatchlistUpdate(payload.watchlist);
+      updateTimestamp();
+    });
+
+    socket.addEventListener('close', () => {
+      setFeedStatus('offline');
+      scheduleReconnect();
+    });
+
+    socket.addEventListener('error', () => {
+      socket.close();
+    });
+  }
+
+  function scheduleReconnect() {
+    setTimeout(connectWebSocket, wsReconnectDelay);
+    wsReconnectDelay = Math.min(wsReconnectDelay * 1.5, 15000);
+  }
+
+  connectWebSocket();
 
   /* ---------------- Movers tabs ---------------- */
   const moversTabs = document.querySelectorAll('.movers-tab');
