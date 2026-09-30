@@ -11,7 +11,7 @@
             <h3 class="mb-1" id="portfolio-total-current">Rs {{ total_current|floatformat:0|intcomma }}</h3>
             <span class="chip {% if total_profit >= 0 %}chip-soft-success{% else %}chip-soft-danger{% endif %}" id="portfolio-total-chip">{% if total_profit >= 0 %}▲{% else %}▼{% endif %} {{ total_profit_percent|floatformat:2 }}%</span>
         </div>
-        <svg class="sparkline portfolio-sparkline" viewBox="0 0 100 32" data-points="8,10,9,12,14,13,17,16,20,24,28"></svg>
+        <svg class="sparkline portfolio-sparkline" id="portfolio-sparkline" viewBox="0 0 100 32" data-points="{{ portfolio_sparkline }}"></svg>
         <div class="portfolio-breakdown">
             <div class="portfolio-row">
                 <span>Invested</span>

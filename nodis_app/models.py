@@ -138,6 +138,51 @@ class PortfolioHolding(models.Model):
         return f"{self.symbol} x{self.quantity} @ {self.buy_price}"
 
 
+class FamilyMember(models.Model):
+    """A family member with their own stock portfolio accordion on the stock exchange page."""
+
+    name = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class FamilyPortfolioHolding(models.Model):
+    """A NEPSE stock position tracked under a specific family member's portfolio accordion."""
+
+    family_member = models.ForeignKey(FamilyMember, on_delete=models.CASCADE, related_name="holdings")
+    symbol = models.CharField(max_length=20)
+    company_name = models.CharField(max_length=150, blank=True)
+    quantity = models.PositiveIntegerField(default=1)
+    buy_price = models.DecimalField(max_digits=12, decimal_places=2)
+    buy_date = models.DateField(default=date.today)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.family_member.name}: {self.symbol} x{self.quantity} @ {self.buy_price}"
+
+
+class AlertRecipient(models.Model):
+    """A named person + WhatsApp number a price alert can be sent to (e.g. 'Ashmita')."""
+
+    name = models.CharField(max_length=100, unique=True)
+    phone_number = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.phone_number})"
+
+
 class PriceAlert(models.Model):
     """A watch on a NEPSE symbol that fires once the price crosses a target, up or down."""
 
@@ -160,6 +205,9 @@ class PriceAlert(models.Model):
     action = models.CharField(max_length=4, choices=ACTION_CHOICES, default=BUY)
     target_price = models.DecimalField(max_digits=12, decimal_places=2)
     last_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    recipient = models.ForeignKey(
+        AlertRecipient, on_delete=models.SET_NULL, null=True, blank=True, related_name="alerts"
+    )
     is_triggered = models.BooleanField(default=False)
     triggered_direction = models.CharField(max_length=4, choices=DIRECTION_CHOICES, blank=True)
     triggered_at = models.DateTimeField(null=True, blank=True)

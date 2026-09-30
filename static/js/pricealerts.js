@@ -41,6 +41,8 @@
         const addModalEl = document.getElementById('addPriceAlertModal');
         const addSymbolSelect = document.getElementById('price-alert-add-symbol');
         const addCompanyNameInput = document.getElementById('price-alert-add-company-name');
+        const addRecipientSelect = document.getElementById('price-alert-add-recipient');
+        const addNewRecipientFields = document.getElementById('price-alert-add-new-recipient-fields');
 
         const editForm = document.getElementById('edit-price-alert-form');
         const editModalEl = document.getElementById('editPriceAlertModal');
@@ -49,6 +51,33 @@
         const editCompanyNameInput = document.getElementById('price-alert-edit-company-name');
         const editActionSelect = document.getElementById('price-alert-edit-action');
         const editTargetPriceInput = document.getElementById('price-alert-edit-target-price');
+        const editRecipientSelect = document.getElementById('price-alert-edit-recipient');
+        const editNewRecipientFields = document.getElementById('price-alert-edit-new-recipient-fields');
+
+        function toggleNewRecipientFields(selectEl, fieldsEl) {
+            if (!selectEl || !fieldsEl) return;
+            selectEl.addEventListener('change', function () {
+                fieldsEl.classList.toggle('d-none', selectEl.value !== '__new__');
+            });
+        }
+        toggleNewRecipientFields(addRecipientSelect, addNewRecipientFields);
+        toggleNewRecipientFields(editRecipientSelect, editNewRecipientFields);
+
+        function populateRecipientSelect(selectEl, recipients, selectedId) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '<option value="">Default number</option>';
+            recipients.forEach(function (r) {
+                const option = document.createElement('option');
+                option.value = r.id;
+                option.textContent = r.name;
+                selectEl.appendChild(option);
+            });
+            const newOption = document.createElement('option');
+            newOption.value = '__new__';
+            newOption.textContent = '+ Add new recipient\u2026';
+            selectEl.appendChild(newOption);
+            selectEl.value = selectedId ? String(selectedId) : '';
+        }
 
         function populateSymbolSelect(selectEl, symbols) {
             if (!selectEl) return;
@@ -95,6 +124,7 @@
             row.setAttribute('data-symbol', alert.symbol);
             row.setAttribute('data-target-price', alert.target_price);
             row.setAttribute('data-action', alert.action);
+            row.setAttribute('data-recipient-id', alert.recipient_id || '');
 
             const actionChipClass = alert.action === 'buy' ? 'chip-soft-success' : 'chip-soft-danger';
             const chipClass = alert.is_triggered ? 'chip-soft-warning' : 'chip-soft-secondary';
@@ -104,6 +134,7 @@
                 '<div>' +
                     '<strong></strong>' +
                     '<p class="mb-0 text-muted stock-sub"></p>' +
+                    '<p class="mb-0 text-muted stock-sub alert-recipient-line"></p>' +
                 '</div>' +
                 '<span class="chip ' + actionChipClass + '"></span>' +
                 '<span class="chip ' + chipClass + '">' + chipText + '</span>' +
@@ -114,6 +145,7 @@
 
             row.querySelector('strong').textContent = alert.symbol;
             row.querySelector('.stock-sub').textContent = alert.status_text;
+            row.querySelector('.alert-recipient-line').textContent = 'Notifies: ' + (alert.recipient_name || 'Default number');
             row.querySelector('.chip.' + actionChipClass).textContent = alert.action_display || '';
             return row;
         }
@@ -133,6 +165,12 @@
             }
             if (activeBadgeEl && typeof data.price_alerts_active_count === 'number') {
                 activeBadgeEl.textContent = data.price_alerts_active_count + ' active';
+            }
+            if (data.alert_recipients) {
+                const addCurrent = addRecipientSelect ? addRecipientSelect.value : '';
+                const editCurrent = editRecipientSelect ? editRecipientSelect.value : '';
+                populateRecipientSelect(addRecipientSelect, data.alert_recipients, addCurrent);
+                populateRecipientSelect(editRecipientSelect, data.alert_recipients, editCurrent);
             }
         }
 
@@ -182,11 +220,14 @@
         function openEditModal(row) {
             if (!editModalEl || !window.bootstrap) return;
             const symbol = row.getAttribute('data-symbol');
+            const recipientId = row.getAttribute('data-recipient-id') || '';
 
             editIdInput.value = row.getAttribute('data-id');
             editTargetPriceInput.value = row.getAttribute('data-target-price');
             editCompanyNameInput.value = '';
             if (editActionSelect) editActionSelect.value = row.getAttribute('data-action') || 'buy';
+            if (editRecipientSelect) editRecipientSelect.value = recipientId;
+            if (editNewRecipientFields) editNewRecipientFields.classList.add('d-none');
 
             symbolsPromise.then(function () {
                 if (editSymbolSelect) editSymbolSelect.value = symbol;
@@ -222,12 +263,14 @@
                 e.preventDefault();
                 clearFieldErrors(addForm);
                 const formData = new FormData(addForm);
+                if (formData.get('recipient') === '__new__') formData.set('recipient', '');
                 formData.set('csrfmiddlewaretoken', getCsrfToken());
                 postJson('/stockex_dash/alerts/add/', formData).then(function (result) {
                     if (result.ok && result.data.success) {
                         render(result.data);
                         addForm.reset();
                         if (addSymbolSelect) addSymbolSelect.selectedIndex = 0;
+                        if (addNewRecipientFields) addNewRecipientFields.classList.add('d-none');
                         hideModal(addModalEl);
                     } else {
                         showFieldErrors(addForm, result.data.errors);
@@ -242,10 +285,12 @@
                 clearFieldErrors(editForm);
                 const id = editIdInput.value;
                 const formData = new FormData(editForm);
+                if (formData.get('recipient') === '__new__') formData.set('recipient', '');
                 formData.set('csrfmiddlewaretoken', getCsrfToken());
                 postJson('/stockex_dash/alerts/' + id + '/update/', formData).then(function (result) {
                     if (result.ok && result.data.success) {
                         render(result.data);
+                        if (editNewRecipientFields) editNewRecipientFields.classList.add('d-none');
                         hideModal(editModalEl);
                     } else {
                         showFieldErrors(editForm, result.data.errors);

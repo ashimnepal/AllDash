@@ -7,10 +7,11 @@
                     </div>
                     <ul class="alerts-list list-unstyled mb-3" id="price-alerts-list">
                         {% for alert in price_alerts %}
-                        <li class="alert-row" data-id="{{ alert.id }}" data-symbol="{{ alert.symbol }}" data-target-price="{{ alert.target_price }}" data-action="{{ alert.action }}">
+                        <li class="alert-row" data-id="{{ alert.id }}" data-symbol="{{ alert.symbol }}" data-target-price="{{ alert.target_price }}" data-action="{{ alert.action }}" data-recipient-id="{{ alert.recipient_id|default:'' }}">
                             <div>
                                 <strong>{{ alert.symbol }}</strong>
                                 <p class="mb-0 text-muted stock-sub">{{ alert.status_text }}</p>
+                                <p class="mb-0 text-muted stock-sub alert-recipient-line">Notifies: {{ alert.recipient_name|default:"Default number" }}</p>
                             </div>
                             <span class="chip {% if alert.action == 'buy' %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{{ alert.action_display }}</span>
                             <span class="chip {% if alert.is_triggered %}chip-soft-warning{% else %}chip-soft-secondary{% endif %}">{% if alert.is_triggered %}Triggered{% else %}Watching{% endif %}</span>
@@ -75,6 +76,29 @@
                         <label for="price-alert-add-target-price" class="text-white">Alert me when price hits (Rs)</label>
                         <div class="text-danger small mt-1" data-error-for="target_price"></div>
                     </div>
+                    <div class="mb-3">
+                        <label for="price-alert-add-recipient" class="form-label text-white">Send WhatsApp to</label>
+                        <select class="form-select" id="price-alert-add-recipient" name="recipient">
+                            <option value="">Default number</option>
+                            {% for r in alert_recipients %}
+                            <option value="{{ r.id }}">{{ r.name }}</option>
+                            {% endfor %}
+                            <option value="__new__">+ Add new recipient…</option>
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="recipient"></div>
+                    </div>
+                    <div class="new-recipient-fields d-none" id="price-alert-add-new-recipient-fields">
+                        <div class="mb-3">
+                            <label for="price-alert-add-new-recipient-name" class="form-label text-white">Recipient's name</label>
+                            <input type="text" class="form-control" id="price-alert-add-new-recipient-name" name="new_recipient_name" placeholder="e.g. Ashmita">
+                            <div class="text-danger small mt-1" data-error-for="new_recipient_name"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price-alert-add-new-recipient-phone" class="form-label text-white">Her/his WhatsApp number</label>
+                            <input type="text" class="form-control" id="price-alert-add-new-recipient-phone" name="new_recipient_phone" placeholder="+9779800000000">
+                            <div class="text-danger small mt-1" data-error-for="new_recipient_phone"></div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -116,6 +140,29 @@
                         <input type="number" class="form-control" id="price-alert-edit-target-price" name="target_price" step="0.01" min="0.01" placeholder="Target price">
                         <label for="price-alert-edit-target-price" class="text-white">Alert me when price hits (Rs)</label>
                         <div class="text-danger small mt-1" data-error-for="target_price"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price-alert-edit-recipient" class="form-label text-white">Send WhatsApp to</label>
+                        <select class="form-select" id="price-alert-edit-recipient" name="recipient">
+                            <option value="">Default number</option>
+                            {% for r in alert_recipients %}
+                            <option value="{{ r.id }}">{{ r.name }}</option>
+                            {% endfor %}
+                            <option value="__new__">+ Add new recipient…</option>
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="recipient"></div>
+                    </div>
+                    <div class="new-recipient-fields d-none" id="price-alert-edit-new-recipient-fields">
+                        <div class="mb-3">
+                            <label for="price-alert-edit-new-recipient-name" class="form-label text-white">Recipient's name</label>
+                            <input type="text" class="form-control" id="price-alert-edit-new-recipient-name" name="new_recipient_name" placeholder="e.g. Ashmita">
+                            <div class="text-danger small mt-1" data-error-for="new_recipient_name"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price-alert-edit-new-recipient-phone" class="form-label text-white">Her/his WhatsApp number</label>
+                            <input type="text" class="form-control" id="price-alert-edit-new-recipient-phone" name="new_recipient_phone" placeholder="+9779800000000">
+                            <div class="text-danger small mt-1" data-error-for="new_recipient_phone"></div>
+                        </div>
                     </div>
                 </form>
             </div>

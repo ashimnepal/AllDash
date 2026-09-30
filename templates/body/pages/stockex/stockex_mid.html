@@ -1,3 +1,4 @@
+{% load humanize %}
 <section class="card stock-hero-card">
     <div class="card-body p-4">
         <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
@@ -238,6 +239,86 @@
 
         <div class="row gx-4 gy-4 mt-1">
             <div class="col-12">
+                <section class="card material-card family-portfolio-card">
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-3">
+                        <div>
+                            <h5 class="mb-1 thisiswhite">Family Portfolios</h5>
+                            <p class="text-muted mb-0 stock-sub">Each family member's holdings, live prices, and today vs. yesterday performance.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFamilyMemberModal">+ Add Family Member</button>
+                    </div>
+                    <div class="accordion accordion-flush" id="family-portfolio-accordion">
+                        {% for member in family_members %}
+                        <div class="accordion-item" data-member-id="{{ member.id }}">
+                            <h2 class="accordion-header" id="family-heading-{{ member.id }}">
+                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#family-collapse-{{ member.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="family-collapse-{{ member.id }}">
+                                    <div class="family-member-summary">
+                                        <strong>{{ member.name }}</strong>
+                                        <span class="chip {% if member.is_day_up %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{% if member.is_day_up %}▲{% else %}▼{% endif %} {{ member.day_change_percent|floatformat:2 }}%</span>
+                                        <span class="family-member-value">Rs {{ member.total_current|floatformat:0|intcomma }}</span>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="family-collapse-{{ member.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="family-heading-{{ member.id }}" data-bs-parent="#family-portfolio-accordion">
+                                <div class="accordion-body">
+                                    <div class="family-portfolio-stats">
+                                        <div><span>Invested</span><strong>Rs {{ member.total_invested|floatformat:0|intcomma }}</strong></div>
+                                        <div><span>Yesterday's Value</span><strong>Rs {{ member.total_yesterday_value|floatformat:0|intcomma }}</strong></div>
+                                        <div><span>Today's Value</span><strong>Rs {{ member.total_current|floatformat:0|intcomma }}</strong></div>
+                                        <div><span>Day Change</span><strong class="{% if member.is_day_up %}text-up{% else %}text-down{% endif %}">{% if member.is_day_up %}+{% endif %}Rs {{ member.day_change|floatformat:0|intcomma }}</strong></div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between mt-3 mb-2">
+                                        <h6 class="mb-0 thisiswhite">Holdings</h6>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-primary family-add-holding-btn" data-member-id="{{ member.id }}" data-member-name="{{ member.name }}">+ Add Stock</button>
+                                            <button type="button" class="row-icon-btn family-delete-member-btn" data-member-id="{{ member.id }}" data-member-name="{{ member.name }}" title="Remove {{ member.name }}" aria-label="Remove {{ member.name }}">&#10007;</button>
+                                        </div>
+                                    </div>
+                                    <div class="holdings-list family-holdings-list" data-member-id="{{ member.id }}">
+                                        {% for holding in member.holdings %}
+                                        <div class="holding-item {% if holding.is_up %}is-up{% else %}is-down{% endif %}"
+                                            data-id="{{ holding.id }}"
+                                            data-member-id="{{ member.id }}"
+                                            data-symbol="{{ holding.symbol }}"
+                                            data-company-name="{{ holding.company_name }}"
+                                            data-quantity="{{ holding.quantity }}"
+                                            data-buy-price="{{ holding.buy_price }}"
+                                            data-buy-date="{{ holding.buy_date }}">
+                                            <div class="holding-top">
+                                                <strong>{{ holding.symbol }}</strong>
+                                                <span class="chip {% if holding.is_up %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{% if holding.is_up %}▲{% else %}▼{% endif %} {{ holding.profit_percent|floatformat:2 }}%</span>
+                                                <div class="holding-actions">
+                                                    <button type="button" class="row-icon-btn edit-amount-btn" title="Edit holding" aria-label="Edit {{ holding.symbol }} holding">&#9998;</button>
+                                                    <button type="button" class="row-icon-btn delete-amount-btn" title="Delete holding" aria-label="Delete {{ holding.symbol }} holding">&#10007;</button>
+                                                </div>
+                                            </div>
+                                            <p class="holding-sub">{{ holding.company_name }}</p>
+                                            <div class="holding-prices">
+                                                <span>Bought <strong>Rs {{ holding.buy_price|floatformat:2|intcomma }}</strong></span>
+                                                <span>Now <strong>Rs {{ holding.current_price|floatformat:2|intcomma }}</strong></span>
+                                            </div>
+                                            <div class="holding-meta">
+                                                <span class="holding-date">Bought {{ holding.buy_date }} · Qty {{ holding.quantity }}</span>
+                                                <span class="holding-profit {% if holding.is_up %}text-up{% else %}text-down{% endif %}">{% if holding.is_up %}+{% endif %}Rs {{ holding.profit|floatformat:2|intcomma }}</span>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <p class="text-muted stock-sub mb-0">No stocks yet — add {{ member.name }}'s first holding.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted stock-sub mb-0" id="family-portfolio-empty">No family members yet — add one to start tracking their portfolio.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="row gx-4 gy-4 mt-1">
+            <div class="col-12">
                 <section class="card material-card watchlist-card">
                     <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-3">
                         <div>
@@ -348,3 +429,117 @@
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="addFamilyMemberModal" tabindex="-1" aria-labelledby="addFamilyMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white">
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="addFamilyMemberModalLabel">Add Family Member</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-family-member-form">
+                    {% csrf_token %}
+                    <div class="mb-3 form-floating">
+                        <input type="text" class="form-control" id="family-member-add-name" name="name" placeholder="Name">
+                        <label for="family-member-add-name" class="text-white">Name</label>
+                        <div class="text-danger small mt-1" data-error-for="name"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="add-family-member-form" class="btn btn-primary">Add Member</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addFamilyHoldingModal" tabindex="-1" aria-labelledby="addFamilyHoldingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white">
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="addFamilyHoldingModalLabel">Add Stock for <span id="family-add-holding-member-name"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-family-holding-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="family-add-holding-member-id" name="family_member">
+                    <div class="mb-3">
+                        <label for="family-holding-add-symbol" class="form-label text-white">Stock</label>
+                        <select class="form-select" id="family-holding-add-symbol" name="symbol">
+                            <option value="">Loading symbols…</option>
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="symbol"></div>
+                        <input type="hidden" id="family-holding-add-company-name" name="company_name">
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="number" class="form-control" id="family-holding-add-quantity" name="quantity" step="1" min="1" value="1" placeholder="Quantity">
+                        <label for="family-holding-add-quantity" class="text-white">Quantity</label>
+                        <div class="text-danger small mt-1" data-error-for="quantity"></div>
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="number" class="form-control" id="family-holding-add-buy-price" name="buy_price" step="0.01" min="0.01" placeholder="Buy price">
+                        <label for="family-holding-add-buy-price" class="text-white">Price it was bought at (Rs)</label>
+                        <div class="text-danger small mt-1" data-error-for="buy_price"></div>
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="date" class="form-control" id="family-holding-add-buy-date" name="buy_date" placeholder="Buy date">
+                        <label for="family-holding-add-buy-date" class="text-white">Date bought</label>
+                        <div class="text-danger small mt-1" data-error-for="buy_date"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="add-family-holding-form" class="btn btn-primary">Add Holding</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editFamilyHoldingModal" tabindex="-1" aria-labelledby="editFamilyHoldingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white">
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="editFamilyHoldingModalLabel">Edit Holding</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-family-holding-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit-family-holding-id">
+                    <input type="hidden" id="family-edit-holding-member-id" name="family_member">
+                    <div class="mb-3">
+                        <label for="family-holding-edit-symbol" class="form-label text-white">Stock</label>
+                        <select class="form-select" id="family-holding-edit-symbol" name="symbol">
+                            <option value="">Loading symbols…</option>
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="symbol"></div>
+                        <input type="hidden" id="family-holding-edit-company-name" name="company_name">
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="number" class="form-control" id="family-holding-edit-quantity" name="quantity" step="1" min="1" placeholder="Quantity">
+                        <label for="family-holding-edit-quantity" class="text-white">Quantity</label>
+                        <div class="text-danger small mt-1" data-error-for="quantity"></div>
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="number" class="form-control" id="family-holding-edit-buy-price" name="buy_price" step="0.01" min="0.01" placeholder="Buy price">
+                        <label for="family-holding-edit-buy-price" class="text-white">Price it was bought at (Rs)</label>
+                        <div class="text-danger small mt-1" data-error-for="buy_price"></div>
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="date" class="form-control" id="family-holding-edit-buy-date" name="buy_date" placeholder="Buy date">
+                        <label for="family-holding-edit-buy-date" class="text-white">Date bought</label>
+                        <div class="text-danger small mt-1" data-error-for="buy_date"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="edit-family-holding-form" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

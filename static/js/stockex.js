@@ -223,6 +223,10 @@
   }
   renderAllSparklines();
 
+  // Exposed so other portfolio-related scripts (stockportfolio.js) can redraw a
+  // sparkline after a live data update without duplicating the drawing logic.
+  window.NoDisDrawSparkline = drawSparkline;
+
   /* ---------------- Live price ticking simulation ---------------- */
   const priceRows = document.querySelectorAll('[data-base-price]');
   function tick() {

@@ -1,7 +1,3 @@
-{% extends "base.html" %}
-
-{% block content %}
-
 <div class="row mt-3">
     <div class="col-12">
         <div class="f1-dashboard-card">
@@ -17,7 +13,7 @@
             <div class="f1-dashboard-grid">
                 <div class="f1-feature-card">
                     <div class="f1-feature-label">Current Leader</div>
-                    <h3 class="f1-feature-title">{{ cl_standings.0.team.shortName|default:cl_standings.0.team.name|default:"Unavailable" }}</h3>
+                    <h3 class="f1-feature-title">{% if cl_standings %}{{ cl_standings.0.team.shortName|default:cl_standings.0.team.name }}{% else %}Unavailable{% endif %}</h3>
                     <div class="f1-feature-meta">
                         {% if cl_leader_lead is not None %}+{{ cl_leader_lead|floatformat:0 }} pts lead • {% endif %}1st overall
                     </div>
@@ -79,4 +75,3 @@
     </div>
 </div>
 
-{% endblock %}

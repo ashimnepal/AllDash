@@ -38,6 +38,7 @@
         const totalInvestedEl = document.getElementById('portfolio-total-invested');
         const totalProfitEl = document.getElementById('portfolio-total-profit');
         const totalChipEl = document.getElementById('portfolio-total-chip');
+        const sparklineEl = document.getElementById('portfolio-sparkline');
 
         const addForm = document.getElementById('add-portfolio-form');
         const addModalEl = document.getElementById('addPortfolioModal');
@@ -157,6 +158,12 @@
             if (totalChipEl) {
                 totalChipEl.className = 'chip ' + (isUp ? 'chip-soft-success' : 'chip-soft-danger');
                 totalChipEl.textContent = (isUp ? '\u25b2' : '\u25bc') + ' ' + (data.total_profit_percent || 0).toFixed(2) + '%';
+            }
+            if (sparklineEl && typeof data.portfolio_sparkline === 'string') {
+                sparklineEl.setAttribute('data-points', data.portfolio_sparkline);
+                if (window.NoDisDrawSparkline) {
+                    window.NoDisDrawSparkline(sparklineEl, data.portfolio_sparkline.split(',').map(Number));
+                }
             }
         }
 

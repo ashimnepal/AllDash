@@ -1,9 +1,12 @@
 from django.contrib import admin
 
 from .models import (
+    AlertRecipient,
     Budget,
     Category,
     Expense,
+    FamilyMember,
+    FamilyPortfolioHolding,
     Income,
     MoneyToGet,
     MoneyToPay,
@@ -59,8 +62,27 @@ class PortfolioHoldingAdmin(admin.ModelAdmin):
     search_fields = ("symbol", "company_name")
 
 
+@admin.register(AlertRecipient)
+class AlertRecipientAdmin(admin.ModelAdmin):
+    list_display = ("name", "phone_number", "created_at")
+    search_fields = ("name", "phone_number")
+
+
 @admin.register(PriceAlert)
 class PriceAlertAdmin(admin.ModelAdmin):
-    list_display = ("symbol", "action", "target_price", "is_triggered", "triggered_direction", "triggered_at")
+    list_display = ("symbol", "action", "target_price", "recipient", "is_triggered", "triggered_direction", "triggered_at")
     list_filter = ("action", "is_triggered")
+    search_fields = ("symbol", "company_name")
+
+
+@admin.register(FamilyMember)
+class FamilyMemberAdmin(admin.ModelAdmin):
+    list_display = ("name", "created_at")
+    search_fields = ("name",)
+
+
+@admin.register(FamilyPortfolioHolding)
+class FamilyPortfolioHoldingAdmin(admin.ModelAdmin):
+    list_display = ("family_member", "symbol", "company_name", "quantity", "buy_price", "buy_date")
+    list_filter = ("family_member", "buy_date")
     search_fields = ("symbol", "company_name")

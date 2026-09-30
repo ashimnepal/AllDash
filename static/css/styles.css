@@ -2558,6 +2558,75 @@ body::before {
   color: #94a3b8;
   font-size: 0.78rem;
 }
+
+/* Family Portfolios accordion */
+.stockex-page .family-portfolio-card .accordion-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+}
+.stockex-page .family-portfolio-card .accordion-item:last-child { margin-bottom: 0; }
+.stockex-page .family-portfolio-card .accordion-button {
+  background: transparent;
+  color: #f8fafc;
+  font-weight: 600;
+  box-shadow: none;
+  padding: 1rem 1.25rem;
+}
+.stockex-page .family-portfolio-card .accordion-button:not(.collapsed) {
+  background: rgba(99, 102, 241, 0.12);
+  color: #f8fafc;
+  box-shadow: none;
+}
+.stockex-page .family-portfolio-card .accordion-button:focus {
+  box-shadow: none;
+  border-color: transparent;
+}
+.stockex-page .family-portfolio-card .accordion-button::after {
+  filter: invert(1) grayscale(100%) brightness(2);
+}
+.stockex-page .family-portfolio-card .accordion-body {
+  background: rgba(15, 23, 42, 0.4);
+  padding: 1rem 1.25rem 1.25rem;
+}
+.stockex-page .family-member-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.35rem;
+  gap: 0.75rem;
+  width: 100%;
+}
+.stockex-page .family-member-value {
+  margin-left: auto;
+  font-weight: 700;
+  color: #f8fafc;
+}
+.stockex-page .family-portfolio-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+.stockex-page .family-portfolio-stats span {
+  display: block;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stockex-page .family-portfolio-stats strong {
+  display: block;
+  font-size: 1rem;
+  color: #e2e8f0;
+  margin-top: 0.15rem;
+  overflow-wrap: break-word;
+}
 .stockex-page .mini-notice-list li {
   padding: 0.65rem 0;
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);

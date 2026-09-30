@@ -55,16 +55,17 @@ def _find_whatsapp_tab(driver):
     return False
 
 
-def send_whatsapp_message(text):
-    """Send `text` to settings.WHATSAPP_TARGET_NUMBER via the open WhatsApp Web tab.
+def send_whatsapp_message(text, phone_number=None):
+    """Send `text` via the open WhatsApp Web tab to `phone_number`, or settings.WHATSAPP_TARGET_NUMBER
+    if no recipient-specific number is given (e.g. an alert with no AlertRecipient assigned).
 
     Returns True on success, False otherwise (Chrome not running with the debug port,
     no WhatsApp Web tab open, DOM/selectors changed, etc). Never raises - callers
     (price alert checks) must not crash if the browser feed is unavailable.
     """
-    phone = re.sub(r"\D", "", settings.WHATSAPP_TARGET_NUMBER or "")
+    phone = re.sub(r"\D", "", phone_number or settings.WHATSAPP_TARGET_NUMBER or "")
     if not phone:
-        logger.warning("WHATSAPP_TARGET_NUMBER not configured; skipping WhatsApp alert: %s", text)
+        logger.warning("No WhatsApp number configured; skipping WhatsApp alert: %s", text)
         return False
 
     try:

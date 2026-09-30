@@ -1,8 +1,11 @@
 from django import forms
 
 from .models import (
+    AlertRecipient,
     Budget,
     Expense,
+    FamilyMember,
+    FamilyPortfolioHolding,
     Income,
     MoneyToGet,
     MoneyToPay,
@@ -258,8 +261,89 @@ class PortfolioHoldingForm(forms.ModelForm):
         return self.cleaned_data["symbol"].strip().upper()
 
 
+class FamilyMemberForm(forms.ModelForm):
+    """Matches the 'Add Family Member' modal above the Family Portfolios accordion."""
+
+    class Meta:
+        model = FamilyMember
+        fields = ["name"]
+        widgets = {
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Family member's name",
+            }),
+        }
+
+    def clean_name(self):
+        return self.cleaned_data["name"].strip()
+
+
+class FamilyPortfolioHoldingForm(forms.ModelForm):
+    """Matches the add/edit holding modals inside each family member's accordion panel."""
+
+    class Meta:
+        model = FamilyPortfolioHolding
+        fields = ["family_member", "symbol", "company_name", "quantity", "buy_price", "buy_date"]
+        widgets = {
+            "family_member": forms.HiddenInput(),
+            "symbol": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Symbol",
+            }),
+            "company_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Company name",
+            }),
+            "quantity": forms.NumberInput(attrs={
+                "class": "form-control",
+                "placeholder": "Quantity",
+                "step": "1",
+                "min": "1",
+            }),
+            "buy_price": forms.NumberInput(attrs={
+                "class": "form-control",
+                "placeholder": "Buy price",
+                "step": "0.01",
+                "min": "0.01",
+            }),
+            "buy_date": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date",
+            }),
+        }
+        labels = {
+            "company_name": "Company name (optional)",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["company_name"].required = False
+
+    def clean_symbol(self):
+        return self.cleaned_data["symbol"].strip().upper()
+
+
 class PriceAlertForm(forms.ModelForm):
-    """Matches the add/edit modals on the stock exchange 'Price Alerts' card."""
+    """Matches the add/edit modals on the stock exchange 'Price Alerts' card.
+
+    `recipient` picks an existing AlertRecipient; `new_recipient_name`/`new_recipient_phone`
+    let the same modal create (or update the number of) a recipient inline instead, so a user
+    can type e.g. 'Ashmita' + her WhatsApp number once and reuse her from the dropdown after.
+    """
+
+    recipient = forms.ModelChoiceField(
+        queryset=AlertRecipient.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    new_recipient_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Recipient's name"}),
+    )
+    new_recipient_phone = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "WhatsApp number, e.g. +9779800000000"}),
+    )
 
     class Meta:
         model = PriceAlert
@@ -290,6 +374,31 @@ class PriceAlertForm(forms.ModelForm):
 
     def clean_symbol(self):
         return self.cleaned_data["symbol"].strip().upper()
+
+    def clean(self):
+        cleaned = super().clean()
+        name = (cleaned.get("new_recipient_name") or "").strip()
+        phone = (cleaned.get("new_recipient_phone") or "").strip()
+        if name and not phone:
+            self.add_error("new_recipient_phone", "Enter a WhatsApp number for the new recipient.")
+        if phone and not name:
+            self.add_error("new_recipient_name", "Enter a name for the new recipient.")
+        return cleaned
+
+    def resolve_recipient(self):
+        """Call after is_valid(): returns the AlertRecipient to attach, creating/updating one if
+        a new name+phone were typed instead of an existing recipient being picked from the list."""
+        name = (self.cleaned_data.get("new_recipient_name") or "").strip()
+        phone = (self.cleaned_data.get("new_recipient_phone") or "").strip()
+        if name and phone:
+            recipient, created = AlertRecipient.objects.get_or_create(
+                name=name, defaults={"phone_number": phone}
+            )
+            if not created and recipient.phone_number != phone:
+                recipient.phone_number = phone
+                recipient.save(update_fields=["phone_number"])
+            return recipient
+        return self.cleaned_data.get("recipient")
 
 
 class CurrencyConverterForm(forms.Form):

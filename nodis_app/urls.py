@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('dashboard/widgets/', views.home_widgets, name='home_widgets'),
     path('league/', views.league, name='leaguepage'),
     path('motogp/', views.motogp, name='motogppage'),
     path('formula1/', views.formula1, name='formula1page'),
@@ -24,6 +25,11 @@ urlpatterns = [
     path('stockex_dash/portfolio/add/', views.portfolio_add, name='portfolio_add'),
     path('stockex_dash/portfolio/<int:pk>/update/', views.portfolio_update, name='portfolio_update'),
     path('stockex_dash/portfolio/<int:pk>/delete/', views.portfolio_delete, name='portfolio_delete'),
+    path('stockex_dash/family/add/', views.family_member_add, name='family_member_add'),
+    path('stockex_dash/family/<int:pk>/delete/', views.family_member_delete, name='family_member_delete'),
+    path('stockex_dash/family/holdings/add/', views.family_portfolio_add, name='family_portfolio_add'),
+    path('stockex_dash/family/holdings/<int:pk>/update/', views.family_portfolio_update, name='family_portfolio_update'),
+    path('stockex_dash/family/holdings/<int:pk>/delete/', views.family_portfolio_delete, name='family_portfolio_delete'),
     path('stockex_dash/alerts/check/', views.price_alerts_check, name='price_alerts_check'),
     path('stockex_dash/alerts/add/', views.price_alert_add, name='price_alert_add'),
     path('stockex_dash/alerts/<int:pk>/update/', views.price_alert_update, name='price_alert_update'),

@@ -1,5 +1,6 @@
 import logging
 import random
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime
 from datetime import timezone as dt_timezone
 from urllib.parse import quote
@@ -12,6 +13,7 @@ from django.db.models import Q, Sum
 from django.db.models.functions import TruncMonth
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views import View
@@ -21,6 +23,8 @@ from nepali_calendar_utils import NameFormat, NepaliCalendarUtilsLang, NepaliDat
 from .forms import (
     CurrencyConverterForm,
     ExpenseForm,
+    FamilyMemberForm,
+    FamilyPortfolioHoldingForm,
     IncomeForm,
     MoneyToGetForm,
     MoneyToPayForm,
@@ -29,8 +33,8 @@ from .forms import (
     PortfolioHoldingForm,
     PriceAlertForm,
 )
-from .models import Budget, Expense, Income, MoneyToGet, MoneyToPay
-from .models import NepalSavingsTransaction, PortfolioHolding, PriceAlert
+from .models import Budget, Expense, FamilyMember, FamilyPortfolioHolding, Income, MoneyToGet, MoneyToPay
+from .models import AlertRecipient, NepalSavingsTransaction, PortfolioHolding, PriceAlert
 from .nepali_holidays import get_year_holidays
 from .whatsapp_web import send_whatsapp_message
 
@@ -491,16 +495,24 @@ SCHEDULED_MATCHES_CACHE_TTL = 30 * 60
 FINISHED_MATCHES_CACHE_TTL = 60 * 60
 SCORERS_CACHE_KEY = 'football_data_{code}_scorers'
 SCORERS_CACHE_TTL = 6 * 60 * 60  # top scorers barely move between matchdays
+FOOTBALL_DATA_DOWN_CACHE_KEY = 'football_data_service_down'
+FOOTBALL_DATA_DOWN_COOLDOWN = 30  # skip retrying football-data.org for a bit after a failed call
 
 
 def _football_data_get(path, params=None):
-    response = requests.get(
-        f'{FOOTBALL_DATA_API_BASE}{path}',
-        headers={'X-Auth-Token': settings.FOOTBALL_DATA_API_TOKEN},
-        params=params,
-        timeout=10,
-    )
-    response.raise_for_status()
+    if cache.get(FOOTBALL_DATA_DOWN_CACHE_KEY):
+        raise requests.ConnectionError("football-data.org recently unreachable, skipping retry")
+    try:
+        response = requests.get(
+            f'{FOOTBALL_DATA_API_BASE}{path}',
+            headers={'X-Auth-Token': settings.FOOTBALL_DATA_API_TOKEN},
+            params=params,
+            timeout=6,
+        )
+        response.raise_for_status()
+    except requests.RequestException:
+        cache.set(FOOTBALL_DATA_DOWN_CACHE_KEY, True, FOOTBALL_DATA_DOWN_COOLDOWN)
+        raise
     return response.json()
 
 
@@ -734,8 +746,18 @@ def _build_sports_events_context():
 
 
 def home(request):
+    """Renders instantly with only the local Nepali calendar - everything else (sports
+    events, NEPSE summary, F1/MotoGP/League widgets) depends on slow third-party APIs and
+    is fetched in the background afterwards by dashboard_widgets.js via `home_widgets`."""
     context = _build_nepali_calendar_context()
-    context.update(_build_sports_events_context())
+    return render(request, 'body/Dashboard/Dashboard.html', context)
+
+
+def home_widgets(request):
+    """Background payload for the home dashboard's slower widgets (sports events sidebar,
+    NEPSE summary tile, F1/MotoGP/League+Champions League cards) - each rendered with its
+    existing template so the HTML fragment can be dropped straight into the page."""
+    context = _build_sports_events_context()
 
     try:
         context['nepse_summary'] = get_nepse_market_summary()
@@ -743,13 +765,19 @@ def home(request):
         logger.error('Home NEPSE market summary fetch failed: %s', exc)
         context['nepse_summary'] = None
 
-    # F1/MotoGP context keys are prefixed since both dashboard cards render into the same
-    # Dashboard.html template context (unlike their dedicated pages, which never collide).
     context.update({f'f1_{key}': value for key, value in _build_f1_context().items()})
     context.update({f'motogp_{key}': value for key, value in _build_motogp_context().items()})
     context.update(_build_league_context())
 
-    return render(request, 'body/Dashboard/Dashboard.html', context)
+    return JsonResponse({
+        'events': render_to_string('body/Dashboard/rightsidebar_events.html', context, request=request),
+        'stockmarket': render_to_string('body/Dashboard/stockmarket.html', context, request=request),
+        'f1': render_to_string('body/Dashboard/f1_dashboard_index.html', context, request=request),
+        'motogp': render_to_string('body/Dashboard/motogp_dashboard_index.html', context, request=request),
+        'premier': render_to_string('body/Dashboard/premier_dashboard_index.html', context, request=request),
+        'champions': render_to_string('body/Dashboard/champions_dashboard_index.html', context, request=request),
+    })
+
 
 def _build_league_context():
     context = {
@@ -765,54 +793,49 @@ def _build_league_context():
         'cl_recent_results': [],
         'cl_leader_lead': None,
     }
-    try:
-        context['standings'] = get_competition_standings(FOOTBALL_DATA_PL_CODE)
+
+    # These 8 calls are all independent - run them concurrently so a cold cache pays for
+    # one round trip's worth of latency instead of the sum of eight.
+    tasks = {
+        'standings': lambda: get_competition_standings(FOOTBALL_DATA_PL_CODE),
+        'top_scorers': lambda: get_competition_scorers(FOOTBALL_DATA_PL_CODE, limit=5),
+        'upcoming_matches': lambda: sorted(get_competition_matches(FOOTBALL_DATA_PL_CODE, 'SCHEDULED'), key=lambda m: m['kickoff']),
+        'recent_results': lambda: sorted(get_competition_matches(FOOTBALL_DATA_PL_CODE, 'FINISHED'), key=lambda m: m['kickoff'], reverse=True),
+        'cl_upcoming_matches': lambda: sorted(get_competition_matches(FOOTBALL_DATA_CL_CODE, 'SCHEDULED'), key=lambda m: m['kickoff']),
+        'cl_recent_results': lambda: sorted(get_competition_matches(FOOTBALL_DATA_CL_CODE, 'FINISHED'), key=lambda m: m['kickoff'], reverse=True),
+        'cl_standings': lambda: get_competition_standings(FOOTBALL_DATA_CL_CODE),
+        'cl_top_scorers': lambda: get_competition_scorers(FOOTBALL_DATA_CL_CODE, limit=5),
+    }
+    results = {}
+    with ThreadPoolExecutor(max_workers=len(tasks)) as pool:
+        futures = {name: pool.submit(fn) for name, fn in tasks.items()}
+        for name, future in futures.items():
+            try:
+                results[name] = future.result()
+            except (requests.RequestException, ValueError, KeyError) as exc:
+                logger.error('football-data.org %s fetch failed: %s', name, exc)
+
+    if 'standings' in results:
+        context['standings'] = results['standings']
         if len(context['standings']) > 1:
             context['leader_lead'] = context['standings'][0]['points'] - context['standings'][1]['points']
-    except (requests.RequestException, ValueError, KeyError) as exc:
-        logger.error('football-data.org standings fetch failed: %s', exc)
-
-    try:
-        context['top_scorers'] = get_competition_scorers(FOOTBALL_DATA_PL_CODE, limit=5)
-    except (requests.RequestException, ValueError, KeyError) as exc:
-        logger.error('football-data.org scorers fetch failed: %s', exc)
-
-    try:
-        upcoming = sorted(get_competition_matches(FOOTBALL_DATA_PL_CODE, 'SCHEDULED'), key=lambda m: m['kickoff'])
-        context['upcoming_matches'] = upcoming[:8]
-        context['next_matches'] = upcoming[:2]
-    except (requests.RequestException, ValueError, KeyError) as exc:
-        logger.error('football-data.org scheduled matches fetch failed: %s', exc)
-
-    try:
-        finished = sorted(get_competition_matches(FOOTBALL_DATA_PL_CODE, 'FINISHED'), key=lambda m: m['kickoff'], reverse=True)
-        context['recent_results'] = finished[:5]
-    except (requests.RequestException, ValueError, KeyError) as exc:
-        logger.error('football-data.org finished matches fetch failed: %s', exc)
-
-    try:
-        cl_upcoming = sorted(get_competition_matches(FOOTBALL_DATA_CL_CODE, 'SCHEDULED'), key=lambda m: m['kickoff'])
-        context['cl_upcoming_matches'] = cl_upcoming[:8]
-    except (requests.RequestException, ValueError, KeyError) as exc:
-        logger.error('football-data.org Champions League scheduled matches fetch failed: %s', exc)
-
-    try:
-        cl_finished = sorted(get_competition_matches(FOOTBALL_DATA_CL_CODE, 'FINISHED'), key=lambda m: m['kickoff'], reverse=True)
-        context['cl_recent_results'] = cl_finished[:5]
-    except (requests.RequestException, ValueError, KeyError) as exc:
-        logger.error('football-data.org Champions League finished matches fetch failed: %s', exc)
-
-    try:
-        context['cl_standings'] = get_competition_standings(FOOTBALL_DATA_CL_CODE)
+    if 'top_scorers' in results:
+        context['top_scorers'] = results['top_scorers']
+    if 'upcoming_matches' in results:
+        context['upcoming_matches'] = results['upcoming_matches'][:8]
+        context['next_matches'] = results['upcoming_matches'][:2]
+    if 'recent_results' in results:
+        context['recent_results'] = results['recent_results'][:5]
+    if 'cl_upcoming_matches' in results:
+        context['cl_upcoming_matches'] = results['cl_upcoming_matches'][:8]
+    if 'cl_recent_results' in results:
+        context['cl_recent_results'] = results['cl_recent_results'][:5]
+    if 'cl_standings' in results:
+        context['cl_standings'] = results['cl_standings']
         if len(context['cl_standings']) > 1:
             context['cl_leader_lead'] = context['cl_standings'][0]['points'] - context['cl_standings'][1]['points']
-    except (requests.RequestException, ValueError, KeyError) as exc:
-        logger.error('football-data.org Champions League standings fetch failed: %s', exc)
-
-    try:
-        context['cl_top_scorers'] = get_competition_scorers(FOOTBALL_DATA_CL_CODE, limit=5)
-    except (requests.RequestException, ValueError, KeyError) as exc:
-        logger.error('football-data.org Champions League scorers fetch failed: %s', exc)
+    if 'cl_top_scorers' in results:
+        context['cl_top_scorers'] = results['cl_top_scorers']
 
     return context
 
@@ -1329,6 +1352,7 @@ def stockex(request):
     context = portfolio_json()
     context.update(price_alerts_json())
     context.update(watchlist_json())
+    context.update(family_members_json())
     ws_scheme = 'wss' if request.is_secure() else 'ws'
     context['nepse_ws_url'] = f"{ws_scheme}://{settings.NEPSE_WS_HOST}"
     return render(request, 'body/pages/stockex/stockex_dash.html', context)
@@ -1351,6 +1375,56 @@ def _format_nepali_amount(value):
 PORTFOLIO_PRICE_CACHE_KEY = 'nepse_price_volume_map'
 PORTFOLIO_PRICE_CACHE_TTL = 60  # NEPSE prices tick constantly; keep this short
 
+NEPSE_DOWN_CACHE_KEY = 'nepse_service_down'
+NEPSE_DOWN_COOLDOWN = 30  # once the LAN Mac mini fails to answer, stop retrying it for a bit
+NEPSE_RAW_CACHE_TTL = 60  # matches PORTFOLIO_PRICE_CACHE_TTL - these all tick together
+
+NEPSE_INDEX_CACHE_KEY = 'nepse_raw_index'
+NEPSE_SUMMARY_CACHE_KEY = 'nepse_raw_summary'
+NEPSE_GAINERS_CACHE_KEY = 'nepse_raw_gainers'
+NEPSE_LOSERS_CACHE_KEY = 'nepse_raw_losers'
+
+
+def _nepse_get_json(path):
+    """GET a LAN NEPSE endpoint with a short circuit-breaker: once a call fails (e.g. the
+    Mac mini is off outside market hours), skip straight to raising for a cooldown window
+    instead of every request waiting out another multi-second timeout."""
+    if cache.get(NEPSE_DOWN_CACHE_KEY):
+        raise requests.ConnectionError("NEPSE API recently unreachable, skipping retry")
+    try:
+        response = requests.get(f"{NEPSE_API_BASE}{path}", timeout=3)
+        response.raise_for_status()
+    except requests.RequestException:
+        cache.set(NEPSE_DOWN_CACHE_KEY, True, NEPSE_DOWN_COOLDOWN)
+        raise
+    return response.json()
+
+
+def _cached_nepse_json(cache_key, path):
+    """Short-TTL cached wrapper around `_nepse_get_json` shared by every raw NEPSE endpoint."""
+    data = cache.get(cache_key)
+    if data is not None:
+        return data
+    data = _nepse_get_json(path)
+    cache.set(cache_key, data, NEPSE_RAW_CACHE_TTL)
+    return data
+
+
+def get_nepse_index_data():
+    return _cached_nepse_json(NEPSE_INDEX_CACHE_KEY, "/NepseIndex")
+
+
+def get_nepse_summary_data():
+    return _cached_nepse_json(NEPSE_SUMMARY_CACHE_KEY, "/Summary")
+
+
+def get_nepse_gainers_data():
+    return _cached_nepse_json(NEPSE_GAINERS_CACHE_KEY, "/TopGainers")
+
+
+def get_nepse_losers_data():
+    return _cached_nepse_json(NEPSE_LOSERS_CACHE_KEY, "/TopLosers")
+
 
 def get_nepse_price_map():
     """Symbol -> {name, price, change_percent, volume} from the LAN NEPSE PriceVolume feed, cached briefly."""
@@ -1358,8 +1432,7 @@ def get_nepse_price_map():
     if price_map is not None:
         return price_map
 
-    response = requests.get(f"{NEPSE_API_BASE}/PriceVolume", timeout=5)
-    response.raise_for_status()
+    rows = _nepse_get_json("/PriceVolume")
     price_map = {
         row["symbol"]: {
             "name": (row.get("securityName") or "").strip(),
@@ -1367,7 +1440,7 @@ def get_nepse_price_map():
             "change_percent": row.get("percentageChange"),
             "volume": row.get("totalTradeQuantity"),
         }
-        for row in response.json()
+        for row in rows
         if row.get("symbol")
     }
     cache.set(PORTFOLIO_PRICE_CACHE_KEY, price_map, PORTFOLIO_PRICE_CACHE_TTL)
@@ -1384,10 +1457,17 @@ def get_nepse_market_summary():
     if summary is not None:
         return summary
 
-    index_data = requests.get(f"{NEPSE_API_BASE}/NepseIndex", timeout=5).json()
-    summary_data = requests.get(f"{NEPSE_API_BASE}/Summary", timeout=5).json()
-    gainers_data = requests.get(f"{NEPSE_API_BASE}/TopGainers", timeout=5).json()
-    losers_data = requests.get(f"{NEPSE_API_BASE}/TopLosers", timeout=5).json()
+    # These 4 are independent LAN calls - fire them concurrently so a cold cache pays for
+    # one round trip instead of the sum of four (each has its own short-TTL cache too).
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        index_future = pool.submit(get_nepse_index_data)
+        summary_future = pool.submit(get_nepse_summary_data)
+        gainers_future = pool.submit(get_nepse_gainers_data)
+        losers_future = pool.submit(get_nepse_losers_data)
+        index_data = index_future.result()
+        summary_data = summary_future.result()
+        gainers_data = gainers_future.result()
+        losers_data = losers_future.result()
 
     nepse_index = index_data.get("NEPSE Index", {})
     price_map = get_nepse_price_map()
@@ -1432,9 +1512,7 @@ def get_watchlist_symbols():
     """Every active equity in our watched sectors, symbol -> {company, category}, sourced from /CompanyList."""
     companies = cache.get(COMPANY_LIST_CACHE_KEY)
     if companies is None:
-        response = requests.get(f"{NEPSE_API_BASE}/CompanyList", timeout=5)
-        response.raise_for_status()
-        companies = response.json()
+        companies = _nepse_get_json("/CompanyList")
         cache.set(COMPANY_LIST_CACHE_KEY, companies, COMPANY_LIST_CACHE_TTL)
 
     symbols = {}
@@ -1463,6 +1541,24 @@ def _watchlist_sparkline(symbol, change_percent):
     for _ in range(10):
         drift = rng.uniform(0.5, 2.5) * (1 if trending_up else -1)
         value = max(2.0, value + drift + rng.uniform(-1, 1))
+        points.append(round(value, 1))
+    return ",".join(str(p) for p in points)
+
+
+def _portfolio_sparkline(total_profit_percent):
+    """7D-style trend line for the 'My Portfolio' sidebar (no historical value feed exists),
+    seeded off the actual profit percent so it always trends the same direction - and by
+    roughly the same magnitude - as the real Invested/Profit numbers shown next to it."""
+    total_profit_percent = total_profit_percent or 0
+    trending_up = total_profit_percent >= 0
+    magnitude = min(abs(total_profit_percent), 25) or 0.4
+    rng = random.Random(round(total_profit_percent, 1))
+    step = magnitude / 7
+    value = 15.0
+    points = [value]
+    for _ in range(7):
+        drift = step * (1 if trending_up else -1)
+        value = max(2.0, value + drift + rng.uniform(-0.8, 0.8))
         points.append(round(value, 1))
     return ",".join(str(p) for p in points)
 
@@ -1554,6 +1650,7 @@ def portfolio_json(extra=None):
         "total_current": total_current,
         "total_profit": total_profit,
         "total_profit_percent": total_profit_percent,
+        "portfolio_sparkline": _portfolio_sparkline(total_profit_percent),
     }
     if extra:
         data.update(extra)
@@ -1602,6 +1699,145 @@ def portfolio_delete(request, pk):
     return JsonResponse(portfolio_json({'success': True, 'message': 'Holding removed.'}))
 
 
+def _family_holding_row(holding, price_map):
+    """Payload for one holding, including its live current price and a today-vs-yesterday split.
+
+    NEPSE's PriceVolume feed already gives today's %% change vs the previous close, so that
+    figure is reused to back out an implied "yesterday value" per holding (no historical price
+    storage needed) rather than a fake/mocked comparison.
+    """
+    info = price_map.get(holding.symbol)
+    current_price = float(info["price"]) if info and info.get("price") is not None else float(holding.buy_price)
+    change_percent = float(info["change_percent"]) if info and info.get("change_percent") is not None else 0.0
+    invested = float(holding.buy_price) * holding.quantity
+    current_value = current_price * holding.quantity
+    profit = current_value - invested
+    profit_percent = (profit / invested * 100) if invested else 0.0
+
+    divisor = 1 + (change_percent / 100)
+    yesterday_value = current_value / divisor if divisor else current_value
+    day_change = current_value - yesterday_value
+
+    return {
+        "id": holding.id,
+        "symbol": holding.symbol,
+        "company_name": holding.company_name or (info["name"] if info else ""),
+        "quantity": holding.quantity,
+        "buy_price": float(holding.buy_price),
+        "current_price": current_price,
+        "buy_date": holding.buy_date.isoformat(),
+        "invested": invested,
+        "current_value": current_value,
+        "profit": profit,
+        "profit_percent": profit_percent,
+        "is_up": profit >= 0,
+        "yesterday_value": yesterday_value,
+        "day_change": day_change,
+        "day_change_percent": change_percent,
+        "is_day_up": day_change >= 0,
+    }
+
+
+def family_members_json(extra=None):
+    """Family Portfolios accordion payload: each member's holdings, totals, and day-over-day move."""
+    try:
+        price_map = get_nepse_price_map()
+    except (requests.RequestException, ValueError):
+        price_map = {}
+
+    members = []
+    for member in FamilyMember.objects.prefetch_related("holdings"):
+        rows = [_family_holding_row(holding, price_map) for holding in member.holdings.all()]
+        total_invested = sum(row["invested"] for row in rows)
+        total_current = sum(row["current_value"] for row in rows)
+        total_yesterday = sum(row["yesterday_value"] for row in rows)
+        total_profit = total_current - total_invested
+        total_profit_percent = (total_profit / total_invested * 100) if total_invested else 0.0
+        day_change = total_current - total_yesterday
+        day_change_percent = (day_change / total_yesterday * 100) if total_yesterday else 0.0
+        members.append({
+            "id": member.id,
+            "name": member.name,
+            "holdings": rows,
+            "total_invested": total_invested,
+            "total_current": total_current,
+            "total_profit": total_profit,
+            "total_profit_percent": total_profit_percent,
+            "total_yesterday_value": total_yesterday,
+            "day_change": day_change,
+            "day_change_percent": day_change_percent,
+            "is_up": total_profit >= 0,
+            "is_day_up": day_change >= 0,
+        })
+
+    data = {"family_members": members}
+    if extra:
+        data.update(extra)
+    return data
+
+
+@require_POST
+def family_member_add(request):
+    form = FamilyMemberForm(request.POST)
+    if form.is_valid():
+        form.save()
+        return JsonResponse(family_members_json({'success': True, 'message': 'Family member added.'}))
+    return JsonResponse({
+        'success': False,
+        'message': 'Please fix the errors below.',
+        'errors': {field: [str(e) for e in errs] for field, errs in form.errors.items()},
+    }, status=400)
+
+
+@require_POST
+def family_member_delete(request, pk):
+    member = get_object_or_404(FamilyMember, pk=pk)
+    member.delete()
+    return JsonResponse(family_members_json({'success': True, 'message': 'Family member removed.'}))
+
+
+@require_POST
+def family_portfolio_add(request):
+    form = FamilyPortfolioHoldingForm(request.POST)
+    if form.is_valid():
+        holding = form.save(commit=False)
+        if not holding.company_name:
+            try:
+                info = get_nepse_price_map().get(holding.symbol)
+                if info:
+                    holding.company_name = info["name"]
+            except (requests.RequestException, ValueError):
+                pass
+        holding.save()
+        return JsonResponse(family_members_json({'success': True, 'message': 'Holding added.'}))
+    return JsonResponse({
+        'success': False,
+        'message': 'Please fix the errors below.',
+        'errors': {field: [str(e) for e in errs] for field, errs in form.errors.items()},
+    }, status=400)
+
+
+@require_POST
+def family_portfolio_update(request, pk):
+    holding = get_object_or_404(FamilyPortfolioHolding, pk=pk)
+    form = FamilyPortfolioHoldingForm(request.POST, instance=holding)
+    if form.is_valid():
+        form.save()
+        return JsonResponse(family_members_json({'success': True, 'message': 'Holding updated.'}))
+    return JsonResponse({
+        'success': False,
+        'message': 'Please fix the errors below.',
+        'errors': {field: [str(e) for e in errs] for field, errs in form.errors.items()},
+    }, status=400)
+
+
+@require_POST
+def family_portfolio_delete(request, pk):
+    holding = get_object_or_404(FamilyPortfolioHolding, pk=pk)
+    holding.delete()
+    return JsonResponse(family_members_json({'success': True, 'message': 'Holding removed.'}))
+
+
 def _price_alert_status(alert, current_price):
     """Row payload for a single alert, including its live current price and status text."""
     target = float(alert.target_price)
@@ -1625,6 +1861,8 @@ def _price_alert_status(alert, current_price):
         "direction": alert.triggered_direction,
         "status_text": status_text,
         "triggered_at": alert.triggered_at.isoformat() if alert.triggered_at else None,
+        "recipient_id": alert.recipient_id,
+        "recipient_name": alert.recipient.name if alert.recipient else "",
     }
 
 
@@ -1637,14 +1875,18 @@ def price_alerts_json(extra=None):
 
     rows = []
     active_count = 0
-    for alert in PriceAlert.objects.all():
+    for alert in PriceAlert.objects.select_related("recipient"):
         info = price_map.get(alert.symbol)
         current_price = float(info["price"]) if info and info.get("price") is not None else float(alert.last_price or alert.target_price)
         if not alert.is_triggered:
             active_count += 1
         rows.append(_price_alert_status(alert, current_price))
 
-    data = {"price_alerts": rows, "price_alerts_active_count": active_count}
+    recipients = [
+        {"id": r.id, "name": r.name, "phone_number": r.phone_number}
+        for r in AlertRecipient.objects.all()
+    ]
+    data = {"price_alerts": rows, "price_alerts_active_count": active_count, "alert_recipients": recipients}
     if extra:
         data.update(extra)
     return data
@@ -1655,6 +1897,7 @@ def price_alert_add(request):
     form = PriceAlertForm(request.POST)
     if form.is_valid():
         alert = form.save(commit=False)
+        alert.recipient = form.resolve_recipient()
         try:
             info = get_nepse_price_map().get(alert.symbol)
         except (requests.RequestException, ValueError):
@@ -1678,6 +1921,7 @@ def price_alert_update(request, pk):
     form = PriceAlertForm(request.POST, instance=alert)
     if form.is_valid():
         alert = form.save(commit=False)
+        alert.recipient = form.resolve_recipient()
         # Editing re-arms the alert with a fresh baseline price.
         alert.is_triggered = False
         alert.triggered_direction = ""
@@ -1717,7 +1961,7 @@ def evaluate_price_alerts():
         return []
 
     triggered_now = []
-    for alert in PriceAlert.objects.filter(is_triggered=False):
+    for alert in PriceAlert.objects.filter(is_triggered=False).select_related("recipient"):
         info = price_map.get(alert.symbol)
         if not info or info.get("price") is None:
             continue
@@ -1744,7 +1988,8 @@ def evaluate_price_alerts():
             direction_text = "crossed above" if crossed_up else "dropped below"
             send_whatsapp_message(
                 f"\U0001F514 {alert.symbol} {action_word} ALERT: price {direction_text} "
-                f"Rs {target:,.2f} (now Rs {current_price:,.2f})"
+                f"Rs {target:,.2f} (now Rs {current_price:,.2f})",
+                phone_number=alert.recipient.phone_number if alert.recipient else None,
             )
         else:
             alert.last_price = current_price
@@ -1760,20 +2005,25 @@ def price_alerts_check(request):
 
 
 def nepse_live_data(request):
-    """Proxy live NEPSE data from the Mac mini's REST API for the stock dashboard."""
+    """Proxy live NEPSE data from the Mac mini's REST API for the stock dashboard.
+
+    Reuses the same short-TTL cached getters as the rest of the page (instead of firing
+    5 fresh uncached requests) since this view is polled every ~15s by the browser -
+    without the cache, a slow/unreachable Mac mini stalls a request this often forever.
+    """
     try:
-        index_data = requests.get(f"{NEPSE_API_BASE}/NepseIndex", timeout=5).json()
-        summary_data = requests.get(f"{NEPSE_API_BASE}/Summary", timeout=5).json()
-        gainers_data = requests.get(f"{NEPSE_API_BASE}/TopGainers", timeout=5).json()
-        losers_data = requests.get(f"{NEPSE_API_BASE}/TopLosers", timeout=5).json()
-        price_volume_data = requests.get(f"{NEPSE_API_BASE}/PriceVolume", timeout=5).json()
+        index_data = get_nepse_index_data()
+        summary_data = get_nepse_summary_data()
+        gainers_data = get_nepse_gainers_data()
+        losers_data = get_nepse_losers_data()
+        price_map = get_nepse_price_map()
     except (requests.RequestException, ValueError):
         return JsonResponse({"error": "Mac mini NEPSE API is unreachable"}, status=502)
 
     nepse_index = index_data.get("NEPSE Index", {})
-    advances = sum(1 for s in price_volume_data if s.get("percentageChange", 0) > 0)
-    declines = sum(1 for s in price_volume_data if s.get("percentageChange", 0) < 0)
-    unchanged = sum(1 for s in price_volume_data if s.get("percentageChange", 0) == 0)
+    advances = sum(1 for row in price_map.values() if (row.get("change_percent") or 0) > 0)
+    declines = sum(1 for row in price_map.values() if (row.get("change_percent") or 0) < 0)
+    unchanged = len(price_map) - advances - declines
 
     try:
         watchlist_symbols = get_watchlist_symbols()
@@ -1782,13 +2032,13 @@ def nepse_live_data(request):
 
     watchlist = [
         {
-            "symbol": s["symbol"],
-            "price": s["lastTradedPrice"],
-            "changePercent": s["percentageChange"],
-            "volume": s["totalTradeQuantity"],
+            "symbol": symbol,
+            "price": info["price"],
+            "changePercent": info["change_percent"],
+            "volume": info["volume"],
         }
-        for s in price_volume_data
-        if s.get("symbol") in watchlist_symbols
+        for symbol, info in price_map.items()
+        if symbol in watchlist_symbols
     ]
 
     data = {
