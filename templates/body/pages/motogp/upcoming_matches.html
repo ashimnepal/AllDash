@@ -1,74 +1,133 @@
 <div class="premier-dashboard-card">
     <div class="premier-dashboard-hero">
-                <div class="premier-dashboard-top">
-                    <span class="dashboard-chip">Calendar</span>
-                    <span class="dashboard-date-pill">This Season</span>
+        <div class="premier-dashboard-top">
+            <span class="dashboard-chip">Calendar</span>
+            <span class="dashboard-date-pill">This Season</span>
+        </div>
+        <h1 class="dashboard-title">Upcoming Races</h1>
+        <p class="dashboard-calendar-text">A quick look at when the next Grands Prix are happening.</p>
+    </div>
+
+    <div class="fixtures-section">
+        <div class="fixtures-section-header">
+            <h2>Next Grands Prix</h2>
+            <span class="premier-pill">{{ upcoming_races|length }} Races</span>
+        </div>
+        <div class="fixtures-grid">
+            {% for race in upcoming_races %}
+            <div class="fixture-card">
+                <div class="fixture-card-header">
+                    <span class="fixture-club">{{ race.name }}</span>
+                    <span class="premier-pill">Round {{ race.round }}</span>
                 </div>
-                <h1 class="dashboard-title">Upcoming Races</h1>
-                <p class="dashboard-calendar-text">A quick look at when the next Grands Prix are happening.</p>
-            </div>
-
-            <div class="fixtures-section">
-                <div class="fixtures-section-header">
-                    <h2>Next Grands Prix</h2>
-                    <span class="premier-pill">4 Races</span>
+                <div class="fixture-teams">
+                    <span>{{ race.circuit.name }}</span>
                 </div>
-                <div class="fixtures-grid">
-                    <div class="fixture-card">
-                        <div class="fixture-card-header">
-                            <span class="fixture-club">Valencia GP</span>
-                            <span class="premier-pill">Round 18</span>
-                        </div>
-                        <div class="fixture-teams">
-                            <span>Circuit Ricardo Tormo</span>
-                        </div>
-                        <div class="fixture-meta">
-                            <span>Valencia, Spain</span>
-                            <span>Sun • 26 Jul, 14:00</span>
-                        </div>
-                    </div>
-
-                    <div class="fixture-card">
-                        <div class="fixture-card-header">
-                            <span class="fixture-club">Misano GP</span>
-                            <span class="premier-pill">Round 19</span>
-                        </div>
-                        <div class="fixture-teams">
-                            <span>Misano World Circuit</span>
-                        </div>
-                        <div class="fixture-meta">
-                            <span>Misano, Italy</span>
-                            <span>Sun • 02 Aug, 14:00</span>
-                        </div>
-                    </div>
-
-                    <div class="fixture-card">
-                        <div class="fixture-card-header">
-                            <span class="fixture-club">Motegi GP</span>
-                            <span class="premier-pill">Round 20</span>
-                        </div>
-                        <div class="fixture-teams">
-                            <span>Twin Ring Motegi</span>
-                        </div>
-                        <div class="fixture-meta">
-                            <span>Motegi, Japan</span>
-                            <span>Sun • 09 Aug, 13:00</span>
-                        </div>
-                    </div>
-
-                <div class="fixture-card">
-                    <div class="fixture-card-header">
-                        <span class="fixture-club">Phillip Island GP</span>
-                        <span class="premier-pill">Round 21</span>
-                    </div>
-                    <div class="fixture-teams">
-                        <span>Phillip Island Circuit</span>
-                    </div>
-                    <div class="fixture-meta">
-                        <span>Victoria, Australia</span>
-                        <span>Sun • 16 Aug, 05:00</span>
-                    </div>
+                <div class="fixture-meta">
+                    <span>{{ race.circuit.place }}, {{ race.country.name }}</span>
+                    <span>{{ race.date_start|date:"D • d M, H:i" }} UTC</span>
                 </div>
             </div>
+            {% empty %}
+            <div class="fixture-card">
+                <div class="fixture-card-header">
+                    <span class="fixture-club">Calendar unavailable</span>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
+
+    <div class="fixtures-section">
+        <div class="fixtures-section-header">
+            <h2>All Riders</h2>
+            <span class="premier-pill">{{ driver_standings|length }} Riders</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Pos</th>
+                        <th scope="col">Rider</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">Points</th>
+                        <th scope="col">Races</th>
+                        <th scope="col">Wins</th>
+                        <th scope="col">Podiums</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in driver_standings %}
+                    <tr>
+                        <td>{{ d.position }}</td>
+                        <td>{{ d.name }}</td>
+                        <td>{{ d.team }}</td>
+                        <td>{{ d.points|floatformat:0 }}</td>
+                        <td>{{ d.starts }}</td>
+                        <td>{{ d.wins }}</td>
+                        <td>{{ d.podiums }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-muted text-center">Rider stats unavailable.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="fixtures-section">
+        <div class="fixtures-section-header">
+            <h2>Last Races</h2>
+            <span class="premier-pill">{{ past_races|length }} Completed</span>
+        </div>
+        {% if past_races %}
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <label class="mb-0 text-muted recent_expense" for="past-race-select">Race:</label>
+            <select id="past-race-select" class="form-select form-select-sm w-auto">
+                {% for race in past_races reversed %}
+                <option value="{{ race.event_id }}" {% if forloop.first %}selected{% endif %}>
+                    Round {{ race.round }} — {{ race.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% for race in past_races reversed %}
+        <div class="past-race-result{% if not forloop.first %} d-none{% endif %}" data-race-key="{{ race.event_id }}">
+            <p class="text-muted mb-2 recent_expense">
+                Winner: <strong>{{ race.winner.name|default:"Unavailable" }}</strong>
+                {% if race.winner.team %}({{ race.winner.team }}){% endif %}
+            </p>
+            <div class="table-responsive">
+                <table class="table table-borderless align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Pos</th>
+                            <th scope="col">Rider</th>
+                            <th scope="col">Team</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in race.results %}
+                        <tr>
+                            <td>{% if row.status == 'OUTSTND' or row.status == 'NOTFINISHFIRST' %}DNF{% else %}{{ row.position }}{% endif %}</td>
+                            <td>{{ row.name }}</td>
+                            <td>{{ row.team }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-muted text-center">Results unavailable.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted mb-0 recent_expense">No completed races yet this season.</p>
+        {% endif %}
+    </div>
+</div>
+

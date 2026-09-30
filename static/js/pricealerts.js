@@ -47,6 +47,7 @@
         const editIdInput = document.getElementById('edit-price-alert-id');
         const editSymbolSelect = document.getElementById('price-alert-edit-symbol');
         const editCompanyNameInput = document.getElementById('price-alert-edit-company-name');
+        const editActionSelect = document.getElementById('price-alert-edit-action');
         const editTargetPriceInput = document.getElementById('price-alert-edit-target-price');
 
         function populateSymbolSelect(selectEl, symbols) {
@@ -93,7 +94,9 @@
             row.setAttribute('data-id', alert.id);
             row.setAttribute('data-symbol', alert.symbol);
             row.setAttribute('data-target-price', alert.target_price);
+            row.setAttribute('data-action', alert.action);
 
+            const actionChipClass = alert.action === 'buy' ? 'chip-soft-success' : 'chip-soft-danger';
             const chipClass = alert.is_triggered ? 'chip-soft-warning' : 'chip-soft-secondary';
             const chipText = alert.is_triggered ? 'Triggered' : 'Watching';
 
@@ -102,6 +105,7 @@
                     '<strong></strong>' +
                     '<p class="mb-0 text-muted stock-sub"></p>' +
                 '</div>' +
+                '<span class="chip ' + actionChipClass + '"></span>' +
                 '<span class="chip ' + chipClass + '">' + chipText + '</span>' +
                 '<div class="holding-actions">' +
                     '<button type="button" class="row-icon-btn edit-amount-btn" title="Edit alert">\u270E</button>' +
@@ -110,6 +114,7 @@
 
             row.querySelector('strong').textContent = alert.symbol;
             row.querySelector('.stock-sub').textContent = alert.status_text;
+            row.querySelector('.chip.' + actionChipClass).textContent = alert.action_display || '';
             return row;
         }
 
@@ -181,6 +186,7 @@
             editIdInput.value = row.getAttribute('data-id');
             editTargetPriceInput.value = row.getAttribute('data-target-price');
             editCompanyNameInput.value = '';
+            if (editActionSelect) editActionSelect.value = row.getAttribute('data-action') || 'buy';
 
             symbolsPromise.then(function () {
                 if (editSymbolSelect) editSymbolSelect.value = symbol;

@@ -4,31 +4,41 @@
 <div class="col-md-2">
     <div class="dashboard-card">
         <div class="dashboard-hero">
-            <span class="dashboard-chip">Champions League</span>
+            <span class="dashboard-chip">Top Scorers</span>
             <div class="league-table-header">
-                <span>Team</span>
-                <span class="pts-pad">Pts</span>
+                <span>Player</span>
+                <span class="pts-pad">Goals</span>
             </div>
+            {% for scorer in top_scorers %}
             <div class="league-table-row">
-                <span class="league-table-team">Real Madrid</span>
-                <span class="league-table-points">18</span>
+                <span class="league-table-team">{{ scorer.player.name }}</span>
+                <span class="league-table-points">{{ scorer.goals }}</span>
             </div>
+            {% empty %}
             <div class="league-table-row">
-                <span class="league-table-team">Bayern</span>
-                <span class="league-table-points">15</span>
+                <span class="league-table-team">No scorer data available</span>
             </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="dashboard-card mt-3">
+        <div class="dashboard-hero">
+            <span class="dashboard-chip">Champions League Top Scorers</span>
+            <div class="league-table-header">
+                <span>Player</span>
+                <span class="pts-pad">Goals</span>
+            </div>
+            {% for scorer in cl_top_scorers %}
             <div class="league-table-row">
-                <span class="league-table-team">Inter</span>
-                <span class="league-table-points">13</span>
+                <span class="league-table-team">{{ scorer.player.name }}</span>
+                <span class="league-table-points">{{ scorer.goals }}</span>
             </div>
+            {% empty %}
             <div class="league-table-row">
-                <span class="league-table-team">PSG</span>
-                <span class="league-table-points">12</span>
+                <span class="league-table-team">No scorer data available</span>
             </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Man City</span>
-                <span class="league-table-points">10</span>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>

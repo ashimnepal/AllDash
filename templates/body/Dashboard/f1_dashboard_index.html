@@ -8,75 +8,63 @@
         <div class="f1-dashboard-card">
             <div class="f1-dashboard-header">
                 <div class="dashboard-chip">Formula 1</div>
-                <div class="f1-live-pill">Next GP: Monaco</div>
+                <div class="f1-live-pill">Next GP: {{ f1_next_meeting.meeting_name|default:"TBA" }}</div>
             </div>
 
             <div class="f1-dashboard-grid">
                 <div class="f1-feature-card">
                     <div class="f1-feature-label">Current Leader</div>
-                    <h3 class="f1-feature-title">Max Verstappen</h3>
-                    <div class="f1-feature-meta">+12 pts lead • 1st overall</div>
+                    <h3 class="f1-feature-title">{{ f1_driver_standings.0.name|default:"Unavailable" }}</h3>
+                    <div class="f1-feature-meta">
+                        {% if f1_leader_lead is not None %}+{{ f1_leader_lead|floatformat:0 }} pts lead • {% endif %}1st overall
+                    </div>
                     <div class="f1-feature-chart">
+                        {% for d in f1_driver_standings|slice:":4" %}
                         <div class="f1-chart-item">
-                            <div class="f1-chart-value">289</div>
-                            <div class="f1-chart-bar bar-1"></div>
-                            <div class="f1-chart-name">Verstappen</div>
+                            <div class="f1-chart-value">{{ d.points|floatformat:0 }}</div>
+                            <div class="f1-chart-bar bar-{{ forloop.counter }}"></div>
+                            <div class="f1-chart-name">{{ d.name }}</div>
                         </div>
-                        <div class="f1-chart-item">
-                            <div class="f1-chart-value">277</div>
-                            <div class="f1-chart-bar bar-2"></div>
-                            <div class="f1-chart-name">Leclerc</div>
-                        </div>
-                        <div class="f1-chart-item">
-                            <div class="f1-chart-value">261</div>
-                            <div class="f1-chart-bar bar-3"></div>
-                            <div class="f1-chart-name">Norris</div>
-                        </div>
-                        <div class="f1-chart-item">
-                            <div class="f1-chart-value">248</div>
-                            <div class="f1-chart-bar bar-4"></div>
-                            <div class="f1-chart-name">Piastri</div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
 
                 <div class="f1-racers-grid">
+                    {% for d in f1_driver_standings|slice:":3" %}
                     <div class="f1-racer-card">
-                        <div class="f1-racer-rank">1</div>
-                        <div class="f1-racer-name">Max Verstappen</div>
-                        <div class="f1-racer-team">Red Bull</div>
+                        <div class="f1-racer-rank">{{ d.position }}</div>
+                        <div class="f1-racer-name">{{ d.name }}</div>
+                        <div class="f1-racer-team">{{ d.team }}</div>
                     </div>
+                    {% empty %}
                     <div class="f1-racer-card">
-                        <div class="f1-racer-rank">2</div>
-                        <div class="f1-racer-name">Charles Leclerc</div>
-                        <div class="f1-racer-team">Ferrari</div>
+                        <div class="f1-racer-name">Standings unavailable</div>
                     </div>
-                    <div class="f1-racer-card">
-                        <div class="f1-racer-rank">3</div>
-                        <div class="f1-racer-name">Lando Norris</div>
-                        <div class="f1-racer-team">McLaren</div>
-                    </div>
+                    {% endfor %}
                 </div>
 
-                <div class="f1-event-card">
+                <div class="f1-event-card team-countdown" data-kickoff="{{ f1_next_race_session.date_start.isoformat }}">
                     <div class="f1-event-label">Incoming Event</div>
-                    <h4 class="f1-event-title">Monaco Grand Prix</h4>
+                    <h4 class="f1-event-title">{{ f1_next_meeting.meeting_name|default:"TBA" }}</h4>
                     <div class="f1-countdown-row">
                         <div class="f1-countdown-box">
-                            <div class="f1-countdown-value">03</div>
+                            <div class="f1-countdown-value" data-unit="days">00</div>
                             <div class="f1-countdown-label">Days</div>
                         </div>
                         <div class="f1-countdown-box">
-                            <div class="f1-countdown-value">08</div>
+                            <div class="f1-countdown-value" data-unit="hours">00</div>
                             <div class="f1-countdown-label">Hours</div>
                         </div>
                         <div class="f1-countdown-box">
-                            <div class="f1-countdown-value">42</div>
+                            <div class="f1-countdown-value" data-unit="mins">00</div>
                             <div class="f1-countdown-label">Mins</div>
                         </div>
                     </div>
-                    <div class="f1-event-meta">Location: Monte Carlo, Monaco</div>
-                    <div class="f1-event-meta">Saturday qualifying at 15:00 • Sunday lights out at 14:00</div>
+                    <div class="f1-event-meta">Location: {{ f1_next_meeting.location|default:"TBA" }}, {{ f1_next_meeting.country_name|default:"" }}</div>
+                    <div class="f1-event-meta">
+                        {% if f1_next_quali_session %}Qualifying {{ f1_next_quali_session.date_start|date:"D H:i" }} UTC{% endif %}
+                        {% if f1_next_race_session %} • Race {{ f1_next_race_session.date_start|date:"D H:i" }} UTC{% endif %}
+                    </div>
                 </div>
             </div>
         </div>

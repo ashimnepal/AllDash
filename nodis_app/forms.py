@@ -263,7 +263,7 @@ class PriceAlertForm(forms.ModelForm):
 
     class Meta:
         model = PriceAlert
-        fields = ["symbol", "company_name", "target_price"]
+        fields = ["symbol", "company_name", "action", "target_price"]
         widgets = {
             "symbol": forms.TextInput(attrs={
                 "class": "form-control",
@@ -272,6 +272,9 @@ class PriceAlertForm(forms.ModelForm):
             "company_name": forms.TextInput(attrs={
                 "class": "form-control",
                 "placeholder": "Company name",
+            }),
+            "action": forms.Select(attrs={
+                "class": "form-select",
             }),
             "target_price": forms.NumberInput(attrs={
                 "class": "form-control",

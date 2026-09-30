@@ -7,11 +7,12 @@
                     </div>
                     <ul class="alerts-list list-unstyled mb-3" id="price-alerts-list">
                         {% for alert in price_alerts %}
-                        <li class="alert-row" data-id="{{ alert.id }}" data-symbol="{{ alert.symbol }}" data-target-price="{{ alert.target_price }}">
+                        <li class="alert-row" data-id="{{ alert.id }}" data-symbol="{{ alert.symbol }}" data-target-price="{{ alert.target_price }}" data-action="{{ alert.action }}">
                             <div>
                                 <strong>{{ alert.symbol }}</strong>
                                 <p class="mb-0 text-muted stock-sub">{{ alert.status_text }}</p>
                             </div>
+                            <span class="chip {% if alert.action == 'buy' %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{{ alert.action_display }}</span>
                             <span class="chip {% if alert.is_triggered %}chip-soft-warning{% else %}chip-soft-secondary{% endif %}">{% if alert.is_triggered %}Triggered{% else %}Watching{% endif %}</span>
                             <div class="holding-actions">
                                 <button type="button" class="row-icon-btn edit-amount-btn" title="Edit alert" aria-label="Edit alert for {{ alert.symbol }}">&#9998;</button>
@@ -61,6 +62,14 @@
                         <div class="text-danger small mt-1" data-error-for="symbol"></div>
                         <input type="hidden" id="price-alert-add-company-name" name="company_name">
                     </div>
+                    <div class="mb-3">
+                        <label for="price-alert-add-action" class="form-label text-white">Action</label>
+                        <select class="form-select" id="price-alert-add-action" name="action">
+                            <option value="buy" selected>Buy</option>
+                            <option value="sell">Sell</option>
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="action"></div>
+                    </div>
                     <div class="mb-3 form-floating">
                         <input type="number" class="form-control" id="price-alert-add-target-price" name="target_price" step="0.01" min="0.01" placeholder="Target price">
                         <label for="price-alert-add-target-price" class="text-white">Alert me when price hits (Rs)</label>
@@ -94,6 +103,14 @@
                         </select>
                         <div class="text-danger small mt-1" data-error-for="symbol"></div>
                         <input type="hidden" id="price-alert-edit-company-name" name="company_name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="price-alert-edit-action" class="form-label text-white">Action</label>
+                        <select class="form-select" id="price-alert-edit-action" name="action">
+                            <option value="buy">Buy</option>
+                            <option value="sell">Sell</option>
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="action"></div>
                     </div>
                     <div class="mb-3 form-floating">
                         <input type="number" class="form-control" id="price-alert-edit-target-price" name="target_price" step="0.01" min="0.01" placeholder="Target price">

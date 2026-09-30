@@ -6,26 +6,16 @@
                 <span>Rider</span>
                 <span class="pts-pad">Pts</span>
             </div>
+            {% for d in driver_standings|slice:":5" %}
             <div class="league-table-row">
-                <span class="league-table-team">Pecco Bagnaia</span>
-                <span class="league-table-points">285</span>
+                <span class="league-table-team">{{ d.name }}</span>
+                <span class="league-table-points">{{ d.points|floatformat:0 }}</span>
             </div>
+            {% empty %}
             <div class="league-table-row">
-                <span class="league-table-team">Jorge Martin</span>
-                <span class="league-table-points">262</span>
+                <span class="league-table-team">Standings unavailable</span>
             </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Marc Marquez</span>
-                <span class="league-table-points">241</span>
-            </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Enea Bastianini</span>
-                <span class="league-table-points">198</span>
-            </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Brad Binder</span>
-                <span class="league-table-points">175</span>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>

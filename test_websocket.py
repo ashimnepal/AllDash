@@ -2,7 +2,7 @@
 
 Usage:
     python test_websocket.py
-    python test_websocket.py ws://192.168.5.182:5555
+    python test_websocket.py ws://192.168.1.93:5555
 """
 import asyncio
 import json
@@ -10,7 +10,7 @@ import sys
 
 import websockets
 
-DEFAULT_URL = "ws://192.168.5.182:5555"
+DEFAULT_URL = "ws://192.168.1.93:5555"
 
 
 async def listen(url: str) -> None:

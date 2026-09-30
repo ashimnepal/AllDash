@@ -61,6 +61,6 @@ class PortfolioHoldingAdmin(admin.ModelAdmin):
 
 @admin.register(PriceAlert)
 class PriceAlertAdmin(admin.ModelAdmin):
-    list_display = ("symbol", "target_price", "is_triggered", "triggered_direction", "triggered_at")
-    list_filter = ("is_triggered",)
+    list_display = ("symbol", "action", "target_price", "is_triggered", "triggered_direction", "triggered_at")
+    list_filter = ("action", "is_triggered")
     search_fields = ("symbol", "company_name")

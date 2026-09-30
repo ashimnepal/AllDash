@@ -6,26 +6,16 @@
                 <span>Driver</span>
                 <span class="pts-pad">Pts</span>
             </div>
+            {% for d in driver_standings|slice:":5" %}
             <div class="league-table-row">
-                <span class="league-table-team">Max Verstappen</span>
-                <span class="league-table-points">393</span>
+                <span class="league-table-team">{{ d.name }}</span>
+                <span class="league-table-points">{{ d.points|floatformat:0 }}</span>
             </div>
+            {% empty %}
             <div class="league-table-row">
-                <span class="league-table-team">Lando Norris</span>
-                <span class="league-table-points">331</span>
+                <span class="league-table-team">Standings unavailable</span>
             </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Charles Leclerc</span>
-                <span class="league-table-points">297</span>
-            </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Lewis Hamilton</span>
-                <span class="league-table-points">255</span>
-            </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Carlos Sainz</span>
-                <span class="league-table-points">218</span>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>

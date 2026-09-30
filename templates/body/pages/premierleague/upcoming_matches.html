@@ -1,167 +1,126 @@
 {% extends "base.html" %}
 
-
-
-
 {% block content %}
 
-<div class="container py-4">
-    <div class="container">
-        <div class="premier-dashboard-card">
-            <div class="premier-dashboard-hero">
-                <div class="premier-dashboard-top">
-                    <span class="dashboard-chip">Fixtures</span>
-                    <span class="dashboard-date-pill">This Week</span>
+<div class="premier-dashboard-card">
+    <div class="premier-dashboard-hero">
+        <div class="premier-dashboard-top">
+            <span class="dashboard-chip">Fixtures</span>
+            <span class="dashboard-date-pill">Live from football-data.org</span>
+        </div>
+        <h1 class="dashboard-title">Upcoming Matches</h1>
+        <p class="dashboard-calendar-text">A quick look at the next Premier League fixtures and the most recent results.</p>
+    </div>
+
+    <div class="fixtures-section">
+                <div class="fixtures-section-header">
+                    <h2>Premier League</h2>
+                    <span class="premier-pill">{{ upcoming_matches|length }} Fixtures</span>
                 </div>
-                <h1 class="dashboard-title">Upcoming Matches</h1>
-                <p class="dashboard-calendar-text">A quick look at when other top clubs are playing next.</p>
+                <div class="fixtures-grid">
+                    {% for match in upcoming_matches %}
+                    <div class="fixture-card">
+                        <div class="fixture-card-header">
+                            <span class="fixture-club">Matchday {{ match.matchday }}</span>
+                            <span class="premier-pill">Premier League</span>
+                        </div>
+                        <div class="fixture-teams">
+                            <span>{{ match.homeTeam.shortName|default:match.homeTeam.name }}</span>
+                            <span class="fixture-vs">vs</span>
+                            <span>{{ match.awayTeam.shortName|default:match.awayTeam.name }}</span>
+                        </div>
+                        <div class="fixture-meta">
+                            <span>{{ match.kickoff|date:"D, d M" }}</span>
+                            <span>{{ match.kickoff|date:"H:i" }} UTC</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>No upcoming fixtures found.</p>
+                    {% endfor %}
+                </div>
             </div>
 
             <div class="fixtures-section">
                 <div class="fixtures-section-header">
-                    <h2>Premier League</h2>
-                    <span class="premier-pill">4 Fixtures</span>
+                    <h2>Recent Results</h2>
+                    <span class="premier-pill">{{ recent_results|length }} Matches</span>
                 </div>
                 <div class="fixtures-grid">
+                    {% for match in recent_results %}
                     <div class="fixture-card">
                         <div class="fixture-card-header">
-                            <span class="fixture-club">Liverpool</span>
-                            <span class="premier-pill">Premier League</span>
+                            <span class="fixture-club">Matchday {{ match.matchday }}</span>
+                            <span class="premier-pill">Full Time</span>
                         </div>
                         <div class="fixture-teams">
-                            <span>Liverpool</span>
-                            <span class="fixture-vs">vs</span>
-                            <span>Newcastle</span>
+                            <span>{{ match.homeTeam.shortName|default:match.homeTeam.name }}</span>
+                            <span class="fixture-vs">{{ match.score.fullTime.home }} - {{ match.score.fullTime.away }}</span>
+                            <span>{{ match.awayTeam.shortName|default:match.awayTeam.name }}</span>
                         </div>
                         <div class="fixture-meta">
-                            <span>Anfield</span>
-                            <span>Sat • 25 Jul, 17:30</span>
+                            <span>{{ match.kickoff|date:"D, d M" }}</span>
                         </div>
                     </div>
-
-                    <div class="fixture-card">
-                        <div class="fixture-card-header">
-                            <span class="fixture-club">Manchester City</span>
-                            <span class="premier-pill">Premier League</span>
-                        </div>
-                        <div class="fixture-teams">
-                            <span>Man City</span>
-                            <span class="fixture-vs">vs</span>
-                            <span>Brighton</span>
-                        </div>
-                        <div class="fixture-meta">
-                            <span>Etihad Stadium</span>
-                            <span>Sat • 25 Jul, 20:00</span>
-                        </div>
-                    </div>
-
-                    <div class="fixture-card">
-                        <div class="fixture-card-header">
-                            <span class="fixture-club">Arsenal</span>
-                            <span class="premier-pill">Premier League</span>
-                        </div>
-                        <div class="fixture-teams">
-                            <span>Arsenal</span>
-                            <span class="fixture-vs">vs</span>
-                            <span>Aston Villa</span>
-                        </div>
-                        <div class="fixture-meta">
-                            <span>Emirates Stadium</span>
-                            <span>Sun • 26 Jul, 16:30</span>
-                        </div>
-                    </div>
-
-                    <div class="fixture-card">
-                        <div class="fixture-card-header">
-                            <span class="fixture-club">Chelsea</span>
-                            <span class="premier-pill">Premier League</span>
-                        </div>
-                        <div class="fixture-teams">
-                            <span>Chelsea</span>
-                            <span class="fixture-vs">vs</span>
-                            <span>West Ham</span>
-                        </div>
-                        <div class="fixture-meta">
-                            <span>Stamford Bridge</span>
-                            <span>Sun • 26 Jul, 14:00</span>
-                        </div>
-                    </div>
+                    {% empty %}
+                    <p>No recent results found.</p>
+                    {% endfor %}
                 </div>
             </div>
 
             <div class="fixtures-section">
                 <div class="fixtures-section-header">
                     <h2>Champions League</h2>
-                    <span class="premier-pill">4 Fixtures</span>
+                    <span class="premier-pill">{{ cl_upcoming_matches|length }} Fixtures</span>
                 </div>
                 <div class="fixtures-grid">
+                    {% for match in cl_upcoming_matches %}
                     <div class="fixture-card">
                         <div class="fixture-card-header">
-                            <span class="fixture-club">Real Madrid</span>
+                            <span class="fixture-club">{% if match.matchday %}Matchday {{ match.matchday }}{% else %}{{ match.stage|title }}{% endif %}</span>
                             <span class="premier-pill">Champions League</span>
                         </div>
                         <div class="fixture-teams">
-                            <span>Real Madrid</span>
+                            <span>{{ match.homeTeam.shortName|default:match.homeTeam.name }}</span>
                             <span class="fixture-vs">vs</span>
-                            <span>Bayern Munich</span>
+                            <span>{{ match.awayTeam.shortName|default:match.awayTeam.name }}</span>
                         </div>
                         <div class="fixture-meta">
-                            <span>Santiago Bernabeu</span>
-                            <span>Tue • 28 Jul, 21:00</span>
+                            <span>{{ match.kickoff|date:"D, d M" }}</span>
+                            <span>{{ match.kickoff|date:"H:i" }} UTC</span>
                         </div>
                     </div>
+                    {% empty %}
+                    <p>No upcoming fixtures found.</p>
+                    {% endfor %}
+                </div>
+            </div>
 
+            <div class="fixtures-section">
+                <div class="fixtures-section-header">
+                    <h2>Champions League Results</h2>
+                    <span class="premier-pill">{{ cl_recent_results|length }} Matches</span>
+                </div>
+                <div class="fixtures-grid">
+                    {% for match in cl_recent_results %}
                     <div class="fixture-card">
                         <div class="fixture-card-header">
-                            <span class="fixture-club">Paris Saint-Germain</span>
-                            <span class="premier-pill">Champions League</span>
+                            <span class="fixture-club">{% if match.matchday %}Matchday {{ match.matchday }}{% else %}{{ match.stage|title }}{% endif %}</span>
+                            <span class="premier-pill">Full Time</span>
                         </div>
                         <div class="fixture-teams">
-                            <span>PSG</span>
-                            <span class="fixture-vs">vs</span>
-                            <span>Juventus</span>
+                            <span>{{ match.homeTeam.shortName|default:match.homeTeam.name }}</span>
+                            <span class="fixture-vs">{{ match.score.fullTime.home }} - {{ match.score.fullTime.away }}</span>
+                            <span>{{ match.awayTeam.shortName|default:match.awayTeam.name }}</span>
                         </div>
                         <div class="fixture-meta">
-                            <span>Parc des Princes</span>
-                            <span>Tue • 28 Jul, 20:45</span>
+                            <span>{{ match.kickoff|date:"D, d M" }}</span>
                         </div>
                     </div>
-
-                    <div class="fixture-card">
-                        <div class="fixture-card-header">
-                            <span class="fixture-club">Manchester United</span>
-                            <span class="premier-pill">Champions League</span>
-                        </div>
-                        <div class="fixture-teams">
-                            <span>Man United</span>
-                            <span class="fixture-vs">vs</span>
-                            <span>Inter Milan</span>
-                        </div>
-                        <div class="fixture-meta">
-                            <span>Old Trafford</span>
-                            <span>Wed • 29 Jul, 21:00</span>
-                        </div>
-                    </div>
-
-                    <div class="fixture-card">
-                        <div class="fixture-card-header">
-                            <span class="fixture-club">Barcelona</span>
-                            <span class="premier-pill">Champions League</span>
-                        </div>
-                        <div class="fixture-teams">
-                            <span>Barcelona</span>
-                            <span class="fixture-vs">vs</span>
-                            <span>Borussia Dortmund</span>
-                        </div>
-                        <div class="fixture-meta">
-                            <span>Camp Nou</span>
-                            <span>Wed • 29 Jul, 21:00</span>
-                        </div>
-                    </div>
+                    {% empty %}
+                    <p>No recent results found.</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
 {% endblock %}

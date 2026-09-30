@@ -80,7 +80,8 @@
   }
 
   const datasets = {
-    '1D': generateSeries(48, 2170, 3.2, 11),
+    // NEPSE trading session is ~5 hours, not a full 24hr day - 5min interval over 5h = 60 points.
+    '1D': generateSeries(60, 2170, 3.2, 11),
     '1W': generateSeries(35, 2140, 8, 22),
     '1M': generateSeries(30, 2080, 14, 33),
     '3M': generateSeries(60, 2020, 22, 44),
@@ -251,11 +252,13 @@
   }
   let simInterval = setInterval(tick, 4000);
 
-  /* ---------------- Live data feed via Django NEPSE proxy (polling) ---------------- */
-  // Django view `nepse_live_data` proxies the LAN NEPSE REST API (192.168.5.182:8000)
-  // and reshapes it into the payload consumed below.
+  /* ---------------- Live data feed: websocket push, REST as bootstrap/fallback ---------------- */
+  // Django view `nepse_live_data` proxies the LAN NEPSE REST API and reshapes it into
+  // the payload consumed below. Used once on load and again whenever the websocket
+  // (real-time push feed) is down.
   const LIVE_DATA_URL = '/stockex_dash/live-data/';
   const LIVE_DATA_POLL_MS = 15000;
+  const WS_URL = chartCanvas.dataset.wsUrl || '';
   /*
     Expected JSON payload shape - every top-level key is optional; only the
     fields that are present get applied to the dashboard:
@@ -268,6 +271,9 @@
       "losers":  [{ "symbol": "NLIC", "company": "Nepal Life Insurance", "price": 985.00, "changePercent": -3.62 }],
       "watchlist": [{ "symbol": "NABIL", "price": 1102.00, "changePercent": -1.34, "volume": 184320 }]
     }
+    The websocket server is expected to broadcast the same shape. If it instead sends
+    something unrecognized, normalizeLivePayload() returns null and the message is
+    dropped safely (logged to the console) instead of crashing the dashboard.
   */
   const feedStatusEl = document.getElementById('ws-feed-status');
   function setFeedStatus(state) {
@@ -451,8 +457,105 @@
       });
   }
 
-  fetchLiveData();
-  setInterval(fetchLiveData, LIVE_DATA_POLL_MS);
+  /* ---------------- REST fallback polling (only runs while the websocket is down) ---------------- */
+  let restPollTimer = null;
+  function startRestFallbackPolling() {
+    if (restPollTimer) return; // already polling, avoid duplicate timers
+    restPollTimer = setInterval(fetchLiveData, LIVE_DATA_POLL_MS);
+  }
+  function stopRestFallbackPolling() {
+    if (!restPollTimer) return;
+    clearInterval(restPollTimer);
+    restPollTimer = null;
+  }
+
+  /* ---------------- Websocket push feed (primary), with reconnect + REST fallback ---------------- */
+  // Accepts a message only if it already matches the /stockex_dash/live-data/ shape.
+  // Anything else is logged and dropped rather than guessed at, since the exact
+  // websocket payload format has not been confirmed against a live market message.
+  function normalizeLivePayload(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    if ('index' in raw || 'market' in raw || 'gainers' in raw || 'losers' in raw || 'watchlist' in raw) {
+      return raw;
+    }
+    return null;
+  }
+
+  let ws = null;
+  let wsReconnectTimer = null;
+  let wsReconnectAttempts = 0;
+  const WS_RECONNECT_BASE_MS = 1000;
+  const WS_RECONNECT_MAX_MS = 30000;
+
+  function scheduleReconnect() {
+    if (wsReconnectTimer) return; // reconnect already scheduled, avoid stacking timers
+    const delay = Math.min(WS_RECONNECT_BASE_MS * (2 ** wsReconnectAttempts), WS_RECONNECT_MAX_MS);
+    wsReconnectAttempts += 1;
+    wsReconnectTimer = setTimeout(() => {
+      wsReconnectTimer = null;
+      connectWebSocket();
+    }, delay);
+  }
+
+  function connectWebSocket() {
+    if (!WS_URL) {
+      startRestFallbackPolling();
+      return;
+    }
+    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+      return; // connection already live/in-flight, don't open a second one
+    }
+
+    setFeedStatus('connecting');
+    try {
+      ws = new WebSocket(WS_URL);
+    } catch (err) {
+      console.error('NEPSE websocket could not be created', err);
+      startRestFallbackPolling();
+      scheduleReconnect();
+      return;
+    }
+
+    ws.onopen = () => {
+      wsReconnectAttempts = 0;
+      stopRestFallbackPolling();
+    };
+
+    ws.onmessage = (event) => {
+      let raw;
+      try {
+        raw = JSON.parse(event.data);
+      } catch (err) {
+        console.warn('Ignoring malformed NEPSE websocket message', err);
+        return;
+      }
+      const payload = normalizeLivePayload(raw);
+      if (!payload) {
+        console.warn('Unrecognized NEPSE websocket message shape, ignoring', raw);
+        return;
+      }
+      applyLivePayload(payload);
+    };
+
+    ws.onerror = (err) => {
+      console.error('NEPSE websocket error', err);
+    };
+
+    ws.onclose = () => {
+      ws = null;
+      setFeedStatus('offline');
+      startRestFallbackPolling();
+      scheduleReconnect();
+    };
+  }
+
+  window.addEventListener('beforeunload', () => {
+    if (wsReconnectTimer) clearTimeout(wsReconnectTimer);
+    if (ws) ws.close();
+  });
+
+  fetchLiveData(); // populate immediately via REST
+  connectWebSocket(); // then switch to real-time push updates
 
   /* ---------------- Movers tabs ---------------- */
   const moversTabs = document.querySelectorAll('.movers-tab');

@@ -148,8 +148,16 @@ class PriceAlert(models.Model):
         (DOWN, "Dropped below"),
     ]
 
+    BUY = "buy"
+    SELL = "sell"
+    ACTION_CHOICES = [
+        (BUY, "Buy"),
+        (SELL, "Sell"),
+    ]
+
     symbol = models.CharField(max_length=20)
     company_name = models.CharField(max_length=150, blank=True)
+    action = models.CharField(max_length=4, choices=ACTION_CHOICES, default=BUY)
     target_price = models.DecimalField(max_digits=12, decimal_places=2)
     last_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     is_triggered = models.BooleanField(default=False)
