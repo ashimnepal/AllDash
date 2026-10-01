@@ -283,7 +283,7 @@ class FamilyPortfolioHoldingForm(forms.ModelForm):
 
     class Meta:
         model = FamilyPortfolioHolding
-        fields = ["family_member", "symbol", "company_name", "quantity", "buy_price", "buy_date"]
+        fields = ["family_member", "symbol", "company_name", "quantity"]
         widgets = {
             "family_member": forms.HiddenInput(),
             "symbol": forms.TextInput(attrs={
@@ -299,16 +299,6 @@ class FamilyPortfolioHoldingForm(forms.ModelForm):
                 "placeholder": "Quantity",
                 "step": "1",
                 "min": "1",
-            }),
-            "buy_price": forms.NumberInput(attrs={
-                "class": "form-control",
-                "placeholder": "Buy price",
-                "step": "0.01",
-                "min": "0.01",
-            }),
-            "buy_date": forms.DateInput(attrs={
-                "class": "form-control",
-                "type": "date",
             }),
         }
         labels = {

@@ -65,8 +65,6 @@
         const editHoldingSymbolSelect = document.getElementById('family-holding-edit-symbol');
         const editHoldingCompanyNameInput = document.getElementById('family-holding-edit-company-name');
         const editHoldingQuantityInput = document.getElementById('family-holding-edit-quantity');
-        const editHoldingBuyPriceInput = document.getElementById('family-holding-edit-buy-price');
-        const editHoldingBuyDateInput = document.getElementById('family-holding-edit-buy-date');
 
         function populateSymbolSelect(selectEl, symbols) {
             if (!selectEl) return;
@@ -108,23 +106,21 @@
 
         function buildHoldingItem(holding, memberId) {
             const item = document.createElement('div');
-            item.className = 'holding-item ' + (holding.is_up ? 'is-up' : 'is-down');
+            item.className = 'holding-item ' + (holding.is_day_up ? 'is-up' : 'is-down');
             item.setAttribute('data-id', holding.id);
             item.setAttribute('data-member-id', memberId);
             item.setAttribute('data-symbol', holding.symbol);
             item.setAttribute('data-company-name', holding.company_name || '');
             item.setAttribute('data-quantity', holding.quantity);
-            item.setAttribute('data-buy-price', holding.buy_price);
-            item.setAttribute('data-buy-date', holding.buy_date);
 
-            const chipClass = holding.is_up ? 'chip-soft-success' : 'chip-soft-danger';
-            const arrow = holding.is_up ? '\u25b2' : '\u25bc';
-            const sign = holding.is_up ? '+' : '';
+            const chipClass = holding.is_day_up ? 'chip-soft-success' : 'chip-soft-danger';
+            const arrow = holding.is_day_up ? '\u25b2' : '\u25bc';
+            const sign = holding.is_day_up ? '+' : '';
 
             item.innerHTML =
                 '<div class="holding-top">' +
                     '<strong></strong>' +
-                    '<span class="chip ' + chipClass + '">' + arrow + ' ' + holding.profit_percent.toFixed(2) + '%</span>' +
+                    '<span class="chip ' + chipClass + '">' + arrow + ' ' + holding.day_change_percent.toFixed(2) + '%</span>' +
                     '<div class="holding-actions">' +
                         '<button type="button" class="row-icon-btn edit-amount-btn" title="Edit holding">\u270E</button>' +
                         '<button type="button" class="row-icon-btn delete-amount-btn" title="Delete holding">\u2715</button>' +
@@ -132,17 +128,17 @@
                 '</div>' +
                 '<p class="holding-sub"></p>' +
                 '<div class="holding-prices">' +
-                    '<span>Bought <strong>' + formatRs(holding.buy_price) + '</strong></span>' +
-                    '<span>Now <strong>' + formatRs(holding.current_price) + '</strong></span>' +
+                    '<span>Price <strong>' + formatRs(holding.current_price) + '</strong></span>' +
+                    '<span>Total <strong>' + formatRs(holding.current_value) + '</strong></span>' +
                 '</div>' +
                 '<div class="holding-meta">' +
                     '<span class="holding-date"></span>' +
-                    '<span class="holding-profit ' + (holding.is_up ? 'text-up' : 'text-down') + '">' + sign + formatRs(holding.profit) + '</span>' +
+                    '<span class="holding-profit ' + (holding.is_day_up ? 'text-up' : 'text-down') + '">' + sign + formatRs(holding.day_change) + '</span>' +
                 '</div>';
 
             item.querySelector('.holding-top strong').textContent = holding.symbol;
             item.querySelector('.holding-sub').textContent = holding.company_name || '';
-            item.querySelector('.holding-date').textContent = 'Bought ' + holding.buy_date + ' \u00b7 Qty ' + holding.quantity;
+            item.querySelector('.holding-date').textContent = 'Qty ' + holding.quantity;
 
             return item;
         }
@@ -172,7 +168,6 @@
                 '<div id="' + collapseId + '" class="accordion-collapse collapse' + (isExpanded ? ' show' : '') + '" aria-labelledby="' + headingId + '" data-bs-parent="#family-portfolio-accordion">' +
                     '<div class="accordion-body">' +
                         '<div class="family-portfolio-stats">' +
-                            '<div><span>Invested</span><strong>' + formatRs(member.total_invested) + '</strong></div>' +
                             '<div><span>Yesterday\u2019s Value</span><strong>' + formatRs(member.total_yesterday_value) + '</strong></div>' +
                             '<div><span>Today\u2019s Value</span><strong>' + formatRs(member.total_current) + '</strong></div>' +
                             '<div><span>Day Change</span><strong class="' + (member.is_day_up ? 'text-up' : 'text-down') + '">' + daySign + formatRs(member.day_change) + '</strong></div>' +
@@ -266,8 +261,6 @@
             editHoldingIdInput.value = item.getAttribute('data-id');
             editHoldingMemberIdInput.value = item.getAttribute('data-member-id');
             editHoldingQuantityInput.value = item.getAttribute('data-quantity');
-            editHoldingBuyPriceInput.value = item.getAttribute('data-buy-price');
-            editHoldingBuyDateInput.value = item.getAttribute('data-buy-date');
             editHoldingCompanyNameInput.value = item.getAttribute('data-company-name');
 
             symbolsPromise.then(function () {

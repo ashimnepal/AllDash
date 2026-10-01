@@ -262,7 +262,6 @@
                             <div id="family-collapse-{{ member.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="family-heading-{{ member.id }}" data-bs-parent="#family-portfolio-accordion">
                                 <div class="accordion-body">
                                     <div class="family-portfolio-stats">
-                                        <div><span>Invested</span><strong>Rs {{ member.total_invested|floatformat:0|intcomma }}</strong></div>
                                         <div><span>Yesterday's Value</span><strong>Rs {{ member.total_yesterday_value|floatformat:0|intcomma }}</strong></div>
                                         <div><span>Today's Value</span><strong>Rs {{ member.total_current|floatformat:0|intcomma }}</strong></div>
                                         <div><span>Day Change</span><strong class="{% if member.is_day_up %}text-up{% else %}text-down{% endif %}">{% if member.is_day_up %}+{% endif %}Rs {{ member.day_change|floatformat:0|intcomma }}</strong></div>
@@ -276,17 +275,15 @@
                                     </div>
                                     <div class="holdings-list family-holdings-list" data-member-id="{{ member.id }}">
                                         {% for holding in member.holdings %}
-                                        <div class="holding-item {% if holding.is_up %}is-up{% else %}is-down{% endif %}"
+                                        <div class="holding-item {% if holding.is_day_up %}is-up{% else %}is-down{% endif %}"
                                             data-id="{{ holding.id }}"
                                             data-member-id="{{ member.id }}"
                                             data-symbol="{{ holding.symbol }}"
                                             data-company-name="{{ holding.company_name }}"
-                                            data-quantity="{{ holding.quantity }}"
-                                            data-buy-price="{{ holding.buy_price }}"
-                                            data-buy-date="{{ holding.buy_date }}">
+                                            data-quantity="{{ holding.quantity }}">
                                             <div class="holding-top">
                                                 <strong>{{ holding.symbol }}</strong>
-                                                <span class="chip {% if holding.is_up %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{% if holding.is_up %}▲{% else %}▼{% endif %} {{ holding.profit_percent|floatformat:2 }}%</span>
+                                                <span class="chip {% if holding.is_day_up %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{% if holding.is_day_up %}▲{% else %}▼{% endif %} {{ holding.day_change_percent|floatformat:2 }}%</span>
                                                 <div class="holding-actions">
                                                     <button type="button" class="row-icon-btn edit-amount-btn" title="Edit holding" aria-label="Edit {{ holding.symbol }} holding">&#9998;</button>
                                                     <button type="button" class="row-icon-btn delete-amount-btn" title="Delete holding" aria-label="Delete {{ holding.symbol }} holding">&#10007;</button>
@@ -294,12 +291,12 @@
                                             </div>
                                             <p class="holding-sub">{{ holding.company_name }}</p>
                                             <div class="holding-prices">
-                                                <span>Bought <strong>Rs {{ holding.buy_price|floatformat:2|intcomma }}</strong></span>
-                                                <span>Now <strong>Rs {{ holding.current_price|floatformat:2|intcomma }}</strong></span>
+                                                <span>Price <strong>Rs {{ holding.current_price|floatformat:2|intcomma }}</strong></span>
+                                                <span>Total <strong>Rs {{ holding.current_value|floatformat:2|intcomma }}</strong></span>
                                             </div>
                                             <div class="holding-meta">
-                                                <span class="holding-date">Bought {{ holding.buy_date }} · Qty {{ holding.quantity }}</span>
-                                                <span class="holding-profit {% if holding.is_up %}text-up{% else %}text-down{% endif %}">{% if holding.is_up %}+{% endif %}Rs {{ holding.profit|floatformat:2|intcomma }}</span>
+                                                <span class="holding-date">Qty {{ holding.quantity }}</span>
+                                                <span class="holding-profit {% if holding.is_day_up %}text-up{% else %}text-down{% endif %}">{% if holding.is_day_up %}+{% endif %}Rs {{ holding.day_change|floatformat:2|intcomma }}</span>
                                             </div>
                                         </div>
                                         {% empty %}
@@ -479,16 +476,6 @@
                         <label for="family-holding-add-quantity" class="text-white">Quantity</label>
                         <div class="text-danger small mt-1" data-error-for="quantity"></div>
                     </div>
-                    <div class="mb-3 form-floating">
-                        <input type="number" class="form-control" id="family-holding-add-buy-price" name="buy_price" step="0.01" min="0.01" placeholder="Buy price">
-                        <label for="family-holding-add-buy-price" class="text-white">Price it was bought at (Rs)</label>
-                        <div class="text-danger small mt-1" data-error-for="buy_price"></div>
-                    </div>
-                    <div class="mb-3 form-floating">
-                        <input type="date" class="form-control" id="family-holding-add-buy-date" name="buy_date" placeholder="Buy date">
-                        <label for="family-holding-add-buy-date" class="text-white">Date bought</label>
-                        <div class="text-danger small mt-1" data-error-for="buy_date"></div>
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -523,16 +510,6 @@
                         <input type="number" class="form-control" id="family-holding-edit-quantity" name="quantity" step="1" min="1" placeholder="Quantity">
                         <label for="family-holding-edit-quantity" class="text-white">Quantity</label>
                         <div class="text-danger small mt-1" data-error-for="quantity"></div>
-                    </div>
-                    <div class="mb-3 form-floating">
-                        <input type="number" class="form-control" id="family-holding-edit-buy-price" name="buy_price" step="0.01" min="0.01" placeholder="Buy price">
-                        <label for="family-holding-edit-buy-price" class="text-white">Price it was bought at (Rs)</label>
-                        <div class="text-danger small mt-1" data-error-for="buy_price"></div>
-                    </div>
-                    <div class="mb-3 form-floating">
-                        <input type="date" class="form-control" id="family-holding-edit-buy-date" name="buy_date" placeholder="Buy date">
-                        <label for="family-holding-edit-buy-date" class="text-white">Date bought</label>
-                        <div class="text-danger small mt-1" data-error-for="buy_date"></div>
                     </div>
                 </form>
             </div>

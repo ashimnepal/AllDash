@@ -152,21 +152,22 @@ class FamilyMember(models.Model):
 
 
 class FamilyPortfolioHolding(models.Model):
-    """A NEPSE stock position tracked under a specific family member's portfolio accordion."""
+    """A NEPSE stock position tracked under a specific family member's portfolio accordion.
+
+    No buy price/date is stored - value is always just quantity x live market price.
+    """
 
     family_member = models.ForeignKey(FamilyMember, on_delete=models.CASCADE, related_name="holdings")
     symbol = models.CharField(max_length=20)
     company_name = models.CharField(max_length=150, blank=True)
     quantity = models.PositiveIntegerField(default=1)
-    buy_price = models.DecimalField(max_digits=12, decimal_places=2)
-    buy_date = models.DateField(default=date.today)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.family_member.name}: {self.symbol} x{self.quantity} @ {self.buy_price}"
+        return f"{self.family_member.name}: {self.symbol} x{self.quantity}"
 
 
 class AlertRecipient(models.Model):

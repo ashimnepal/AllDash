@@ -1700,19 +1700,17 @@ def portfolio_delete(request, pk):
 
 
 def _family_holding_row(holding, price_map):
-    """Payload for one holding, including its live current price and a today-vs-yesterday split.
+    """Payload for one holding: live price, total value (qty x market price), today's move.
 
-    NEPSE's PriceVolume feed already gives today's %% change vs the previous close, so that
-    figure is reused to back out an implied "yesterday value" per holding (no historical price
-    storage needed) rather than a fake/mocked comparison.
+    No buy price/date is stored for family holdings - total value is always just quantity x
+    live market price. NEPSE's PriceVolume feed already gives today's %% change vs the previous
+    close, so that figure is reused to back out an implied "yesterday value" (no historical
+    price storage needed) for the day-change display.
     """
     info = price_map.get(holding.symbol)
-    current_price = float(info["price"]) if info and info.get("price") is not None else float(holding.buy_price)
+    current_price = float(info["price"]) if info and info.get("price") is not None else 0.0
     change_percent = float(info["change_percent"]) if info and info.get("change_percent") is not None else 0.0
-    invested = float(holding.buy_price) * holding.quantity
     current_value = current_price * holding.quantity
-    profit = current_value - invested
-    profit_percent = (profit / invested * 100) if invested else 0.0
 
     divisor = 1 + (change_percent / 100)
     yesterday_value = current_value / divisor if divisor else current_value
@@ -1723,14 +1721,8 @@ def _family_holding_row(holding, price_map):
         "symbol": holding.symbol,
         "company_name": holding.company_name or (info["name"] if info else ""),
         "quantity": holding.quantity,
-        "buy_price": float(holding.buy_price),
         "current_price": current_price,
-        "buy_date": holding.buy_date.isoformat(),
-        "invested": invested,
         "current_value": current_value,
-        "profit": profit,
-        "profit_percent": profit_percent,
-        "is_up": profit >= 0,
         "yesterday_value": yesterday_value,
         "day_change": day_change,
         "day_change_percent": change_percent,
@@ -1748,25 +1740,18 @@ def family_members_json(extra=None):
     members = []
     for member in FamilyMember.objects.prefetch_related("holdings"):
         rows = [_family_holding_row(holding, price_map) for holding in member.holdings.all()]
-        total_invested = sum(row["invested"] for row in rows)
         total_current = sum(row["current_value"] for row in rows)
         total_yesterday = sum(row["yesterday_value"] for row in rows)
-        total_profit = total_current - total_invested
-        total_profit_percent = (total_profit / total_invested * 100) if total_invested else 0.0
         day_change = total_current - total_yesterday
         day_change_percent = (day_change / total_yesterday * 100) if total_yesterday else 0.0
         members.append({
             "id": member.id,
             "name": member.name,
             "holdings": rows,
-            "total_invested": total_invested,
             "total_current": total_current,
-            "total_profit": total_profit,
-            "total_profit_percent": total_profit_percent,
             "total_yesterday_value": total_yesterday,
             "day_change": day_change,
             "day_change_percent": day_change_percent,
-            "is_up": total_profit >= 0,
             "is_day_up": day_change >= 0,
         })
 

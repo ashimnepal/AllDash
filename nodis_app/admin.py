@@ -83,6 +83,6 @@ class FamilyMemberAdmin(admin.ModelAdmin):
 
 @admin.register(FamilyPortfolioHolding)
 class FamilyPortfolioHoldingAdmin(admin.ModelAdmin):
-    list_display = ("family_member", "symbol", "company_name", "quantity", "buy_price", "buy_date")
-    list_filter = ("family_member", "buy_date")
+    list_display = ("family_member", "symbol", "company_name", "quantity")
+    list_filter = ("family_member",)
     search_fields = ("symbol", "company_name")
