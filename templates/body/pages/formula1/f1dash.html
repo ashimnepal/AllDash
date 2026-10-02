@@ -6,42 +6,31 @@
     <div class="f1-dashboard-card">
         <div class="f1-dashboard-header">
             <div class="dashboard-chip">Formula 1</div>
-            <div class="f1-live-pill">Next GP: Belgian Grand Prix</div>
+            <div class="f1-live-pill">Next GP: {{ next_meeting.meeting_name|default:"TBA" }}</div>
         </div>
 
         <div class="f1-dashboard-grid">
             <div class="f1-feature-card">
                 <div class="f1-feature-label">Current Leader</div>
-                <h3 class="f1-feature-title">Max Verstappen</h3>
-                <div class="f1-feature-meta">+62 pts lead • 1st overall</div>
+                <h3 class="f1-feature-title">{{ driver_standings.0.name|default:"Unavailable" }}</h3>
+                <div class="f1-feature-meta">
+                    {% if leader_lead is not None %}+{{ leader_lead|floatformat:0 }} pts lead • {% endif %}1st overall
+                </div>
                 <div class="f1-feature-chart">
+                    {% for d in driver_standings|slice:":4" %}
                     <div class="f1-chart-item">
-                        <div class="f1-chart-value">393</div>
-                        <div class="f1-chart-bar bar-1"></div>
-                        <div class="f1-chart-name">Verstappen</div>
+                        <div class="f1-chart-value">{{ d.points|floatformat:0 }}</div>
+                        <div class="f1-chart-bar bar-{{ forloop.counter }}"></div>
+                        <div class="f1-chart-name">{{ d.name }}</div>
                     </div>
-                    <div class="f1-chart-item">
-                        <div class="f1-chart-value">331</div>
-                        <div class="f1-chart-bar bar-2"></div>
-                        <div class="f1-chart-name">Norris</div>
-                    </div>
-                    <div class="f1-chart-item">
-                        <div class="f1-chart-value">297</div>
-                        <div class="f1-chart-bar bar-3"></div>
-                        <div class="f1-chart-name">Leclerc</div>
-                    </div>
-                    <div class="f1-chart-item">
-                        <div class="f1-chart-value">255</div>
-                        <div class="f1-chart-bar bar-4"></div>
-                        <div class="f1-chart-name">Hamilton</div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
 
             <div class="f1-circuit-card">
                 <div class="f1-circuit-label">Next Circuit</div>
-                <h3 class="f1-circuit-name">Circuit de Spa-Francorchamps</h3>
-                <div class="f1-circuit-meta">Stavelot, Belgium • 7.004 km • 19 turns</div>
+                <h3 class="f1-circuit-name">{{ next_meeting.circuit_short_name|default:"TBA" }}</h3>
+                <div class="f1-circuit-meta">{{ next_meeting.location }}, {{ next_meeting.country_name }} • {{ next_meeting.circuit_type }}</div>
                 <div class="f1-circuit-diagram">
                     <svg viewBox="0 0 240 140" class="f1-circuit-track" xmlns="http://www.w3.org/2000/svg">
                         <path d="M25,60 C15,35 35,15 65,18 C90,20 95,35 88,45 C80,58 60,50 55,65 C50,80 70,85 95,90 C130,98 160,70 185,80 C210,90 220,110 200,122 C175,136 140,128 115,118 C90,108 70,112 55,122 C35,134 15,120 18,100 C20,85 25,75 25,60 Z"
@@ -51,27 +40,31 @@
                 </div>
             </div>
 
-            <div class="f1-event-card">
+            <div class="f1-event-card team-countdown" data-kickoff="{{ next_race_session.date_start.isoformat }}">
                 <div class="f1-event-label">Incoming Event</div>
-                <h4 class="f1-event-title">Belgian Grand Prix</h4>
+                <h4 class="f1-event-title">{{ next_meeting.meeting_name|default:"TBA" }}</h4>
                 <div class="f1-countdown-row">
                     <div class="f1-countdown-box">
-                        <div class="f1-countdown-value">04</div>
+                        <div class="f1-countdown-value" data-unit="days">00</div>
                         <div class="f1-countdown-label">Days</div>
                     </div>
                     <div class="f1-countdown-box">
-                        <div class="f1-countdown-value">11</div>
+                        <div class="f1-countdown-value" data-unit="hours">00</div>
                         <div class="f1-countdown-label">Hours</div>
                     </div>
                     <div class="f1-countdown-box">
-                        <div class="f1-countdown-value">27</div>
+                        <div class="f1-countdown-value" data-unit="mins">00</div>
                         <div class="f1-countdown-label">Mins</div>
                     </div>
                 </div>
-                <div class="f1-event-meta">Location: Stavelot, Belgium</div>
-                <div class="f1-event-meta">Saturday qualifying at 16:00 • Sunday race at 15:00</div>
+                <div class="f1-event-meta">Location: {{ next_meeting.location }}, {{ next_meeting.country_name }}</div>
+                <div class="f1-event-meta">
+                    {% if next_quali_session %}Qualifying {{ next_quali_session.date_start|date:"D H:i" }} UTC{% endif %}
+                    {% if next_race_session %} • Race {{ next_race_session.date_start|date:"D H:i" }} UTC{% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+

@@ -13,21 +13,21 @@
             {% include 'body/Dashboard/calander.html' %}
 
 
-            {% include 'body/Dashboard/rightsidebar_events.html' %}
+            <div class="col-md-2" id="widget-events">{% include 'body/Dashboard/rightsidebar_events.html' %}</div>
         </div>
 
 
-        {% include 'body/Dashboard/stockmarket.html' %}
+        <div id="widget-stockmarket">{% include 'body/Dashboard/stockmarket.html' %}</div>
 
     </div>
 
 </div>
 
-{% include 'body/Dashboard/f1_dashboard_index.html' %}
-{% include 'body/Dashboard/motogp_dashboard_index.html' %}
+<div id="widget-f1">{% include 'body/Dashboard/f1_dashboard_index.html' %}</div>
+<div id="widget-motogp">{% include 'body/Dashboard/motogp_dashboard_index.html' %}</div>
 
-{% include 'body/Dashboard/premier_dashboard_index.html' %}
-{% include 'body/Dashboard/champions_dashboard_index.html' %}
+<div id="widget-premier">{% include 'body/Dashboard/premier_dashboard_index.html' %}</div>
+<div id="widget-champions">{% include 'body/Dashboard/champions_dashboard_index.html' %}</div>
 
 {% include 'body/Dashboard/nepal_cricket.html' %}
 

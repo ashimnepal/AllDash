@@ -80,7 +80,8 @@
   }
 
   const datasets = {
-    '1D': generateSeries(48, 2170, 3.2, 11),
+    // NEPSE trading session is ~5 hours, not a full 24hr day - 5min interval over 5h = 60 points.
+    '1D': generateSeries(60, 2170, 3.2, 11),
     '1W': generateSeries(35, 2140, 8, 22),
     '1M': generateSeries(30, 2080, 14, 33),
     '3M': generateSeries(60, 2020, 22, 44),
@@ -171,6 +172,33 @@
     });
   });
 
+  /* ---------------- Watchlist category + search filter ---------------- */
+  const watchlistSearchInput = document.querySelector('.watchlist-search');
+  let watchlistCategory = 'all';
+
+  function applyWatchlistFilters() {
+    const query = (watchlistSearchInput?.value || '').trim().toLowerCase();
+    document.querySelectorAll('.watchlist-card tbody tr[data-symbol]').forEach((row) => {
+      const matchesCategory = watchlistCategory === 'all' || row.dataset.category === watchlistCategory;
+      const company = row.querySelector('.stock-sub')?.textContent || '';
+      const matchesSearch = !query
+        || row.dataset.symbol.toLowerCase().includes(query)
+        || company.toLowerCase().includes(query);
+      row.classList.toggle('is-hidden', !(matchesCategory && matchesSearch));
+    });
+  }
+
+  document.querySelectorAll('.watchlist-category-pill').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.watchlist-category-pill').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      watchlistCategory = btn.dataset.category;
+      applyWatchlistFilters();
+    });
+  });
+
+  watchlistSearchInput?.addEventListener('input', applyWatchlistFilters);
+
   /* ---------------- Sparklines (mini SVG) ---------------- */
   function drawSparkline(svg, points) {
     const w = 100;
@@ -194,6 +222,10 @@
     });
   }
   renderAllSparklines();
+
+  // Exposed so other portfolio-related scripts (stockportfolio.js) can redraw a
+  // sparkline after a live data update without duplicating the drawing logic.
+  window.NoDisDrawSparkline = drawSparkline;
 
   /* ---------------- Live price ticking simulation ---------------- */
   const priceRows = document.querySelectorAll('[data-base-price]');
@@ -222,7 +254,312 @@
       }
     });
   }
-  setInterval(tick, 4000);
+  let simInterval = setInterval(tick, 4000);
+
+  /* ---------------- Live data feed: websocket push, REST as bootstrap/fallback ---------------- */
+  // Django view `nepse_live_data` proxies the LAN NEPSE REST API and reshapes it into
+  // the payload consumed below. Used once on load and again whenever the websocket
+  // (real-time push feed) is down.
+  const LIVE_DATA_URL = '/stockex_dash/live-data/';
+  const LIVE_DATA_POLL_MS = 15000;
+  const WS_URL = chartCanvas.dataset.wsUrl || '';
+  /*
+    Expected JSON payload shape - every top-level key is optional; only the
+    fields that are present get applied to the dashboard:
+    {
+      "index":   { "value": 2187.42, "change": 18.64, "changePercent": 0.86,
+                   "high": 2193.55, "low": 2168.20, "prevClose": 2168.78 },
+      "market":  { "turnover": "Rs 4.82 Arba", "marketCap": "Rs 42.6 Kharba",
+                   "advances": 182, "declines": 96, "unchanged": 41 },
+      "gainers": [{ "symbol": "SHIVM", "company": "Shivam Cements", "price": 812.00, "changePercent": 6.42 }],
+      "losers":  [{ "symbol": "NLIC", "company": "Nepal Life Insurance", "price": 985.00, "changePercent": -3.62 }],
+      "watchlist": [{ "symbol": "NABIL", "price": 1102.00, "changePercent": -1.34, "volume": 184320 }]
+    }
+    The websocket server is expected to broadcast the same shape. If it instead sends
+    something unrecognized, normalizeLivePayload() returns null and the message is
+    dropped safely (logged to the console) instead of crashing the dashboard.
+  */
+  const feedStatusEl = document.getElementById('ws-feed-status');
+  function setFeedStatus(state) {
+    if (!feedStatusEl) return;
+    const config = {
+      connecting: ['Connecting…', 'chip chip-soft-secondary'],
+      live: ['● Live feed', 'chip chip-soft-success'],
+      offline: ['○ Feed offline — retrying…', 'chip chip-soft-danger'],
+    };
+    const [text, className] = config[state] || config.connecting;
+    feedStatusEl.textContent = text;
+    feedStatusEl.className = className;
+  }
+
+  function fmtNum(value) {
+    return Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtRs(value) {
+    return 'Rs ' + fmtNum(value);
+  }
+  function chipText(changePercent) {
+    const up = Number(changePercent) >= 0;
+    return `${up ? '▲' : '▼'} ${Math.abs(changePercent).toFixed(2)}%`;
+  }
+
+  function applyIndexUpdate(index) {
+    if (!index) return;
+    const priceEl = document.getElementById('chart-price-value');
+    const statValueEl = document.getElementById('stat-index-value');
+    const statChipEl = document.getElementById('stat-index-chip');
+    const chartChipEl = document.getElementById('chart-change-chip');
+
+    if (index.value != null) {
+      const formatted = fmtNum(index.value);
+      if (priceEl) priceEl.textContent = formatted;
+      if (statValueEl) statValueEl.textContent = formatted;
+    }
+    if (index.changePercent != null) {
+      const up = Number(index.changePercent) >= 0;
+      if (statChipEl) {
+        statChipEl.textContent = chipText(index.changePercent);
+        statChipEl.className = 'chip ' + (up ? 'chip-soft-success' : 'chip-soft-danger');
+      }
+      if (chartChipEl) {
+        chartChipEl.textContent = index.change != null
+          ? `${up ? '+' : '-'}${Math.abs(index.change).toFixed(2)} (${Math.abs(index.changePercent).toFixed(2)}%)`
+          : chipText(index.changePercent);
+        chartChipEl.className = 'chip ' + (up ? 'chip-soft-success' : 'chip-soft-danger');
+      }
+    }
+
+    const openEl = document.getElementById('stat-open');
+    const highEl = document.getElementById('stat-high');
+    const lowEl = document.getElementById('stat-low');
+    const prevEl = document.getElementById('stat-prevclose');
+    if (openEl && index.open != null) openEl.textContent = fmtNum(index.open);
+    if (highEl && index.high != null) highEl.textContent = fmtNum(index.high);
+    if (lowEl && index.low != null) lowEl.textContent = fmtNum(index.low);
+    if (prevEl && index.prevClose != null) prevEl.textContent = fmtNum(index.prevClose);
+
+    if (index.value != null && currentFrame === '1D') {
+      const series = datasets['1D'];
+      series.shift();
+      series.push(Number(index.value));
+      renderChart();
+    }
+  }
+
+  function applyMarketUpdate(market) {
+    if (!market) return;
+    const turnoverEl = document.getElementById('stat-turnover');
+    const turnoverChipEl = document.getElementById('stat-turnover-chip');
+    const marketCapEl = document.getElementById('stat-marketcap');
+    const marketCapChipEl = document.getElementById('stat-marketcap-chip');
+    const advDecEl = document.getElementById('stat-advdec');
+    const unchangedEl = document.getElementById('stat-unchanged');
+
+    if (turnoverEl && market.turnover != null) turnoverEl.textContent = market.turnover;
+    if (turnoverChipEl && market.turnoverChangePercent != null) {
+      turnoverChipEl.textContent = chipText(market.turnoverChangePercent);
+      turnoverChipEl.className = 'chip ' + (market.turnoverChangePercent >= 0 ? 'chip-soft-success' : 'chip-soft-danger');
+    }
+    if (marketCapEl && market.marketCap != null) marketCapEl.textContent = market.marketCap;
+    if (marketCapChipEl && market.marketCapChangePercent != null) {
+      marketCapChipEl.textContent = chipText(market.marketCapChangePercent);
+      marketCapChipEl.className = 'chip ' + (market.marketCapChangePercent >= 0 ? 'chip-soft-success' : 'chip-soft-danger');
+    }
+    if (advDecEl && market.advances != null && market.declines != null) {
+      advDecEl.textContent = `${market.advances} / ${market.declines}`;
+    }
+    if (unchangedEl && market.unchanged != null) unchangedEl.textContent = `${market.unchanged} unchanged`;
+  }
+
+  function moverRowHTML(item) {
+    const up = Number(item.changePercent) >= 0;
+    return `<li class="mover-row">
+      <div class="mover-info">
+        <strong>${item.symbol}</strong>
+        <span class="text-muted stock-sub">${item.company || ''}</span>
+      </div>
+      <svg class="sparkline" viewBox="0 0 100 32" data-points="${item.sparkline || '10,12,14,16,18,20,22'}"></svg>
+      <div class="mover-figures text-end">
+        <p class="mb-0 mover-price">${fmtRs(item.price)}</p>
+        <span class="chip ${up ? 'chip-soft-success' : 'chip-soft-danger'}">${chipText(item.changePercent)}</span>
+      </div>
+    </li>`;
+  }
+
+  function applyMoversUpdate(gainers, losers) {
+    const gainersList = document.getElementById('gainers-list');
+    const losersList = document.getElementById('losers-list');
+    if (gainersList && Array.isArray(gainers)) {
+      gainersList.innerHTML = gainers.map(moverRowHTML).join('');
+    }
+    if (losersList && Array.isArray(losers)) {
+      losersList.innerHTML = losers.map(moverRowHTML).join('');
+    }
+    if (Array.isArray(gainers) || Array.isArray(losers)) renderAllSparklines();
+  }
+
+  function applyWatchlistUpdate(watchlist) {
+    if (!Array.isArray(watchlist)) return;
+    watchlist.forEach((item) => {
+      const row = document.querySelector(`[data-symbol="${item.symbol}"]`);
+      if (!row) return;
+      if (item.price != null) {
+        row.dataset.basePrice = item.price;
+        const priceCell = row.querySelector('.live-price');
+        if (priceCell) {
+          priceCell.textContent = fmtRs(item.price);
+          priceCell.classList.remove('flash-up', 'flash-down');
+          void priceCell.offsetWidth;
+          priceCell.classList.add(item.changePercent >= 0 ? 'flash-up' : 'flash-down');
+        }
+      }
+      if (item.changePercent != null) {
+        const changeCell = row.querySelector('.live-change');
+        if (changeCell) {
+          const up = Number(item.changePercent) >= 0;
+          changeCell.innerHTML = `<span class="chip ${up ? 'chip-soft-success' : 'chip-soft-danger'}">${chipText(item.changePercent)}</span>`;
+        }
+      }
+      if (item.volume != null) {
+        const volumeCell = row.querySelectorAll('td')[4];
+        if (volumeCell) volumeCell.textContent = Number(item.volume).toLocaleString('en-US');
+      }
+    });
+  }
+
+  let liveFeedEngaged = false;
+
+  function applyLivePayload(payload) {
+    if (!liveFeedEngaged) {
+      liveFeedEngaged = true;
+      if (simInterval) {
+        clearInterval(simInterval);
+        simInterval = null;
+      }
+    }
+    setFeedStatus('live');
+    applyIndexUpdate(payload.index);
+    applyMarketUpdate(payload.market);
+    applyMoversUpdate(payload.gainers, payload.losers);
+    applyWatchlistUpdate(payload.watchlist);
+    updateTimestamp();
+  }
+
+  function fetchLiveData() {
+    if (!liveFeedEngaged) setFeedStatus('connecting');
+    return fetch(LIVE_DATA_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error('Live data request failed');
+        return res.json();
+      })
+      .then((payload) => {
+        if (payload.error) throw new Error(payload.error);
+        applyLivePayload(payload);
+      })
+      .catch(() => {
+        setFeedStatus('offline');
+      });
+  }
+
+  /* ---------------- REST fallback polling (only runs while the websocket is down) ---------------- */
+  let restPollTimer = null;
+  function startRestFallbackPolling() {
+    if (restPollTimer) return; // already polling, avoid duplicate timers
+    restPollTimer = setInterval(fetchLiveData, LIVE_DATA_POLL_MS);
+  }
+  function stopRestFallbackPolling() {
+    if (!restPollTimer) return;
+    clearInterval(restPollTimer);
+    restPollTimer = null;
+  }
+
+  /* ---------------- Websocket push feed (primary), with reconnect + REST fallback ---------------- */
+  // Accepts a message only if it already matches the /stockex_dash/live-data/ shape.
+  // Anything else is logged and dropped rather than guessed at, since the exact
+  // websocket payload format has not been confirmed against a live market message.
+  function normalizeLivePayload(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    if ('index' in raw || 'market' in raw || 'gainers' in raw || 'losers' in raw || 'watchlist' in raw) {
+      return raw;
+    }
+    return null;
+  }
+
+  let ws = null;
+  let wsReconnectTimer = null;
+  let wsReconnectAttempts = 0;
+  const WS_RECONNECT_BASE_MS = 1000;
+  const WS_RECONNECT_MAX_MS = 30000;
+
+  function scheduleReconnect() {
+    if (wsReconnectTimer) return; // reconnect already scheduled, avoid stacking timers
+    const delay = Math.min(WS_RECONNECT_BASE_MS * (2 ** wsReconnectAttempts), WS_RECONNECT_MAX_MS);
+    wsReconnectAttempts += 1;
+    wsReconnectTimer = setTimeout(() => {
+      wsReconnectTimer = null;
+      connectWebSocket();
+    }, delay);
+  }
+
+  function connectWebSocket() {
+    if (!WS_URL) {
+      startRestFallbackPolling();
+      return;
+    }
+    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+      return; // connection already live/in-flight, don't open a second one
+    }
+
+    setFeedStatus('connecting');
+    try {
+      ws = new WebSocket(WS_URL);
+    } catch (err) {
+      console.error('NEPSE websocket could not be created', err);
+      startRestFallbackPolling();
+      scheduleReconnect();
+      return;
+    }
+
+    ws.onopen = () => {
+      wsReconnectAttempts = 0;
+      stopRestFallbackPolling();
+    };
+
+    ws.onmessage = (event) => {
+      let raw;
+      try {
+        raw = JSON.parse(event.data);
+      } catch (err) {
+        console.warn('Ignoring malformed NEPSE websocket message', err);
+        return;
+      }
+      const payload = normalizeLivePayload(raw);
+      if (!payload) {
+        console.warn('Unrecognized NEPSE websocket message shape, ignoring', raw);
+        return;
+      }
+      applyLivePayload(payload);
+    };
+
+    ws.onerror = (err) => {
+      console.error('NEPSE websocket error', err);
+    };
+
+    ws.onclose = () => {
+      ws = null;
+      setFeedStatus('offline');
+      startRestFallbackPolling();
+      scheduleReconnect();
+    };
+  }
+
+  window.addEventListener('beforeunload', () => {
+    if (wsReconnectTimer) clearTimeout(wsReconnectTimer);
+    if (ws) ws.close();
+  });
+
+  fetchLiveData(); // populate immediately via REST
+  connectWebSocket(); // then switch to real-time push updates
 
   /* ---------------- Movers tabs ---------------- */
   const moversTabs = document.querySelectorAll('.movers-tab');
@@ -246,7 +583,7 @@
   const refreshBtn = document.getElementById('refresh-btn');
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
-      tick();
+      fetchLiveData();
       renderChart();
       refreshBtn.classList.add('spinning');
       setTimeout(() => refreshBtn.classList.remove('spinning'), 600);

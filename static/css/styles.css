@@ -393,6 +393,27 @@ body::before {
   background: transparent;
 }
 
+.dashboard-mini-day.holiday {
+  position: relative;
+  background: rgba(248, 113, 113, 0.18);
+  color: #dc2626;
+}
+
+.dashboard-mini-day.holiday.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: #ffffff;
+}
+
+.dashboard-mini-day.holiday::after {
+  content: "";
+  position: absolute;
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
 .dashboard-upcoming-list {
   display: grid;
   gap: 0.65rem;
@@ -657,6 +678,42 @@ body::before {
   gap: 1rem;
 }
 
+/* Drivers table inside the "Upcoming Races" card — Bootstrap defaults to a
+   light theme per-cell background that the plain .table rule can't override. */
+.fixtures-section .table-responsive {
+  margin-top: 0;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.fixtures-section .table {
+  color: #e2e8f0;
+  background: transparent !important;
+  border-collapse: separate;
+  border-spacing: 0 0.6rem;
+}
+.fixtures-section .table thead th {
+  background: transparent !important;
+  color: rgba(203, 213, 225, 0.8) !important;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-bottom: none;
+  padding: 0.6rem 1rem;
+}
+.fixtures-section .table tbody tr {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+.fixtures-section .table tbody tr td {
+  border: none !important;
+  background: transparent !important;
+  color: #f8fafc !important;
+  vertical-align: middle;
+  padding: 1rem;
+}
+.fixtures-section .table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
 .fixture-card {
   display: grid;
   gap: 0.6rem;
@@ -830,44 +887,93 @@ body::before {
 .money-owed-actions {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.38rem;
+  margin-left: auto;
 }
 
 .row-icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
   flex: 0 0 auto;
   padding: 0;
-  border-radius: 50%;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  background: rgba(255, 255, 255, 0.04);
-  color: #94a3b8;
-  font-size: 0.72rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.78);
+  color: #e2e8f0;
+  font-size: 1.05rem;
+  font-weight: 800;
   line-height: 1;
   cursor: pointer;
-  transition: all 0.18s ease;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease, border-color 0.16s ease;
 }
 
 .row-icon-btn:hover,
 .row-icon-btn:focus-visible {
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.35);
   outline: none;
 }
 
+.row-icon-btn.px-3 {
+  width: auto;
+  min-width: 60px;
+  height: auto;
+  padding: 0.52rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+.add-entry-btn {
+  background: linear-gradient(135deg, #34d399 0%, #16a34a 100%);
+  border-color: rgba(167, 243, 208, 0.9);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.32), inset 0 1px 0 rgba(255,255,255,0.16);
+}
+
+.add-entry-btn:hover,
+.add-entry-btn:focus-visible {
+  background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+  border-color: rgba(187, 247, 208, 1);
+}
+
+.edit-amount-btn,
+.edit-nepal-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: rgba(147, 197, 253, 0.9);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.38), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+
+.delete-amount-btn,
+.delete-nepal-btn {
+  background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+  border-color: rgba(254, 202, 202, 0.9);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(220, 38, 38, 0.35), inset 0 1px 0 rgba(255,255,255,0.14);
+}
+
 .edit-amount-btn:hover,
-.edit-amount-btn:focus-visible {
-  background: rgba(91, 112, 230, 0.35);
-  border-color: rgba(91, 112, 230, 0.6);
+.edit-amount-btn:focus-visible,
+.edit-nepal-btn:hover,
+.edit-nepal-btn:focus-visible {
+  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+  border-color: rgba(191, 219, 254, 1);
 }
 
 .delete-amount-btn:hover,
-.delete-amount-btn:focus-visible {
-  background: rgba(239, 68, 68, 0.35);
-  border-color: rgba(239, 68, 68, 0.6);
+.delete-amount-btn:focus-visible,
+.delete-nepal-btn:hover,
+.delete-nepal-btn:focus-visible {
+  background: linear-gradient(135deg, #fb7185 0%, #dc2626 100%);
+  border-color: rgba(254, 205, 211, 1);
 }
 
 .dashboard-subtitle {
@@ -1381,57 +1487,115 @@ body::before {
   color: rgb(255, 255, 255) !important;
 }
 
+/* ==========================================================================
+   Expense Tracking — consolidated Material design (single source of truth)
+   ========================================================================== */
 .expense-page {
   min-height: calc(100vh - 80px);
-  background: linear-gradient(180deg, #080b14 0%, #111827 100%);
-  padding: 2.5rem 0 4rem;
+  background: linear-gradient(180deg, #0b0f1a 0%, #121d3a 100%);
+  padding: 2.75rem 0 4rem;
 }
-.expense-page .container {
-  max-width: 1180px;
+.expense-page .container-fluid {
+  max-width: none;
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
+.recent_expense {
+  color: #f8fafc !important;
+}
+
+/* Page header */
 .expense-page .page-header {
-  padding: 1.75rem 1.5rem;
-  border-radius: 32px;
-  background: rgba(15, 23, 42, 0.98);
+  padding: 1.75rem 1.85rem;
+  border-radius: 24px;
+  background: rgba(15, 23, 42, 0.96);
   border: 1px solid rgba(148, 163, 184, 0.16);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.24);
 }
 .expense-page .page-header h1 {
-  font-size: clamp(2rem, 2.3vw, 3rem);
-  margin-bottom: 0.5rem;
+  font-size: clamp(1.85rem, 2.4vw, 2.6rem);
+  margin-bottom: 0.4rem;
   color: #f8fafc;
 }
 .expense-page .eyebrow {
-  letter-spacing: 0.22em;
-  font-size: 0.8rem;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.2em;
+  font-size: 0.76rem;
+  margin-bottom: 0.4rem;
   color: #93c5fd;
   font-weight: 800;
 }
-
-.recent_expense{
-color: #f8fafc !important;
-}
-.expense-page .lead {
+.expense-page .lead,
+.expense-page .page-header .text-muted {
   max-width: 640px;
-  color: #cbd5e1;
-  line-height: 1.75;
+  color: rgba(203, 213, 225, 0.78);
+  line-height: 1.65;
 }
-.expense-page .btn-fab {
-  padding: 1rem 1.6rem;
-  border-radius: 999px;
-  font-weight: 700;
+
+/* Buttons — Add / Save / Cancel / Danger actions */
+.expense-page .btn,
+.expense-page .btn-primary,
+.expense-page .btn-secondary,
+.expense-page .btn-danger,
+.expense-page .btn-fab,
+.expense-page .btn-fab-danger {
   border: none;
-  background: linear-gradient(135deg, #5b70e6 0%, #8b8cf3 100%);
-  color: #ffffff;
-  box-shadow: 0 24px 48px rgba(91, 112, 230, 0.24);
+  border-radius: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
 }
-.expense-page .material-card {
+.expense-page .btn:hover,
+.expense-page .btn-primary:hover,
+.expense-page .btn-secondary:hover,
+.expense-page .btn-danger:hover,
+.expense-page .btn-fab:hover,
+.expense-page .btn-fab-danger:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  color: #ffffff;
+}
+.expense-page .btn-primary,
+.expense-page .btn-fab {
+  background: linear-gradient(135deg, #5b70e6 0%, #8b5cf6 100%);
+  color: #ffffff;
+  box-shadow: 0 16px 30px rgba(91, 112, 230, 0.3);
+}
+.expense-page .btn-secondary {
+  background: rgba(148, 163, 184, 0.12);
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: none;
+}
+.expense-page .btn-danger,
+.expense-page .btn-fab-danger {
+  background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+  color: #ffffff;
+  box-shadow: 0 16px 30px rgba(225, 29, 72, 0.26);
+}
+.expense-page .btn-fab,
+.expense-page .btn-fab-danger {
+  padding: 0.85rem 1.5rem;
+  border-radius: 14px;
+}
+
+/* Cards — one consistent Material surface */
+.expense-page .material-card,
+.expense-page .dashboard-card,
+.expense-page .summary-card,
+.expense-page .form-card,
+.expense-page .expense-card {
   background: rgba(15, 23, 42, 0.96);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 28px;
-  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.28);
-  padding: 1.5rem 1.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 24px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22);
+}
+.expense-page .material-card,
+.expense-page .summary-card .card-body,
+.expense-page .form-card .card-body {
+  padding: 1.6rem 1.75rem;
+}
+.expense-page .expense-card .card-body {
+  padding: 2rem 2rem 2.25rem;
 }
 .expense-page .material-card > .d-flex,
 .expense-page .material-card > .card-body,
@@ -1442,14 +1606,20 @@ color: #f8fafc !important;
 .expense-page .material-card h6 {
   color: #f8fafc;
 }
-.expense-page .material-card p.text-muted,
 .expense-page .material-card .text-muted {
   color: rgba(203, 213, 225, 0.68);
 }
-.expense-page .material-card .soft-badge {
+.expense-page .soft-badge {
+  display: inline-flex;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
   background: rgba(91, 112, 230, 0.18);
   color: #dbeafe;
+  font-weight: 700;
+  font-size: 0.82rem;
 }
+
+/* Table toolbar (month navigation / filter) */
 .expense-page .table-toolbar {
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
   padding-bottom: 1rem;
@@ -1460,6 +1630,7 @@ color: #f8fafc !important;
 .expense-page .table-toolbar .btn-group .btn {
   border-radius: 999px;
   min-width: 5.5rem;
+  color: #f8fafc;
 }
 .expense-page .table-toolbar .form-select {
   min-width: 180px;
@@ -1467,51 +1638,50 @@ color: #f8fafc !important;
   border: 1px solid rgba(148, 163, 184, 0.18);
   color: #e2e8f0;
 }
+.expense-page .table-toolbar .form-select:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+}
 .expense-page .table-toolbar .form-select option {
   background: rgba(15, 23, 42, 0.96);
   color: #e2e8f0;
 }
-.expense-page .material-card .table-responsive,
-.expense-page .material-card .table {
-  min-width: 100%;
-  background: transparent !important;
+
+/* Tables — spaced "card row" style */
+.expense-page .table-responsive {
+  margin-top: 1rem;
+  border-radius: 20px;
+  overflow: hidden;
 }
-.expense-page .material-card .table thead,
-.expense-page .material-card .table tbody,
-.expense-page .material-card .table tr,
-.expense-page .material-card .table th,
-.expense-page .material-card .table td {
+.expense-page .table {
+  color: #e2e8f0;
   background: transparent !important;
+  border-collapse: separate;
+  border-spacing: 0 0.6rem;
 }
-.expense-page .material-card .table th,
-.expense-page .material-card .table td {
+.expense-page .table thead th {
+  background: transparent !important;
+  color: rgba(203, 213, 225, 0.8) !important;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-bottom: none;
+  padding: 0.6rem 1rem;
+}
+.expense-page .table tbody tr {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+.expense-page .table tbody tr td {
+  border: none !important;
+  background: transparent !important;
   color: #f8fafc !important;
   vertical-align: middle;
-  padding: 1rem 0.75rem;
+  padding: 1rem;
 }
-.expense-page .material-card .table thead th {
-  color: rgba(203, 213, 225, 0.8) !important;
+.expense-page .table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.07);
 }
-.expense-page .material-card .table tbody tr {
-  background: rgba(255, 255, 255, 0.02);
-}
-.expense-page .summary-card {
-  background: rgba(15, 23, 42, 0.96);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 28px;
-}
-.expense-page .summary-card .card-body {
-  padding: 2rem 1.6rem;
-}
-.expense-page .summary-card .summary-bar {
-  background: rgba(203, 213, 225, 0.08);
-}
-.expense-page .summary-card .summary-list li {
-  color: #cbd5e1;
-}
-.expense-page .summary-card .legend {
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
-}
+
+/* Stat cards */
 .expense-page .stat-card {
   display: flex;
   gap: 1rem;
@@ -1524,12 +1694,12 @@ color: #f8fafc !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 18px;
+  border-radius: 16px;
   font-size: 1.15rem;
   box-shadow: 0 12px 24px rgba(91, 112, 230, 0.16);
   color: #ffffff;
 }
-.expense-page .bg-indigo { background: linear-gradient(135deg, #5b70e6 0%, #8b8cf3 100%); }
+.expense-page .bg-indigo { background: linear-gradient(135deg, #5b70e6 0%, #8b5cf6 100%); }
 .expense-page .bg-warning { background: linear-gradient(135deg, #facc15 0%, #fbbf24 100%); }
 .expense-page .bg-success { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
 .expense-page .bg-secondary { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
@@ -1538,15 +1708,8 @@ color: #f8fafc !important;
   color: #94a3b8;
   font-size: 0.95rem;
 }
-.expense-page .soft-badge {
-  display: inline-flex;
-  padding: 0.5rem 0.9rem;
-  border-radius: 999px;
-  background: rgba(79, 70, 229, 0.16);
-  color: #dbeafe;
-  font-weight: 700;
-  font-size: 0.82rem;
-}
+
+/* Category chips */
 .expense-page .chip {
   display: inline-flex;
   align-items: center;
@@ -1565,46 +1728,7 @@ color: #f8fafc !important;
 .expense-page .chip-soft-danger { background: rgba(244, 114, 182, 0.14); color: #f9a8d4; }
 .expense-page .chip-soft-secondary { background: rgba(148, 163, 184, 0.14); color: #cbd5e1; }
 
-.expense-page .btn-fab-danger {
-  padding: 1rem 1.6rem;
-  border-radius: 999px;
-  font-weight: 700;
-  border: none;
-  background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
-  color: #ffffff;
-  box-shadow: 0 24px 48px rgba(244, 63, 94, 0.24);
-}
-.expense-page .btn-fab-danger:hover {
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-.expense-page .total-savings-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 0.6rem;
-  padding: 2.2rem 1.6rem;
-}
-.expense-page .total-savings-amount {
-  margin: 0;
-  font-size: clamp(2rem, 3vw, 2.6rem);
-  font-weight: 800;
-  color: #86efac;
-}
-.expense-page .total-savings-amount.is-negative {
-  color: #fda4af;
-}
-.expense-page .amount-added {
-  color: #86efac;
-  font-weight: 700;
-}
-.expense-page .amount-used {
-  color: #fda4af;
-  font-weight: 700;
-}
+/* Spending distribution summary */
 .expense-page .summary-bar {
   height: 0.9rem;
   border-radius: 999px;
@@ -1616,13 +1740,13 @@ color: #f8fafc !important;
   display: block;
   height: 100%;
   border-radius: 999px;
-  background-image: linear-gradient(135deg, #5b70e6 0%, #8b8cf3 100%);
+  background-image: linear-gradient(135deg, #5b70e6 0%, #8b5cf6 100%);
 }
 .expense-page .summary-list li {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 0;
+  padding: 0.85rem 0;
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
   color: #cbd5e1;
 }
@@ -1633,78 +1757,50 @@ color: #f8fafc !important;
   border-radius: 0.35rem;
   margin-right: 0.75rem;
   display: inline-block;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 .expense-page .legend-primary { background: #5b70e6; }
 .expense-page .legend-warning { background: #facc15; }
 .expense-page .legend-success { background: #22c55e; }
 .expense-page .legend-danger { background: #ec4899; }
-.expense-page .table {
-  color: #e2e8f0;
-}
-.expense-page .table thead th {
-  color: #94a3b8;
-  font-weight: 700;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-}
-.expense-page .table tbody tr {
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-}
-.expense-page .table tbody tr:last-child { border-bottom: none; }
-.expense-page .table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-.expense-page .form-card {
-  background: rgba(15, 23, 42, 0.96);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 28px;
-}
-.expense-page .form-card .card-body {
-  padding: 2rem 1.6rem;
-}
-.expense-page .expense-card {
-  background: rgba(10, 18, 39, 0.92);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 32px;
-  box-shadow: 0 42px 100px rgba(0, 0, 0, 0.24);
-}
-.expense-page .expense-card .card-body {
-  padding: 2rem 2rem 2.25rem;
-}
+.expense-page .legend-info { background: #3b82f6; }
+.expense-page .legend-secondary { background: #94a3b8; }
+
+/* Forms (add expense / add income / modal forms) */
 .expense-page .form-card .form-floating .form-control,
 .expense-page .form-card .form-floating .form-select {
-  border-radius: 18px;
-  padding: 1.4rem 1rem 0.75rem;
+  border-radius: 16px;
+  padding: 1.35rem 1rem 0.7rem;
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.18);
   color: #e2e8f0;
-  min-height: 3.5rem;
+  min-height: 3.4rem;
 }
 .expense-page .form-card .form-floating .form-control::placeholder,
 .expense-page .form-card .form-floating .form-select option:first-of-type {
   color: transparent;
 }
 .expense-page .form-card .form-floating label {
-  color: #94a3b8;
+  color: rgba(203, 213, 225, 0.75);
   padding-left: 0.75rem;
   font-weight: 500;
 }
 .expense-page .form-card .form-floating .form-control:focus,
 .expense-page .form-card .form-floating .form-select:focus {
-  box-shadow: 0 0 0 0.3rem rgba(91, 112, 230, 0.18);
-  border-color: rgba(91, 112, 230, 0.44);
-}
-.expense-page .form-card .form-select {
-  color: #e2e8f0;
+  box-shadow: 0 0 0 0.25rem rgba(91, 112, 230, 0.2);
+  border-color: rgba(91, 112, 230, 0.5);
 }
 .expense-page .form-card .form-select option {
   background: rgba(15, 23, 42, 0.96);
   color: #e2e8f0;
 }
-.expense-page .form-card .form-control:focus-visible,
-.expense-page .form-card .form-select:focus-visible {
-  outline: none;
+.expense-page .form-card .btn-primary {
+  border-radius: 16px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 16px 32px rgba(91, 112, 230, 0.26);
 }
 
+/* Currency converter card */
 .expense-page .currency-converter-card,
 .expense-page .currency-converter-card h5,
 .expense-page .currency-converter-card p,
@@ -1736,228 +1832,83 @@ color: #f8fafc !important;
 .expense-page .currency-converter-card .soft-badge {
   background: rgba(255, 255, 255, 0.14);
 }
-
-/* Expense page material design overrides */
-.expense-page {
-  min-height: calc(100vh - 80px);
-  background: linear-gradient(180deg, #0e1726 0%, #121d3a 100%);
-  padding: 2.8rem 0 4rem;
-}
-.expense-page .page-header {
-  padding: 1.75rem 1.5rem;
-  border-radius: 32px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  background: rgba(15, 23, 42, 0.98);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.25);
-}
-.expense-page .page-header h1 {
-  font-size: clamp(2rem, 2.5vw, 3rem);
-  margin-bottom: 0.5rem;
-  color: #f8fafc;
-}
-.expense-page .eyebrow {
-  letter-spacing: 0.22em;
-  font-size: 0.8rem;
-  color: #93c5fd;
-  font-weight: 800;
-}
-.expense-page .lead,
-.expense-page .page-header .text-muted {
-  color: rgba(203, 213, 225, 0.78);
-}
-.expense-page .btn-fab {
-  padding: 1rem 1.75rem;
-  border-radius: 999px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.24);
-}
-.expense-page .material-card,
-.expense-page .dashboard-card,
-.expense-page .summary-card,
-.expense-page .form-card {
-  background: rgba(15, 23, 42, 0.96);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 28px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.14);
-}
-.expense-page .material-card {
-  padding: 1.75rem 1.75rem;
-}
-.expense-page .stat-card {
+.expense-page .currency-converter-card .converter-result-panel {
   display: flex;
-  gap: 1rem;
   align-items: center;
-  padding: 1.5rem;
+  gap: 0.85rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
-.expense-page .stat-icon {
-  width: 3.25rem;
-  height: 3.25rem;
-  display: inline-flex;
+.expense-page .currency-converter-card .converter-result-icon {
+  flex: 0 0 auto;
+  display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 18px;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
   font-size: 1.15rem;
 }
-.expense-page .people-bar {
-  gap: 1rem;
-  padding: 1.3rem 1.35rem;
-  border-radius: 26px;
+.expense-page .currency-converter-card .converter-result-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.6) !important;
 }
-.expense-page .people-pill {
-  min-width: 190px;
-  padding: 1rem 1.1rem;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
+.expense-page .currency-converter-card .converter-result-value {
+  font-size: 1.15rem;
+  font-weight: 600;
 }
-.expense-page .people-avatar {
-  width: 2.8rem;
-  height: 2.8rem;
-  background: rgba(99, 102, 241, 0.24);
+.expense-page .currency-converter-card .converter-result-panel.is-loading .converter-result-value {
+  color: rgba(255, 255, 255, 0.7) !important;
 }
-.expense-page .table-toolbar {
-  border-color: rgba(148, 163, 184, 0.12);
+.expense-page .currency-converter-card .converter-result-panel.is-success {
+  background: rgba(46, 204, 113, 0.14);
+  border-color: rgba(46, 204, 113, 0.4);
 }
-.expense-page .table-toolbar .btn-group .btn {
-  color: #f8fafc;
+.expense-page .currency-converter-card .converter-result-panel.is-success .converter-result-icon {
+  background: rgba(46, 204, 113, 0.25);
 }
-.expense-page .table-toolbar .form-select {
-  background: rgba(15, 23, 42, 0.94);
+.expense-page .currency-converter-card .converter-result-panel.is-error {
+  background: rgba(231, 76, 60, 0.14);
+  border-color: rgba(231, 76, 60, 0.45);
 }
-.expense-page .table-toolbar .form-select:focus {
-  border-color: rgba(99, 102, 241, 0.5);
-}
-.expense-page .summary-bar {
-  height: 0.95rem;
-  border-radius: 999px;
-  overflow: hidden;
-}
-.expense-page .summary-fill {
-  background-image: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-}
-.expense-page .dashboard-hero,
-.expense-page .material-card .table-responsive,
-.expense-page .material-card .table,
-.expense-page .league-table-header,
-.expense-page .league-table-row {
-  width: 100%;
-}
-.expense-page .dashboard-card .dashboard-chip,
-.expense-page .soft-badge {
-  background: rgba(79, 70, 229, 0.16);
-}
-.expense-page .form-card .form-floating .form-control,
-.expense-page .form-card .form-floating .form-select {
-  border-radius: 18px;
-  padding: 1.3rem 1rem 0.8rem;
-  background: rgba(15, 23, 42, 0.92);
-}
-.expense-page .form-card .form-floating label {
-  color: rgba(203, 213, 225, 0.7);
-}
-.expense-page .form-card .btn-primary {
-  border-radius: 18px;
-  box-shadow: 0 18px 34px rgba(91, 112, 230, 0.22);
-}
-@media (max-width: 991px) {
-  .expense-page .page-header { padding: 1.35rem 1rem; }
-  .expense-page .btn-fab { width: 100%; justify-content: center; }
-}
-@media (max-width: 767px) {
-  .expense-page .stat-card { flex-direction: column; align-items: flex-start; }
+.expense-page .currency-converter-card .converter-result-panel.is-error .converter-result-icon {
+  background: rgba(231, 76, 60, 0.25);
 }
 
-/* Dark-mode spacing and contrast cleanup for expense card */
-.expense-page .table-responsive {
-  margin-top: 1rem;
-  border-radius: 24px;
-  overflow: hidden;
+/* Nepal savings total card */
+.expense-page .total-savings-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding: 2.2rem 1.6rem;
 }
-.expense-page .table {
-  background: rgba(15, 23, 42, 0.88) !important;
-  border-collapse: separate;
-  border-spacing: 0 0.65rem;
+.expense-page .total-savings-amount {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 800;
+  color: #86efac;
 }
-.expense-page .table thead th {
-  background: rgba(15, 23, 42, 0.92) !important;
-  color: #cbd5e1 !important;
+.expense-page .total-savings-amount.is-negative {
+  color: #fda4af;
+}
+.expense-page .amount-added {
+  color: #86efac;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  border-bottom: none;
-  padding: 1rem 1rem;
 }
-.expense-page .table tbody tr {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 20px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-}
-.expense-page .table tbody tr td {
-  border: none !important;
-  background: transparent !important;
-  color: #f8fafc !important;
-  padding: 1rem 1rem;
-}
-.expense-page .table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-.expense-page .table tbody tr + tr {
-  margin-top: 0.5rem;
-}
-.expense-page .people-bar {
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  padding: 1.25rem 1.3rem;
-  border-radius: 26px;
-}
-.expense-page .people-list {
-  gap: 1rem;
-}
-.expense-page .people-pill {
-  min-width: 220px;
-  padding: 1.05rem 1.2rem;
-  background: rgba(255, 255, 255, 0.05);
-}
-.expense-page .people-pill strong,
-.expense-page .people-pill p {
-  color: #e2e8f0;
-}
-.expense-page .people-pill p {
-  opacity: 0.8;
-}
-.expense-page .soft-badge {
-  background: rgba(79, 70, 229, 0.18);
-  color: #dbeafe;
-}
-.expense-page .summary-card {
-  margin-top: 1.5rem;
-}
-.expense-page .summary-list li {
-  padding: 0.95rem 0;
-}
-.expense-page .summary-list li + li {
-  margin-top: 0.35rem;
-}
-.expense-page .balance-card,
-.expense-page .summary-card,
-.expense-page .material-card,
-.expense-page .expense-card {
-  border-color: rgba(148, 163, 184, 0.18);
-}
-.expense-page .expense-card {
-  padding: 2.2rem 2rem 2.4rem;
+.expense-page .amount-used {
+  color: #fda4af;
+  font-weight: 700;
 }
 
-
-.expense-page .form-card .btn-primary {
-  background: linear-gradient(135deg, #5b70e6 0%, #8b8cf3 100%);
-  border: none;
-  border-radius: 18px;
-  padding: 1rem 1.2rem;
-  box-shadow: 0 18px 34px rgba(91, 112, 230, 0.24);
-}
-.expense-page .form-card .btn-primary:hover {
-  transform: translateY(-1px);
-}
 @media (max-width: 991px) {
   .expense-page .page-header { padding: 1.35rem 1rem; }
   .expense-page .btn-fab { width: 100%; justify-content: center; }
@@ -2142,6 +2093,48 @@ color: #f8fafc !important;
 .stockex-page .chip-soft-success { background: rgba(16, 185, 129, 0.14); color: #86efac; }
 .stockex-page .chip-soft-danger { background: rgba(244, 63, 94, 0.14); color: #fda4af; }
 .stockex-page .chip-soft-secondary { background: rgba(148, 163, 184, 0.14); color: #cbd5e1; }
+.stockex-page .chip-soft-warning { background: rgba(251, 191, 36, 0.14); color: #fde68a; }
+
+.price-alert-toast-container {
+  position: fixed;
+  top: 5.5rem;
+  right: 1.25rem;
+  z-index: 1080;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: 340px;
+}
+.price-alert-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-left: 3px solid #34d399;
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.5);
+  color: #f8fafc;
+  font-size: 0.85rem;
+  animation: price-alert-toast-in 0.25s ease;
+}
+.price-alert-toast.is-down { border-left-color: #fb7185; }
+.price-alert-toast strong { display: block; margin-bottom: 0.15rem; }
+.price-alert-toast .price-alert-toast-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.price-alert-toast .price-alert-toast-close:hover { color: #f8fafc; }
+@keyframes price-alert-toast-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* Chart card */
 .stockex-page .chart-price {
@@ -2179,6 +2172,36 @@ color: #f8fafc !important;
 .stockex-page .timeframe-pill.active {
   background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   color: #052e1f;
+}
+.stockex-page .watchlist-category-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+.stockex-page .watchlist-category-pill {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.stockex-page .watchlist-category-pill:hover {
+  color: #e2e8f0;
+}
+.stockex-page .watchlist-category-pill.active {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: #052e1f;
+}
+.stockex-page .watchlist-card tbody tr.is-hidden {
+  display: none;
 }
 .stockex-page .chart-canvas-wrap {
   position: relative;
@@ -2430,6 +2453,12 @@ color: #f8fafc !important;
   color: #f8fafc;
   font-size: 0.95rem;
 }
+.stockex-page .holding-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.38rem;
+  margin-left: auto;
+}
 .stockex-page .holding-sub {
   margin: 0.2rem 0 0.6rem;
   color: #94a3b8;
@@ -2528,6 +2557,75 @@ color: #f8fafc !important;
   margin: 0;
   color: #94a3b8;
   font-size: 0.78rem;
+}
+
+/* Family Portfolios accordion */
+.stockex-page .family-portfolio-card .accordion-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+}
+.stockex-page .family-portfolio-card .accordion-item:last-child { margin-bottom: 0; }
+.stockex-page .family-portfolio-card .accordion-button {
+  background: transparent;
+  color: #f8fafc;
+  font-weight: 600;
+  box-shadow: none;
+  padding: 1rem 1.25rem;
+}
+.stockex-page .family-portfolio-card .accordion-button:not(.collapsed) {
+  background: rgba(99, 102, 241, 0.12);
+  color: #f8fafc;
+  box-shadow: none;
+}
+.stockex-page .family-portfolio-card .accordion-button:focus {
+  box-shadow: none;
+  border-color: transparent;
+}
+.stockex-page .family-portfolio-card .accordion-button::after {
+  filter: invert(1) grayscale(100%) brightness(2);
+}
+.stockex-page .family-portfolio-card .accordion-body {
+  background: rgba(15, 23, 42, 0.4);
+  padding: 1rem 1.25rem 1.25rem;
+}
+.stockex-page .family-member-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.35rem;
+  gap: 0.75rem;
+  width: 100%;
+}
+.stockex-page .family-member-value {
+  margin-left: auto;
+  font-weight: 700;
+  color: #f8fafc;
+}
+.stockex-page .family-portfolio-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+.stockex-page .family-portfolio-stats span {
+  display: block;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stockex-page .family-portfolio-stats strong {
+  display: block;
+  font-size: 1rem;
+  color: #e2e8f0;
+  margin-top: 0.15rem;
+  overflow-wrap: break-word;
 }
 .stockex-page .mini-notice-list li {
   padding: 0.65rem 0;

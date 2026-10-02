@@ -2,6 +2,7 @@
     function updateMatchCountdowns() {
         document.querySelectorAll('.team-countdown').forEach(function (card) {
             const kickoff = new Date(card.dataset.kickoff);
+            if (isNaN(kickoff.getTime())) return; // widget still loading / no data yet
             const daysEl = card.querySelector('[data-unit="days"]');
             const hoursEl = card.querySelector('[data-unit="hours"]');
             const minsEl = card.querySelector('[data-unit="mins"]');
@@ -18,10 +19,10 @@
             diff -= mins * (1000 * 60);
             const secs = Math.floor(diff / 1000);
 
-            daysEl.textContent = String(days).padStart(2, '0');
-            hoursEl.textContent = String(hours).padStart(2, '0');
-            minsEl.textContent = String(mins).padStart(2, '0');
-            secsEl.textContent = String(secs).padStart(2, '0');
+            daysEl && (daysEl.textContent = String(days).padStart(2, '0'));
+            hoursEl && (hoursEl.textContent = String(hours).padStart(2, '0'));
+            minsEl && (minsEl.textContent = String(mins).padStart(2, '0'));
+            secsEl && (secsEl.textContent = String(secs).padStart(2, '0'));
         });
     }
 

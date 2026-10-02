@@ -9,26 +9,36 @@
                 <span>Team</span>
                 <span class="pts-pad">Pts</span>
             </div>
+            {% for row in standings|slice:":8" %}
             <div class="league-table-row">
-                <span class="league-table-team">Arsenal</span>
-                <span class="league-table-points">84</span>
+                <span class="league-table-team">{{ row.position }}. {{ row.team.shortName|default:row.team.name }}</span>
+                <span class="league-table-points">{{ row.points }}</span>
             </div>
+            {% empty %}
             <div class="league-table-row">
-                <span class="league-table-team">Man City</span>
-                <span class="league-table-points">78</span>
+                <span class="league-table-team">Standings unavailable</span>
             </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="dashboard-card mt-3">
+        <div class="dashboard-hero">
+            <span class="dashboard-chip">Champions League</span>
+            <div class="league-table-header">
+                <span>Team</span>
+                <span class="pts-pad">Pts</span>
+            </div>
+            {% for row in cl_standings|slice:":8" %}
             <div class="league-table-row">
-                <span class="league-table-team">Liverpool</span>
-                <span class="league-table-points">75</span>
+                <span class="league-table-team">{{ row.position }}. {{ row.team.shortName|default:row.team.name }}</span>
+                <span class="league-table-points">{{ row.points }}</span>
             </div>
+            {% empty %}
             <div class="league-table-row">
-                <span class="league-table-team">Tottenham</span>
-                <span class="league-table-points">70</span>
+                <span class="league-table-team">Standings unavailable</span>
             </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Aston Villa</span>
-                <span class="league-table-points">68</span>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>

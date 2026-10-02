@@ -4,7 +4,7 @@
 
     const now = new Date();
     const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Asia/Kathmandu',
+      timeZone: 'America/Toronto',
       day: '2-digit',
       month: 'short',
       year: 'numeric',

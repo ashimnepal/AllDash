@@ -1,91 +1,76 @@
-{% extends "base.html" %}
-
-{% block content %}
-
 <div class="row mt-3">
     <div class="col-12">
         <div class="f1-dashboard-card">
             <div class="f1-dashboard-header">
                 <div class="dashboard-chip">Premier League</div>
-                <div class="f1-live-pill">Next Match: Arsenal vs Chelsea</div>
+                <div class="f1-live-pill">
+                    {% with next_match=next_matches.0 %}
+                    {% if next_match %}Next Match: {{ next_match.homeTeam.shortName|default:next_match.homeTeam.name }} vs {{ next_match.awayTeam.shortName|default:next_match.awayTeam.name }}{% else %}Next Match: TBA{% endif %}
+                    {% endwith %}
+                </div>
             </div>
 
             <div class="f1-dashboard-grid">
                 <div class="f1-feature-card">
                     <div class="f1-feature-label">Current Leader</div>
-                    <h3 class="f1-feature-title">Arsenal</h3>
-                    <div class="f1-feature-meta">+4 pts lead • 1st overall</div>
+                    <h3 class="f1-feature-title">{% if standings %}{{ standings.0.team.shortName|default:standings.0.team.name }}{% else %}Unavailable{% endif %}</h3>
+                    <div class="f1-feature-meta">
+                        {% if leader_lead is not None %}+{{ leader_lead|floatformat:0 }} pts lead • {% endif %}1st overall
+                    </div>
                     <div class="f1-feature-chart">
+                        {% for row in standings|slice:":4" %}
                         <div class="f1-chart-item">
-                            <div class="f1-chart-value">68</div>
-                            <div class="f1-chart-bar bar-1"></div>
-                            <div class="f1-chart-name">Arsenal</div>
+                            <div class="f1-chart-value">{{ row.points }}</div>
+                            <div class="f1-chart-bar bar-{{ forloop.counter }}"></div>
+                            <div class="f1-chart-name">{{ row.team.shortName|default:row.team.name }}</div>
                         </div>
-                        <div class="f1-chart-item">
-                            <div class="f1-chart-value">64</div>
-                            <div class="f1-chart-bar bar-2"></div>
-                            <div class="f1-chart-name">City</div>
-                        </div>
-                        <div class="f1-chart-item">
-                            <div class="f1-chart-value">61</div>
-                            <div class="f1-chart-bar bar-3"></div>
-                            <div class="f1-chart-name">Liverpool</div>
-                        </div>
-                        <div class="f1-chart-item">
-                            <div class="f1-chart-value">58</div>
-                            <div class="f1-chart-bar bar-4"></div>
-                            <div class="f1-chart-name">Spurs</div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
 
                 <div class="premier-club-feature">
-                    <div class="premier-club-banner">Manchester United</div>
+                    <div class="premier-club-banner">Upcoming Fixtures</div>
                     <div class="premier-club-grid">
+                        {% for match in upcoming_matches|slice:":3" %}
                         <div class="premier-club-card">
-                            <div class="premier-club-tag">Next Match</div>
-                            <div class="premier-club-name">Manchester United vs Tottenham</div>
-                            <div class="premier-club-meta">Saturday • 20:00 • Old Trafford</div>
+                            <div class="premier-club-tag">{% if forloop.first %}Next Match{% elif forloop.counter == 2 %}Following Fixture{% else %}Upcoming{% endif %}</div>
+                            <div class="premier-club-name">{{ match.homeTeam.shortName|default:match.homeTeam.name }} vs {{ match.awayTeam.shortName|default:match.awayTeam.name }}</div>
+                            <div class="premier-club-meta">{{ match.kickoff|date:"D" }} • {{ match.kickoff|date:"H:i" }} UTC</div>
                         </div>
+                        {% empty %}
                         <div class="premier-club-card">
-                            <div class="premier-club-tag">Following Fixture</div>
-                            <div class="premier-club-name">Manchester United vs Brighton</div>
-                            <div class="premier-club-meta">Next weekend • 16:00 • Amex Stadium</div>
+                            <div class="premier-club-name">No upcoming fixtures found.</div>
                         </div>
-                        <div class="premier-club-card">
-                            <div class="premier-club-tag">Upcoming</div>
-                            <div class="premier-club-name">Manchester United vs Liverpool</div>
-                            <div class="premier-club-meta">Premier League title race clash</div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
 
-                <div class="f1-event-card">
+                <div class="f1-event-card team-countdown" data-kickoff="{{ next_matches.0.kickoff.isoformat }}">
                     <div class="f1-event-label">Incoming Event</div>
-                    <h4 class="f1-event-title">Arsenal vs Chelsea</h4>
+                    {% with next_match=next_matches.0 %}
+                    <h4 class="f1-event-title">{% if next_match %}{{ next_match.homeTeam.shortName|default:next_match.homeTeam.name }} vs {{ next_match.awayTeam.shortName|default:next_match.awayTeam.name }}{% else %}TBA{% endif %}</h4>
                     <div class="f1-countdown-row">
                         <div class="f1-countdown-box">
-                            <div class="f1-countdown-value">02</div>
+                            <div class="f1-countdown-value" data-unit="days">00</div>
                             <div class="f1-countdown-label">Days</div>
                         </div>
                         <div class="f1-countdown-box">
-                            <div class="f1-countdown-value">11</div>
+                            <div class="f1-countdown-value" data-unit="hours">00</div>
                             <div class="f1-countdown-label">Hours</div>
                         </div>
                         <div class="f1-countdown-box">
-                            <div class="f1-countdown-value">30</div>
+                            <div class="f1-countdown-value" data-unit="mins">00</div>
                             <div class="f1-countdown-label">Mins</div>
                         </div>
                     </div>
-                    <div class="f1-event-meta">Fixture: Arsenal vs Chelsea</div>
-                    <div class="f1-event-meta">Location: Emirates Stadium, London</div>
-                    <div class="f1-event-meta">Saturday kickoff at 17:30 • Live on Sky Sports</div>
+                    {% if next_match %}
+                    <div class="f1-event-meta">Fixture: {{ next_match.homeTeam.shortName|default:next_match.homeTeam.name }} vs {{ next_match.awayTeam.shortName|default:next_match.awayTeam.name }}</div>
+                    <div class="f1-event-meta">Kickoff {{ next_match.kickoff|date:"D H:i" }} UTC</div>
+                    {% endif %}
+                    {% endwith %}
                 </div>                
             </div>
         </div>
     </div>
 </div>
 
-
-
-{% endblock %}

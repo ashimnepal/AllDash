@@ -1,3 +1,4 @@
+{% load humanize %}
 <section class="card stock-hero-card">
     <div class="card-body p-4">
         <div class="page-header d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
@@ -21,8 +22,8 @@
                     <div class="stat-icon bg-emerald text-white">N</div>
                     <div>
                         <p class="stat-label">NEPSE Index</p>
-                        <h3>2,187.42</h3>
-                        <span class="chip chip-soft-success">▲ 0.86%</span>
+                        <h3 id="stat-index-value">2,187.42</h3>
+                        <span class="chip chip-soft-success" id="stat-index-chip">▲ 0.86%</span>
                     </div>
                 </article>
             </div>
@@ -31,8 +32,8 @@
                     <div class="stat-icon bg-indigo text-white">₨</div>
                     <div>
                         <p class="stat-label">Today's Turnover</p>
-                        <h3>Rs 4.82 Arba</h3>
-                        <span class="chip chip-soft-success">▲ 12.4%</span>
+                        <h3 id="stat-turnover">Rs 4.82 Arba</h3>
+                        <span class="chip chip-soft-success" id="stat-turnover-chip">▲ 12.4%</span>
                     </div>
                 </article>
             </div>
@@ -41,8 +42,8 @@
                     <div class="stat-icon bg-amber text-dark">⇅</div>
                     <div>
                         <p class="stat-label">Advance / Decline</p>
-                        <h3>182 / 96</h3>
-                        <span class="chip chip-soft-secondary">41 unchanged</span>
+                        <h3 id="stat-advdec">182 / 96</h3>
+                        <span class="chip chip-soft-secondary" id="stat-unchanged">41 unchanged</span>
                     </div>
                 </article>
             </div>
@@ -51,8 +52,8 @@
                     <div class="stat-icon bg-violet text-white">Σ</div>
                     <div>
                         <p class="stat-label">Market Cap</p>
-                        <h3>Rs 42.6 Kharba</h3>
-                        <span class="chip chip-soft-success">▲ 0.64%</span>
+                        <h3 id="stat-marketcap">Rs 42.6 Kharba</h3>
+                        <span class="chip chip-soft-success" id="stat-marketcap-chip">▲ 0.64%</span>
                     </div>
                 </article>
             </div>
@@ -65,8 +66,8 @@
                         <div>
                             <p class="text-muted mb-1 stock-sub">Nepal Stock Exchange · Live</p>
                             <div class="d-flex align-items-baseline gap-2">
-                                <h2 class="chart-price mb-0">2,187.42</h2>
-                                <span class="chip chip-soft-success">+18.64 (0.86%)</span>
+                                <h2 class="chart-price mb-0" id="chart-price-value">2,187.42</h2>
+                                <span class="chip chip-soft-success" id="chart-change-chip">+18.64 (0.86%)</span>
                             </div>
                         </div>
                         <div class="timeframe-group" role="group" aria-label="Chart timeframe">
@@ -79,27 +80,30 @@
                         </div>
                     </div>
                     <div class="chart-canvas-wrap">
-                        <canvas id="nepseChart"></canvas>
+                        <canvas id="nepseChart" data-ws-url="{{ nepse_ws_url }}"></canvas>
                     </div>
                     <div class="row gx-3 gy-2 chart-stats mt-3">
                         <div class="col-6 col-md-3">
                             <p class="stat-label mb-1">Open</p>
-                            <p class="stat-value mb-0">2,171.80</p>
+                            <p class="stat-value mb-0" id="stat-open">2,171.80</p>
                         </div>
                         <div class="col-6 col-md-3">
                             <p class="stat-label mb-1">High</p>
-                            <p class="stat-value mb-0">2,193.55</p>
+                            <p class="stat-value mb-0" id="stat-high">2,193.55</p>
                         </div>
                         <div class="col-6 col-md-3">
                             <p class="stat-label mb-1">Low</p>
-                            <p class="stat-value mb-0">2,168.20</p>
+                            <p class="stat-value mb-0" id="stat-low">2,168.20</p>
                         </div>
                         <div class="col-6 col-md-3">
                             <p class="stat-label mb-1">Prev. Close</p>
-                            <p class="stat-value mb-0">2,168.78</p>
+                            <p class="stat-value mb-0" id="stat-prevclose">2,168.78</p>
                         </div>
                     </div>
-                    <p class="text-muted mb-0 mt-2 stock-sub small" id="last-updated">Updated just now</p>
+                    <p class="text-muted mb-0 mt-2 stock-sub small d-flex align-items-center gap-2">
+                        <span class="chip chip-soft-secondary" id="ws-feed-status">Connecting…</span>
+                        <span id="last-updated">Updated just now</span>
+                    </p>
                 </section>
             </div>
 
@@ -235,6 +239,83 @@
 
         <div class="row gx-4 gy-4 mt-1">
             <div class="col-12">
+                <section class="card material-card family-portfolio-card">
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-3">
+                        <div>
+                            <h5 class="mb-1 thisiswhite">Family Portfolios</h5>
+                            <p class="text-muted mb-0 stock-sub">Each family member's holdings, live prices, and today vs. yesterday performance.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFamilyMemberModal">+ Add Family Member</button>
+                    </div>
+                    <div class="accordion accordion-flush" id="family-portfolio-accordion">
+                        {% for member in family_members %}
+                        <div class="accordion-item" data-member-id="{{ member.id }}">
+                            <h2 class="accordion-header" id="family-heading-{{ member.id }}">
+                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#family-collapse-{{ member.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="family-collapse-{{ member.id }}">
+                                    <div class="family-member-summary">
+                                        <strong>{{ member.name }}</strong>
+                                        <span class="chip {% if member.is_day_up %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{% if member.is_day_up %}▲{% else %}▼{% endif %} {{ member.day_change_percent|floatformat:2 }}%</span>
+                                        <span class="family-member-value">Rs {{ member.total_current|floatformat:0|intcomma }}</span>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="family-collapse-{{ member.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="family-heading-{{ member.id }}" data-bs-parent="#family-portfolio-accordion">
+                                <div class="accordion-body">
+                                    <div class="family-portfolio-stats">
+                                        <div><span>Yesterday's Value</span><strong>Rs {{ member.total_yesterday_value|floatformat:0|intcomma }}</strong></div>
+                                        <div><span>Today's Value</span><strong>Rs {{ member.total_current|floatformat:0|intcomma }}</strong></div>
+                                        <div><span>Day Change</span><strong class="{% if member.is_day_up %}text-up{% else %}text-down{% endif %}">{% if member.is_day_up %}+{% endif %}Rs {{ member.day_change|floatformat:0|intcomma }}</strong></div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between mt-3 mb-2">
+                                        <h6 class="mb-0 thisiswhite">Holdings</h6>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-primary family-add-holding-btn" data-member-id="{{ member.id }}" data-member-name="{{ member.name }}">+ Add Stock</button>
+                                            <button type="button" class="row-icon-btn family-delete-member-btn" data-member-id="{{ member.id }}" data-member-name="{{ member.name }}" title="Remove {{ member.name }}" aria-label="Remove {{ member.name }}">&#10007;</button>
+                                        </div>
+                                    </div>
+                                    <div class="holdings-list family-holdings-list" data-member-id="{{ member.id }}">
+                                        {% for holding in member.holdings %}
+                                        <div class="holding-item {% if holding.is_day_up %}is-up{% else %}is-down{% endif %}"
+                                            data-id="{{ holding.id }}"
+                                            data-member-id="{{ member.id }}"
+                                            data-symbol="{{ holding.symbol }}"
+                                            data-company-name="{{ holding.company_name }}"
+                                            data-quantity="{{ holding.quantity }}">
+                                            <div class="holding-top">
+                                                <strong>{{ holding.symbol }}</strong>
+                                                <span class="chip {% if holding.is_day_up %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{% if holding.is_day_up %}▲{% else %}▼{% endif %} {{ holding.day_change_percent|floatformat:2 }}%</span>
+                                                <div class="holding-actions">
+                                                    <button type="button" class="row-icon-btn edit-amount-btn" title="Edit holding" aria-label="Edit {{ holding.symbol }} holding">&#9998;</button>
+                                                    <button type="button" class="row-icon-btn delete-amount-btn" title="Delete holding" aria-label="Delete {{ holding.symbol }} holding">&#10007;</button>
+                                                </div>
+                                            </div>
+                                            <p class="holding-sub">{{ holding.company_name }}</p>
+                                            <div class="holding-prices">
+                                                <span>Price <strong>Rs {{ holding.current_price|floatformat:2|intcomma }}</strong></span>
+                                                <span>Total <strong>Rs {{ holding.current_value|floatformat:2|intcomma }}</strong></span>
+                                            </div>
+                                            <div class="holding-meta">
+                                                <span class="holding-date">Qty {{ holding.quantity }}</span>
+                                                <span class="holding-profit {% if holding.is_day_up %}text-up{% else %}text-down{% endif %}">{% if holding.is_day_up %}+{% endif %}Rs {{ holding.day_change|floatformat:2|intcomma }}</span>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <p class="text-muted stock-sub mb-0">No stocks yet — add {{ member.name }}'s first holding.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted stock-sub mb-0" id="family-portfolio-empty">No family members yet — add one to start tracking their portfolio.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="row gx-4 gy-4 mt-1">
+            <div class="col-12">
                 <section class="card material-card watchlist-card">
                     <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-3">
                         <div>
@@ -242,9 +323,14 @@
                             <p class="text-muted mb-0 stock-sub">Live prices refresh automatically every few seconds.</p>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <input type="search" class="form-control form-control-sm watchlist-search" placeholder="Search symbol…">
-                            <button type="button" class="btn btn-secondary btn-sm">+ Add stock</button>
+                            <input type="search" class="form-control form-control-sm watchlist-search" placeholder="Search symbol or company…">
                         </div>
+                    </div>
+                    <div class="watchlist-category-group mb-3" role="group" aria-label="Watchlist category">
+                        <button type="button" class="watchlist-category-pill active" data-category="all">All</button>
+                        {% for cat in watchlist_categories %}
+                        <button type="button" class="watchlist-category-pill" data-category="{{ cat }}">{{ cat }}</button>
+                        {% endfor %}
                     </div>
                     <div class="table-responsive">
                         <table class="table table-borderless align-middle mb-0">
@@ -260,69 +346,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr data-base-price="1102.00">
-                                    <td><strong class="thisiswhite">NABIL</strong></td>
-                                    <td class="text-muted stock-sub">Nabil Bank Ltd.</td>
-                                    <td class="live-price">Rs 1,102.00</td>
-                                    <td class="live-change"><span class="chip chip-soft-danger">▼ 1.34%</span></td>
-                                    <td class="thisiswhite">184,320</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="20,19,21,18,17,19,16,15,17,14,13"></svg></td>
+                                {% for row in watchlist %}
+                                <tr data-base-price="{{ row.price|default_if_none:'0'|floatformat:2 }}" data-symbol="{{ row.symbol }}" data-category="{{ row.category }}">
+                                    <td><strong class="thisiswhite">{{ row.symbol }}</strong></td>
+                                    <td class="text-muted stock-sub">{{ row.company }}</td>
+                                    <td class="live-price">{% if row.price is not None %}Rs {{ row.price|floatformat:2 }}{% else %}—{% endif %}</td>
+                                    <td class="live-change">
+                                        {% if row.change_percent is not None %}
+                                        <span class="chip {% if row.change_percent >= 0 %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{% if row.change_percent >= 0 %}▲{% else %}▼{% endif %} {{ row.change_percent|floatformat:2 }}%</span>
+                                        {% else %}
+                                        <span class="chip chip-soft-secondary">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="thisiswhite">{% if row.volume is not None %}{{ row.volume }}{% else %}—{% endif %}</td>
+                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="{{ row.sparkline }}"></svg></td>
                                     <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
                                 </tr>
-                                <tr data-base-price="890.50">
-                                    <td><strong class="thisiswhite">NICA</strong></td>
-                                    <td class="text-muted stock-sub">NIC Asia Bank Ltd.</td>
-                                    <td class="live-price">Rs 890.50</td>
-                                    <td class="live-change"><span class="chip chip-soft-danger">▼ 1.98%</span></td>
-                                    <td class="thisiswhite">96,150</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="18,20,17,19,16,18,15,17,14,16,13"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
-                                </tr>
-                                <tr data-base-price="298.40">
-                                    <td><strong class="thisiswhite">HIDCL</strong></td>
-                                    <td class="text-muted stock-sub">Hydroelectricity Inv. &amp; Dev.</td>
-                                    <td class="live-price">Rs 298.40</td>
-                                    <td class="live-change"><span class="chip chip-soft-success">▲ 4.87%</span></td>
-                                    <td class="thisiswhite">412,680</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="10,12,11,14,16,15,18,20,19,22,24"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star active" aria-label="Toggle watch">★</button></td>
-                                </tr>
-                                <tr data-base-price="512.60">
-                                    <td><strong class="thisiswhite">NHPC</strong></td>
-                                    <td class="text-muted stock-sub">National Hydro Power Co.</td>
-                                    <td class="live-price">Rs 512.60</td>
-                                    <td class="live-change"><span class="chip chip-soft-success">▲ 3.95%</span></td>
-                                    <td class="thisiswhite">268,940</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="13,14,16,15,18,17,20,19,22,21,24"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star active" aria-label="Toggle watch">★</button></td>
-                                </tr>
-                                <tr data-base-price="401.20">
-                                    <td><strong class="thisiswhite">UPPER</strong></td>
-                                    <td class="text-muted stock-sub">Upper Tamakoshi Hydropower</td>
-                                    <td class="live-price">Rs 401.20</td>
-                                    <td class="live-change"><span class="chip chip-soft-success">▲ 3.28%</span></td>
-                                    <td class="thisiswhite">150,410</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="17,18,17,19,20,19,21,22,21,23,24"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
-                                </tr>
-                                <tr data-base-price="1245.00">
-                                    <td><strong class="thisiswhite">CHCL</strong></td>
-                                    <td class="text-muted stock-sub">Chilime Hydropower Co.</td>
-                                    <td class="live-price">Rs 1,245.00</td>
-                                    <td class="live-change"><span class="chip chip-soft-success">▲ 2.74%</span></td>
-                                    <td class="thisiswhite">72,860</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="19,20,19,21,20,22,21,23,22,24,25"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
-                                </tr>
-                                <tr data-base-price="812.00">
-                                    <td><strong class="thisiswhite">SHIVM</strong></td>
-                                    <td class="text-muted stock-sub">Shivam Cements Ltd.</td>
-                                    <td class="live-price">Rs 812.00</td>
-                                    <td class="live-change"><span class="chip chip-soft-success">▲ 6.42%</span></td>
-                                    <td class="thisiswhite">324,720</td>
-                                    <td><svg class="sparkline" viewBox="0 0 100 32" data-points="6,9,12,16,20,18,22,24,26,28,30"></svg></td>
-                                    <td class="text-end"><button type="button" class="watch-star" aria-label="Toggle watch">★</button></td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -386,3 +426,97 @@
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="addFamilyMemberModal" tabindex="-1" aria-labelledby="addFamilyMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white">
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="addFamilyMemberModalLabel">Add Family Member</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-family-member-form">
+                    {% csrf_token %}
+                    <div class="mb-3 form-floating">
+                        <input type="text" class="form-control" id="family-member-add-name" name="name" placeholder="Name">
+                        <label for="family-member-add-name" class="text-white">Name</label>
+                        <div class="text-danger small mt-1" data-error-for="name"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="add-family-member-form" class="btn btn-primary">Add Member</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addFamilyHoldingModal" tabindex="-1" aria-labelledby="addFamilyHoldingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white">
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="addFamilyHoldingModalLabel">Add Stock for <span id="family-add-holding-member-name"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-family-holding-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="family-add-holding-member-id" name="family_member">
+                    <div class="mb-3">
+                        <label for="family-holding-add-symbol" class="form-label text-white">Stock</label>
+                        <select class="form-select" id="family-holding-add-symbol" name="symbol">
+                            <option value="">Loading symbols…</option>
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="symbol"></div>
+                        <input type="hidden" id="family-holding-add-company-name" name="company_name">
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="number" class="form-control" id="family-holding-add-quantity" name="quantity" step="1" min="1" value="1" placeholder="Quantity">
+                        <label for="family-holding-add-quantity" class="text-white">Quantity</label>
+                        <div class="text-danger small mt-1" data-error-for="quantity"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="add-family-holding-form" class="btn btn-primary">Add Holding</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editFamilyHoldingModal" tabindex="-1" aria-labelledby="editFamilyHoldingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white">
+            <div class="modal-header">
+                <h5 class="modal-title text-white" id="editFamilyHoldingModalLabel">Edit Holding</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-family-holding-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit-family-holding-id">
+                    <input type="hidden" id="family-edit-holding-member-id" name="family_member">
+                    <div class="mb-3">
+                        <label for="family-holding-edit-symbol" class="form-label text-white">Stock</label>
+                        <select class="form-select" id="family-holding-edit-symbol" name="symbol">
+                            <option value="">Loading symbols…</option>
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="symbol"></div>
+                        <input type="hidden" id="family-holding-edit-company-name" name="company_name">
+                    </div>
+                    <div class="mb-3 form-floating">
+                        <input type="number" class="form-control" id="family-holding-edit-quantity" name="quantity" step="1" min="1" placeholder="Quantity">
+                        <label for="family-holding-edit-quantity" class="text-white">Quantity</label>
+                        <div class="text-danger small mt-1" data-error-for="quantity"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="edit-family-holding-form" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

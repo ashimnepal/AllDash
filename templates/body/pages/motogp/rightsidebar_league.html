@@ -6,26 +6,16 @@
                 <span>Team</span>
                 <span class="pts-pad">Pts</span>
             </div>
+            {% for t in team_standings|slice:":5" %}
             <div class="league-table-row">
-                <span class="league-table-team">Ducati</span>
-                <span class="league-table-points">512</span>
+                <span class="league-table-team">{{ t.name }}</span>
+                <span class="league-table-points">{{ t.points|floatformat:0 }}</span>
             </div>
+            {% empty %}
             <div class="league-table-row">
-                <span class="league-table-team">KTM</span>
-                <span class="league-table-points">356</span>
+                <span class="league-table-team">Standings unavailable</span>
             </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Aprilia</span>
-                <span class="league-table-points">298</span>
-            </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Honda</span>
-                <span class="league-table-points">210</span>
-            </div>
-            <div class="league-table-row">
-                <span class="league-table-team">Yamaha</span>
-                <span class="league-table-points">175</span>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>

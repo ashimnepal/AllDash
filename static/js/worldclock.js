@@ -1,8 +1,8 @@
   function updateWorldClock() {
     document.querySelectorAll('.worldclock-tile').forEach(function (tile) {
       const timezone = tile.dataset.timezone;
-      const timeEl = document.getElementById('time-' + timezone.replace(/[\/]/g, '-'));
-      const dateEl = document.getElementById('date-' + timezone.replace(/[\/]/g, '-'));
+      const timeEl = document.getElementById('time-' + timezone);
+      const dateEl = document.getElementById('date-' + timezone);
 
       if (!timeEl || !dateEl) return;
 

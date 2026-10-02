@@ -1,15 +1,32 @@
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-t^y$pue$nypr#^9)7sm%mr*oljw*@m!$i@_4+6*14h^+u=ikt&'
+SECRET_KEY = os.environ.get('SECRET_KEY') or 'django-insecure-dev-secret-key-change-me'
+
+# Key for https://www.exchangerate-api.com/, read from the .env file (never commit real keys).
+EXCHANGERATE_API_KEY = os.environ.get('EXCHANGERATE_API_KEY', '')
+
+# Key for https://www.football-data.org/, read from the .env file (never commit real keys).
+FOOTBALL_DATA_API_TOKEN = os.environ.get('FOOTBALL_DATA_API_TOKEN', '')
+
+# host:port of the LAN NEPSE websocket feed (scheme is derived per-request in
+# views.stockex so HTTPS deployments get wss:// automatically).
+NEPSE_WS_HOST = os.environ.get('NEPSE_WS_HOST', '192.168.1.93:5555')
+
+# WhatsApp price alerts: drives an already-logged-in WhatsApp Web tab in Firefox via
+# Selenium (see nodis_app/whatsapp_web.py for one-time setup). Both read from .env.
+WHATSAPP_TARGET_NUMBER = os.environ.get('WHATSAPP_TARGET_NUMBER', '')
+WHATSAPP_GECKODRIVER_ADDRESS = os.environ.get('WHATSAPP_GECKODRIVER_ADDRESS', '127.0.0.1:4444')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -26,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'nodis_app',
 ]
 

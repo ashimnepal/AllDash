@@ -11,64 +11,122 @@
     <div class="fixtures-section">
         <div class="fixtures-section-header">
             <h2>Next Grands Prix</h2>
-            <span class="premier-pill">4 Races</span>
+            <span class="premier-pill">{{ upcoming_races|length }} Races</span>
         </div>
         <div class="fixtures-grid">
+            {% for race in upcoming_races %}
             <div class="fixture-card">
                 <div class="fixture-card-header">
-                    <span class="fixture-club">Belgian GP</span>
-                    <span class="premier-pill">Round 14</span>
+                    <span class="fixture-club">{{ race.meeting_name }}</span>
+                    <span class="premier-pill">Round {{ race.round }}</span>
                 </div>
                 <div class="fixture-teams">
-                    <span>Circuit de Spa-Francorchamps</span>
+                    <span>{{ race.circuit_short_name }}</span>
                 </div>
                 <div class="fixture-meta">
-                    <span>Stavelot, Belgium</span>
-                    <span>Sun • 26 Jul, 15:00</span>
+                    <span>{{ race.location }}, {{ race.country_name }}</span>
+                    <span>{{ race.date_start|date:"D • d M, H:i" }} UTC</span>
                 </div>
             </div>
-
+            {% empty %}
             <div class="fixture-card">
                 <div class="fixture-card-header">
-                    <span class="fixture-club">Hungarian GP</span>
-                    <span class="premier-pill">Round 15</span>
-                </div>
-                <div class="fixture-teams">
-                    <span>Hungaroring</span>
-                </div>
-                <div class="fixture-meta">
-                    <span>Mogyorod, Hungary</span>
-                    <span>Sun • 02 Aug, 15:00</span>
+                    <span class="fixture-club">Calendar unavailable</span>
                 </div>
             </div>
+            {% endfor %}
+        </div>
+    </div>
 
-            <div class="fixture-card">
-                <div class="fixture-card-header">
-                    <span class="fixture-club">Dutch GP</span>
-                    <span class="premier-pill">Round 16</span>
-                </div>
-                <div class="fixture-teams">
-                    <span>Circuit Zandvoort</span>
-                </div>
-                <div class="fixture-meta">
-                    <span>Zandvoort, Netherlands</span>
-                    <span>Sun • 30 Aug, 15:00</span>
-                </div>
-            </div>
+    <div class="fixtures-section">
+        <div class="fixtures-section-header">
+            <h2>All Drivers</h2>
+            <span class="premier-pill">{{ driver_standings|length }} Drivers</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Pos</th>
+                        <th scope="col">Driver</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">Points</th>
+                        <th scope="col">Races</th>
+                        <th scope="col">Wins</th>
+                        <th scope="col">Podiums</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in driver_standings %}
+                    <tr>
+                        <td>{{ d.position }}</td>
+                        <td>{{ d.name }}</td>
+                        <td>{{ d.team }}</td>
+                        <td>{{ d.points|floatformat:0 }}</td>
+                        <td>{{ d.starts }}</td>
+                        <td>{{ d.wins }}</td>
+                        <td>{{ d.podiums }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-muted text-center">Driver stats unavailable.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-            <div class="fixture-card">
-                <div class="fixture-card-header">
-                    <span class="fixture-club">Italian GP</span>
-                    <span class="premier-pill">Round 17</span>
-                </div>
-                <div class="fixture-teams">
-                    <span>Autodromo Nazionale Monza</span>
-                </div>
-                <div class="fixture-meta">
-                    <span>Monza, Italy</span>
-                    <span>Sun • 06 Sep, 15:00</span>
-                </div>
+    <div class="fixtures-section">
+        <div class="fixtures-section-header">
+            <h2>Last Races</h2>
+            <span class="premier-pill">{{ past_races|length }} Completed</span>
+        </div>
+        {% if past_races %}
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <label class="mb-0 text-muted recent_expense" for="past-race-select">Race:</label>
+            <select id="past-race-select" class="form-select form-select-sm w-auto">
+                {% for race in past_races reversed %}
+                <option value="{{ race.meeting_key }}" {% if forloop.first %}selected{% endif %}>
+                    Round {{ race.round }} — {{ race.meeting_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% for race in past_races reversed %}
+        <div class="past-race-result{% if not forloop.first %} d-none{% endif %}" data-race-key="{{ race.meeting_key }}">
+            <p class="text-muted mb-2 recent_expense">
+                Winner: <strong>{{ race.winner.name|default:"Unavailable" }}</strong>
+                {% if race.winner.team %}({{ race.winner.team }}){% endif %}
+            </p>
+            <div class="table-responsive">
+                <table class="table table-borderless align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Pos</th>
+                            <th scope="col">Driver</th>
+                            <th scope="col">Team</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in race.results %}
+                        <tr>
+                            <td>{% if row.dnf %}DNF{% elif row.dsq %}DSQ{% else %}{{ row.position }}{% endif %}</td>
+                            <td>{{ row.name }}</td>
+                            <td>{{ row.team }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-muted text-center">Results unavailable.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted mb-0 recent_expense">No completed races yet this season.</p>
+        {% endif %}
     </div>
 </div>

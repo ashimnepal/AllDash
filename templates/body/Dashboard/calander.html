@@ -7,28 +7,34 @@
                 <div class="dashboard-card">
                     <div class="dashboard-hero dashboard-calendar-shell">
                         <div class="dashboard-calendar-top">
-                            <span class="dashboard-chip topdate">2083</span>
-                            <span class="dashboard-date-pill" id="nepal-time-pill">Loading Nepal time...</span>
+                            <span class="dashboard-chip topdate">{{ nepali_year }}</span>
+                            <span class="dashboard-date-pill" id="nepal-time-pill">Loading Toronto time...</span>
                         </div>
 
                         <div class="dashboard-calendar-body">
                             <div class="dashboard-calendar-date">
-                                <span class="dashboard-calendar-weekday">Wednesday</span>
-                                <span class="dashboard-calendar-day">22</span>
-                                <span class="dashboard-calendar-month">Shrawan</span>
+                                <span class="dashboard-calendar-weekday">{{ nepali_weekday_name }}</span>
+                                <span class="dashboard-calendar-day">{{ nepali_day }}</span>
+                                <span class="dashboard-calendar-month">{{ nepali_month_name }}</span>
                             </div>
 
                             <div class="dashboard-calendar-detail">
+                                {% if nepali_todays_holiday %}
                                 <span class="dashboard-special-label">Special Today</span>
-                                <h2 class="dashboard-calendar-title">Hariyali Teej</h2>
-                                <p class="dashboard-calendar-text">Tithi: Chaturthi, a sacred day of fasting, devotion, and blessings for marital harmony.</p>
+                                <h2 class="dashboard-calendar-title">{{ nepali_todays_holiday.name }}</h2>
+                                <p class="dashboard-calendar-text">{{ nepali_todays_holiday.description }}</p>
+                                {% else %}
+                                <span class="dashboard-special-label">Today</span>
+                                <h2 class="dashboard-calendar-title">{{ nepali_month_name }} {{ nepali_day }}, {{ nepali_year }}</h2>
+                                <p class="dashboard-calendar-text">No special occasion today - check the upcoming special days below.</p>
+                                {% endif %}
                             </div>
                         </div>
 
                         <div class="dashboard-calendar-bottom">
                             <div class="dashboard-mini-calendar">
                                 <div class="dashboard-mini-calendar-header">
-                                    <span>July 2026</span>
+                                    <span>{{ nepali_month_label }}</span>
                                     <span class="dashboard-mini-month-tag">Nepali Month</span>
                                 </div>
 
@@ -41,63 +47,25 @@
                                     <span class="dashboard-mini-weekday">Fri</span>
                                     <span class="dashboard-mini-weekday">Sat</span>
 
-                                    <span class="dashboard-mini-day muted">28</span>
-                                    <span class="dashboard-mini-day muted">29</span>
-                                    <span class="dashboard-mini-day muted">30</span>
-                                    <span class="dashboard-mini-day">1</span>
-                                    <span class="dashboard-mini-day">2</span>
-                                    <span class="dashboard-mini-day">3</span>
-                                    <span class="dashboard-mini-day">4</span>
-
-                                    <span class="dashboard-mini-day">5</span>
-                                    <span class="dashboard-mini-day">6</span>
-                                    <span class="dashboard-mini-day">7</span>
-                                    <span class="dashboard-mini-day">8</span>
-                                    <span class="dashboard-mini-day">9</span>
-                                    <span class="dashboard-mini-day">10</span>
-                                    <span class="dashboard-mini-day">11</span>
-
-                                    <span class="dashboard-mini-day">12</span>
-                                    <span class="dashboard-mini-day">13</span>
-                                    <span class="dashboard-mini-day">14</span>
-                                    <span class="dashboard-mini-day">15</span>
-                                    <span class="dashboard-mini-day">16</span>
-                                    <span class="dashboard-mini-day">17</span>
-                                    <span class="dashboard-mini-day">18</span>
-
-                                    <span class="dashboard-mini-day">19</span>
-                                    <span class="dashboard-mini-day">20</span>
-                                    <span class="dashboard-mini-day">21</span>
-                                    <span class="dashboard-mini-day active">22</span>
-                                    <span class="dashboard-mini-day">23</span>
-                                    <span class="dashboard-mini-day">24</span>
-                                    <span class="dashboard-mini-day">25</span>
-
-                                    <span class="dashboard-mini-day">26</span>
-                                    <span class="dashboard-mini-day">27</span>
-                                    <span class="dashboard-mini-day">28</span>
-                                    <span class="dashboard-mini-day">29</span>
-                                    <span class="dashboard-mini-day">30</span>
-                                    <span class="dashboard-mini-day">31</span>
-                                    <span class="dashboard-mini-day muted">1</span>
+                                    {% for cell in nepali_calendar_days %}
+                                    <span class="dashboard-mini-day{% if cell.muted %} muted{% endif %}{% if cell.active %} active{% endif %}{% if cell.holiday %} holiday{% endif %}"{% if cell.holiday %} title="{{ cell.holiday.name }}"{% endif %}>{{ cell.day }}</span>
+                                    {% endfor %}
                                 </div>
                             </div>
 
                             <div class="dashboard-upcoming-card">
                                 <div class="dashboard-upcoming-header">Upcoming Special Days</div>
                                 <div class="dashboard-upcoming-list">
+                                    {% for holiday in nepali_upcoming_holidays %}
                                     <div class="dashboard-upcoming-item">
-                                        <span class="dashboard-upcoming-name">Nag Panchami</span>
-                                        <span class="dashboard-upcoming-date">29 July</span>
+                                        <span class="dashboard-upcoming-name">{{ holiday.name }}</span>
+                                        <span class="dashboard-upcoming-date">{{ holiday.date_label }}</span>
                                     </div>
+                                    {% empty %}
                                     <div class="dashboard-upcoming-item">
-                                        <span class="dashboard-upcoming-name">Gai Jatra</span>
-                                        <span class="dashboard-upcoming-date">04 Aug</span>
+                                        <span class="dashboard-upcoming-name">No upcoming special days found</span>
                                     </div>
-                                    <div class="dashboard-upcoming-item">
-                                        <span class="dashboard-upcoming-name">Indra Jatra</span>
-                                        <span class="dashboard-upcoming-date">08 Aug</span>
-                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
