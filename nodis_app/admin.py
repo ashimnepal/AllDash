@@ -70,8 +70,8 @@ class AlertRecipientAdmin(admin.ModelAdmin):
 
 @admin.register(PriceAlert)
 class PriceAlertAdmin(admin.ModelAdmin):
-    list_display = ("symbol", "action", "target_price", "recipient", "is_triggered", "triggered_direction", "triggered_at")
-    list_filter = ("action", "is_triggered")
+    list_display = ("symbol", "action", "target_price", "holder", "recipient", "is_triggered", "triggered_direction", "triggered_at", "message_sent")
+    list_filter = ("action", "is_triggered", "message_sent", "holder")
     search_fields = ("symbol", "company_name")
 
 

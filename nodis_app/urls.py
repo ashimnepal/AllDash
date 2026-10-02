@@ -31,6 +31,7 @@ urlpatterns = [
     path('stockex_dash/family/holdings/<int:pk>/update/', views.family_portfolio_update, name='family_portfolio_update'),
     path('stockex_dash/family/holdings/<int:pk>/delete/', views.family_portfolio_delete, name='family_portfolio_delete'),
     path('stockex_dash/alerts/check/', views.price_alerts_check, name='price_alerts_check'),
+    path('stockex_dash/alerts/test/', views.price_alerts_send_test, name='price_alerts_send_test'),
     path('stockex_dash/alerts/add/', views.price_alert_add, name='price_alert_add'),
     path('stockex_dash/alerts/<int:pk>/update/', views.price_alert_update, name='price_alert_update'),
     path('stockex_dash/alerts/<int:pk>/delete/', views.price_alert_delete, name='price_alert_delete'),

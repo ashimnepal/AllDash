@@ -36,11 +36,13 @@
 
         const activeBadgeEl = document.getElementById('price-alerts-active-badge');
         const toastContainerEl = document.getElementById('price-alert-toast-container');
+        const testBtn = document.getElementById('test-price-alerts-btn');
 
         const addForm = document.getElementById('add-price-alert-form');
         const addModalEl = document.getElementById('addPriceAlertModal');
         const addSymbolSelect = document.getElementById('price-alert-add-symbol');
         const addCompanyNameInput = document.getElementById('price-alert-add-company-name');
+        const addHolderSelect = document.getElementById('price-alert-add-holder');
         const addRecipientSelect = document.getElementById('price-alert-add-recipient');
         const addNewRecipientFields = document.getElementById('price-alert-add-new-recipient-fields');
 
@@ -51,6 +53,7 @@
         const editCompanyNameInput = document.getElementById('price-alert-edit-company-name');
         const editActionSelect = document.getElementById('price-alert-edit-action');
         const editTargetPriceInput = document.getElementById('price-alert-edit-target-price');
+        const editHolderSelect = document.getElementById('price-alert-edit-holder');
         const editRecipientSelect = document.getElementById('price-alert-edit-recipient');
         const editNewRecipientFields = document.getElementById('price-alert-edit-new-recipient-fields');
 
@@ -125,6 +128,7 @@
             row.setAttribute('data-target-price', alert.target_price);
             row.setAttribute('data-action', alert.action);
             row.setAttribute('data-recipient-id', alert.recipient_id || '');
+            row.setAttribute('data-holder-id', alert.holder_id || '');
 
             const actionChipClass = alert.action === 'buy' ? 'chip-soft-success' : 'chip-soft-danger';
             const chipClass = alert.is_triggered ? 'chip-soft-warning' : 'chip-soft-secondary';
@@ -134,6 +138,7 @@
                 '<div>' +
                     '<strong></strong>' +
                     '<p class="mb-0 text-muted stock-sub"></p>' +
+                    '<p class="mb-0 text-muted stock-sub alert-holder-line d-none"></p>' +
                     '<p class="mb-0 text-muted stock-sub alert-recipient-line"></p>' +
                 '</div>' +
                 '<span class="chip ' + actionChipClass + '"></span>' +
@@ -145,6 +150,11 @@
 
             row.querySelector('strong').textContent = alert.symbol;
             row.querySelector('.stock-sub').textContent = alert.status_text;
+            const holderLineEl = row.querySelector('.alert-holder-line');
+            if (alert.holder_name) {
+                holderLineEl.textContent = 'Holds: ' + alert.holder_name;
+                holderLineEl.classList.remove('d-none');
+            }
             row.querySelector('.alert-recipient-line').textContent = 'Notifies: ' + (alert.recipient_name || 'Default number');
             row.querySelector('.chip.' + actionChipClass).textContent = alert.action_display || '';
             return row;
@@ -200,6 +210,32 @@
             setTimeout(function () { toast.remove(); }, 8000);
         }
 
+        function showInfoToast(title, message, isError) {
+            if (!toastContainerEl) return;
+            const toast = document.createElement('div');
+            toast.className = 'price-alert-toast' + (isError ? ' is-down' : '');
+
+            const body = document.createElement('div');
+            const titleEl = document.createElement('strong');
+            titleEl.textContent = title;
+            const messageEl = document.createElement('span');
+            messageEl.textContent = message;
+            body.appendChild(titleEl);
+            body.appendChild(messageEl);
+
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'price-alert-toast-close';
+            closeBtn.setAttribute('aria-label', 'Dismiss');
+            closeBtn.textContent = '\u2715';
+            closeBtn.addEventListener('click', function () { toast.remove(); });
+
+            toast.appendChild(body);
+            toast.appendChild(closeBtn);
+            toastContainerEl.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 8000);
+        }
+
         function postJson(url, body) {
             const csrfToken = getCsrfToken();
             return fetch(url, {
@@ -221,11 +257,13 @@
             if (!editModalEl || !window.bootstrap) return;
             const symbol = row.getAttribute('data-symbol');
             const recipientId = row.getAttribute('data-recipient-id') || '';
+            const holderId = row.getAttribute('data-holder-id') || '';
 
             editIdInput.value = row.getAttribute('data-id');
             editTargetPriceInput.value = row.getAttribute('data-target-price');
             editCompanyNameInput.value = '';
             if (editActionSelect) editActionSelect.value = row.getAttribute('data-action') || 'buy';
+            if (editHolderSelect) editHolderSelect.value = holderId;
             if (editRecipientSelect) editRecipientSelect.value = recipientId;
             if (editNewRecipientFields) editNewRecipientFields.classList.add('d-none');
 
@@ -270,6 +308,7 @@
                         render(result.data);
                         addForm.reset();
                         if (addSymbolSelect) addSymbolSelect.selectedIndex = 0;
+                        if (addHolderSelect) addHolderSelect.selectedIndex = 0;
                         if (addNewRecipientFields) addNewRecipientFields.classList.add('d-none');
                         hideModal(addModalEl);
                     } else {
@@ -295,6 +334,32 @@
                     } else {
                         showFieldErrors(editForm, result.data.errors);
                     }
+                });
+            });
+        }
+
+        if (testBtn) {
+            testBtn.addEventListener('click', function () {
+                testBtn.disabled = true;
+                const originalText = testBtn.textContent;
+                testBtn.textContent = 'Sending test messages…';
+                const formData = new FormData();
+                formData.set('csrfmiddlewaretoken', getCsrfToken());
+                postJson('/stockex_dash/alerts/test/', formData).then(function (result) {
+                    const data = result.data || {};
+                    (data.results || []).forEach(function (r) {
+                        showInfoToast(
+                            r.sent ? '\u2705 Test sent' : '\u274C Test failed',
+                            r.label + ' (' + r.phone_number + ')' + (r.sent ? ' received the test message.' : ' did not receive it.'),
+                            !r.sent
+                        );
+                    });
+                    showInfoToast(result.ok && data.success ? 'Test complete' : 'Test failed', data.message || 'No response from server.', !(result.ok && data.success));
+                }).catch(function () {
+                    showInfoToast('Test failed', 'Could not reach the server.', true);
+                }).then(function () {
+                    testBtn.disabled = false;
+                    testBtn.textContent = originalText;
                 });
             });
         }

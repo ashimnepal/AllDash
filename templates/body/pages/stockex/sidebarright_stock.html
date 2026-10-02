@@ -7,10 +7,11 @@
                     </div>
                     <ul class="alerts-list list-unstyled mb-3" id="price-alerts-list">
                         {% for alert in price_alerts %}
-                        <li class="alert-row" data-id="{{ alert.id }}" data-symbol="{{ alert.symbol }}" data-target-price="{{ alert.target_price }}" data-action="{{ alert.action }}" data-recipient-id="{{ alert.recipient_id|default:'' }}">
+                        <li class="alert-row" data-id="{{ alert.id }}" data-symbol="{{ alert.symbol }}" data-target-price="{{ alert.target_price }}" data-action="{{ alert.action }}" data-recipient-id="{{ alert.recipient_id|default:'' }}" data-holder-id="{{ alert.holder_id|default:'' }}">
                             <div>
                                 <strong>{{ alert.symbol }}</strong>
                                 <p class="mb-0 text-muted stock-sub">{{ alert.status_text }}</p>
+                                {% if alert.holder_name %}<p class="mb-0 text-muted stock-sub alert-holder-line">Holds: {{ alert.holder_name }}</p>{% endif %}
                                 <p class="mb-0 text-muted stock-sub alert-recipient-line">Notifies: {{ alert.recipient_name|default:"Default number" }}</p>
                             </div>
                             <span class="chip {% if alert.action == 'buy' %}chip-soft-success{% else %}chip-soft-danger{% endif %}">{{ alert.action_display }}</span>
@@ -25,6 +26,7 @@
                         {% endfor %}
                     </ul>
                     <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addPriceAlertModal">+ Create alert</button>
+                    <button type="button" class="btn btn-outline-secondary w-100 mt-2" id="test-price-alerts-btn">Test messaging system</button>
                 </section>
             </div>
 
@@ -75,6 +77,16 @@
                         <input type="number" class="form-control" id="price-alert-add-target-price" name="target_price" step="0.01" min="0.01" placeholder="Target price">
                         <label for="price-alert-add-target-price" class="text-white">Alert me when price hits (Rs)</label>
                         <div class="text-danger small mt-1" data-error-for="target_price"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price-alert-add-holder" class="form-label text-white">Who holds this share?</label>
+                        <select class="form-select" id="price-alert-add-holder" name="holder">
+                            <option value="">— No specific holder —</option>
+                            {% for m in family_members %}
+                            <option value="{{ m.id }}">{{ m.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="holder"></div>
                     </div>
                     <div class="mb-3">
                         <label for="price-alert-add-recipient" class="form-label text-white">Send WhatsApp to</label>
@@ -140,6 +152,16 @@
                         <input type="number" class="form-control" id="price-alert-edit-target-price" name="target_price" step="0.01" min="0.01" placeholder="Target price">
                         <label for="price-alert-edit-target-price" class="text-white">Alert me when price hits (Rs)</label>
                         <div class="text-danger small mt-1" data-error-for="target_price"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price-alert-edit-holder" class="form-label text-white">Who holds this share?</label>
+                        <select class="form-select" id="price-alert-edit-holder" name="holder">
+                            <option value="">— No specific holder —</option>
+                            {% for m in family_members %}
+                            <option value="{{ m.id }}">{{ m.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="text-danger small mt-1" data-error-for="holder"></div>
                     </div>
                     <div class="mb-3">
                         <label for="price-alert-edit-recipient" class="form-label text-white">Send WhatsApp to</label>

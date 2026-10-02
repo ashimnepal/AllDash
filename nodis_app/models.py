@@ -209,9 +209,20 @@ class PriceAlert(models.Model):
     recipient = models.ForeignKey(
         AlertRecipient, on_delete=models.SET_NULL, null=True, blank=True, related_name="alerts"
     )
+    holder = models.ForeignKey(
+        FamilyMember,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="price_alerts",
+        help_text="Which family member's share this alert is about (purely informational - doesn't change who gets notified).",
+    )
     is_triggered = models.BooleanField(default=False)
     triggered_direction = models.CharField(max_length=4, choices=DIRECTION_CHOICES, blank=True)
     triggered_at = models.DateTimeField(null=True, blank=True)
+    message_sent = models.BooleanField(
+        default=False, help_text="Whether the WhatsApp alert message was actually delivered."
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

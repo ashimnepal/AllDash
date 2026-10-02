@@ -23,7 +23,7 @@ import urllib.parse
 
 from django.conf import settings
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
@@ -82,10 +82,19 @@ def send_whatsapp_message(text, phone_number=None):
             logger.warning("No open web.whatsapp.com tab found in the attached Firefox window")
             return False
 
+        # Force a hard reload (discards the whole SPA/React state) before loading the
+        # deep link. Without this, navigating straight from one chat to another re-uses
+        # the still-mounted page - if the new chat is slower to render than the old
+        # compose box takes to disappear, Selenium can end up pressing Enter on the
+        # PREVIOUS (wrong) chat's still-present box, silently sending nothing to the
+        # intended recipient while still reporting success. This bit real: sending the
+        # same test text to 3 numbers in a row delivered twice to one number and never
+        # to a different one in between, even though every call reported True.
+        driver.get("about:blank")
         driver.get(f"https://web.whatsapp.com/send?phone={phone}&text={urllib.parse.quote(text)}")
 
         try:
-            WebDriverWait(driver, 3).until(
+            WebDriverWait(driver, WAIT_SECONDS).until(
                 EC.element_to_be_clickable((By.XPATH, CONTINUE_TO_CHAT_XPATH))
             ).click()
         except TimeoutException:
@@ -95,6 +104,25 @@ def send_whatsapp_message(text, phone_number=None):
             message_box = WebDriverWait(driver, WAIT_SECONDS).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, MESSAGE_BOX_SELECTOR))
             )
+            # Confirm WhatsApp actually pre-filled THIS message before pressing Enter,
+            # as a second line of defense on top of the hard reload above.
+            expected_snippet = text.strip()[:20]
+
+            def _box_has_expected_text(_driver):
+                try:
+                    return expected_snippet in (message_box.text or "")
+                except StaleElementReferenceException:
+                    return False
+
+            try:
+                WebDriverWait(driver, WAIT_SECONDS).until(_box_has_expected_text)
+            except TimeoutException:
+                logger.warning(
+                    "Compose box for %s never showed the expected message text - chat "
+                    "probably hadn't finished loading; treating as a failed send",
+                    phone,
+                )
+                return False
             message_box.send_keys(Keys.ENTER)
         except TimeoutException:
             # Compose box selector didn't match this WhatsApp Web version - fall back

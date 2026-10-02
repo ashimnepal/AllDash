@@ -334,6 +334,11 @@ class PriceAlertForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "WhatsApp number, e.g. +9779800000000"}),
     )
+    holder = forms.ModelChoiceField(
+        queryset=FamilyMember.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
 
     class Meta:
         model = PriceAlert

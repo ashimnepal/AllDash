@@ -9,7 +9,7 @@ import requests
 from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import Q, Sum
+from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import TruncMonth
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -1388,25 +1388,48 @@ NEPSE_LOSERS_CACHE_KEY = 'nepse_raw_losers'
 def _nepse_get_json(path):
     """GET a LAN NEPSE endpoint with a short circuit-breaker: once a call fails (e.g. the
     Mac mini is off outside market hours), skip straight to raising for a cooldown window
-    instead of every request waiting out another multi-second timeout."""
-    if cache.get(NEPSE_DOWN_CACHE_KEY):
-        raise requests.ConnectionError("NEPSE API recently unreachable, skipping retry")
+    instead of every request waiting out another multi-second timeout.
+
+    The breaker is keyed per-path (not shared globally) - one endpoint hanging (e.g. /Summary
+    timing out) must not trip the breaker for the other independent endpoints, which can be
+    perfectly healthy at the same time.
+    """
+    down_cache_key = f"{NEPSE_DOWN_CACHE_KEY}:{path}"
+    if cache.get(down_cache_key):
+        raise requests.ConnectionError(f"NEPSE API {path} recently unreachable, skipping retry")
     try:
         response = requests.get(f"{NEPSE_API_BASE}{path}", timeout=3)
         response.raise_for_status()
     except requests.RequestException:
-        cache.set(NEPSE_DOWN_CACHE_KEY, True, NEPSE_DOWN_COOLDOWN)
+        cache.set(down_cache_key, True, NEPSE_DOWN_COOLDOWN)
         raise
     return response.json()
 
 
+NEPSE_STALE_CACHE_SUFFIX = '_stale'
+NEPSE_STALE_CACHE_TTL = 60 * 60 * 12  # keep the last real snapshot available through a long outage
+
+
 def _cached_nepse_json(cache_key, path):
-    """Short-TTL cached wrapper around `_nepse_get_json` shared by every raw NEPSE endpoint."""
+    """Short-TTL cached wrapper around `_nepse_get_json` shared by every raw NEPSE endpoint.
+
+    Falls back to the last successfully fetched snapshot (cached much longer) when the Mac
+    mini is unreachable, instead of raising - without this, every page using this data would
+    flip to a misleading "nothing happened" placeholder the moment the short cache expired
+    mid-outage, instead of just showing the last real numbers it actually has.
+    """
     data = cache.get(cache_key)
     if data is not None:
         return data
-    data = _nepse_get_json(path)
+    try:
+        data = _nepse_get_json(path)
+    except requests.RequestException:
+        stale = cache.get(cache_key + NEPSE_STALE_CACHE_SUFFIX)
+        if stale is not None:
+            return stale
+        raise
     cache.set(cache_key, data, NEPSE_RAW_CACHE_TTL)
+    cache.set(cache_key + NEPSE_STALE_CACHE_SUFFIX, data, NEPSE_STALE_CACHE_TTL)
     return data
 
 
@@ -1427,12 +1450,25 @@ def get_nepse_losers_data():
 
 
 def get_nepse_price_map():
-    """Symbol -> {name, price, change_percent, volume} from the LAN NEPSE PriceVolume feed, cached briefly."""
+    """Symbol -> {name, price, change_percent, volume} from the LAN NEPSE PriceVolume feed, cached briefly.
+
+    Falls back to the last successfully fetched snapshot when the Mac mini is unreachable
+    (same reasoning as `_cached_nepse_json` above) so portfolio/alerts/watchlist keep showing
+    real last-known prices instead of every holding resetting to "no change" (current price
+    = buy price, 0% profit) the instant this falls back to an empty map.
+    """
     price_map = cache.get(PORTFOLIO_PRICE_CACHE_KEY)
     if price_map is not None:
         return price_map
 
-    rows = _nepse_get_json("/PriceVolume")
+    try:
+        rows = _nepse_get_json("/PriceVolume")
+    except requests.RequestException:
+        stale = cache.get(PORTFOLIO_PRICE_CACHE_KEY + NEPSE_STALE_CACHE_SUFFIX)
+        if stale is not None:
+            return stale
+        raise
+
     price_map = {
         row["symbol"]: {
             "name": (row.get("securityName") or "").strip(),
@@ -1444,6 +1480,7 @@ def get_nepse_price_map():
         if row.get("symbol")
     }
     cache.set(PORTFOLIO_PRICE_CACHE_KEY, price_map, PORTFOLIO_PRICE_CACHE_TTL)
+    cache.set(PORTFOLIO_PRICE_CACHE_KEY + NEPSE_STALE_CACHE_SUFFIX, price_map, NEPSE_STALE_CACHE_TTL)
     return price_map
 
 
@@ -1738,7 +1775,9 @@ def family_members_json(extra=None):
         price_map = {}
 
     members = []
-    for member in FamilyMember.objects.prefetch_related("holdings"):
+    for member in FamilyMember.objects.prefetch_related(
+        Prefetch("holdings", queryset=FamilyPortfolioHolding.objects.order_by("symbol"))
+    ):
         rows = [_family_holding_row(holding, price_map) for holding in member.holdings.all()]
         total_current = sum(row["current_value"] for row in rows)
         total_yesterday = sum(row["yesterday_value"] for row in rows)
@@ -1848,6 +1887,8 @@ def _price_alert_status(alert, current_price):
         "triggered_at": alert.triggered_at.isoformat() if alert.triggered_at else None,
         "recipient_id": alert.recipient_id,
         "recipient_name": alert.recipient.name if alert.recipient else "",
+        "holder_id": alert.holder_id,
+        "holder_name": alert.holder.name if alert.holder else "",
     }
 
 
@@ -1860,7 +1901,7 @@ def price_alerts_json(extra=None):
 
     rows = []
     active_count = 0
-    for alert in PriceAlert.objects.select_related("recipient"):
+    for alert in PriceAlert.objects.select_related("recipient", "holder"):
         info = price_map.get(alert.symbol)
         current_price = float(info["price"]) if info and info.get("price") is not None else float(alert.last_price or alert.target_price)
         if not alert.is_triggered:
@@ -1883,6 +1924,7 @@ def price_alert_add(request):
     if form.is_valid():
         alert = form.save(commit=False)
         alert.recipient = form.resolve_recipient()
+        alert.holder = form.cleaned_data.get("holder")
         try:
             info = get_nepse_price_map().get(alert.symbol)
         except (requests.RequestException, ValueError):
@@ -1907,6 +1949,7 @@ def price_alert_update(request, pk):
     if form.is_valid():
         alert = form.save(commit=False)
         alert.recipient = form.resolve_recipient()
+        alert.holder = form.cleaned_data.get("holder")
         # Editing re-arms the alert with a fresh baseline price.
         alert.is_triggered = False
         alert.triggered_direction = ""
@@ -1932,21 +1975,46 @@ def price_alert_delete(request, pk):
     return JsonResponse(price_alerts_json({'success': True, 'message': 'Alert removed.'}))
 
 
+def _alert_message_text(alert, target, current_price, crossed_up):
+    action_word = "BUY" if alert.action == PriceAlert.BUY else "SELL"
+    direction_text = "crossed above" if crossed_up else "dropped below"
+    holder_line = f" [{alert.holder.name}'s holding]" if alert.holder_id else ""
+    return (
+        f"\U0001F514 {alert.symbol} {action_word} ALERT{holder_line}: price {direction_text} "
+        f"Rs {target:,.2f} (now Rs {current_price:,.2f})"
+    )
+
+
 def evaluate_price_alerts():
     """Check untriggered PriceAlerts against live prices, flip+WhatsApp any that just crossed target.
 
     Shared by the dashboard's poll endpoint (price_alerts_check) and the check_price_alerts
     management command, so a triggered alert is only ever messaged once regardless of which
     caller notices it first (the DB's is_triggered flag is the single source of truth).
+    Also retries delivery for any already-triggered alert whose WhatsApp message previously
+    failed to send (e.g. Firefox/geckodriver wasn't running at the time) - without this,
+    a failed send was silently lost forever since the alert never gets re-checked.
     Returns the list of status dicts for alerts that triggered on this call.
     """
+    # Retry any previously-triggered alert that never actually got its message delivered.
+    for alert in PriceAlert.objects.filter(is_triggered=True, message_sent=False).select_related("recipient", "holder"):
+        target = float(alert.target_price)
+        current_price = float(alert.last_price) if alert.last_price is not None else target
+        crossed_up = alert.triggered_direction == PriceAlert.UP
+        sent = send_whatsapp_message(
+            _alert_message_text(alert, target, current_price, crossed_up),
+            phone_number=alert.recipient.phone_number if alert.recipient else None,
+        )
+        alert.message_sent = sent
+        alert.save(update_fields=["message_sent"])
+
     try:
         price_map = get_nepse_price_map()
     except (requests.RequestException, ValueError):
         return []
 
     triggered_now = []
-    for alert in PriceAlert.objects.filter(is_triggered=False).select_related("recipient"):
+    for alert in PriceAlert.objects.filter(is_triggered=False).select_related("recipient", "holder"):
         info = price_map.get(alert.symbol)
         if not info or info.get("price") is None:
             continue
@@ -1966,16 +2034,13 @@ def evaluate_price_alerts():
             alert.triggered_direction = PriceAlert.UP if crossed_up else PriceAlert.DOWN
             alert.triggered_at = timezone.now()
             alert.last_price = current_price
-            alert.save()
-            status = _price_alert_status(alert, current_price)
-            triggered_now.append(status)
-            action_word = "BUY" if alert.action == PriceAlert.BUY else "SELL"
-            direction_text = "crossed above" if crossed_up else "dropped below"
-            send_whatsapp_message(
-                f"\U0001F514 {alert.symbol} {action_word} ALERT: price {direction_text} "
-                f"Rs {target:,.2f} (now Rs {current_price:,.2f})",
+            sent = send_whatsapp_message(
+                _alert_message_text(alert, target, current_price, crossed_up),
                 phone_number=alert.recipient.phone_number if alert.recipient else None,
             )
+            alert.message_sent = sent
+            alert.save()
+            triggered_now.append(_price_alert_status(alert, current_price))
         else:
             alert.last_price = current_price
             alert.save(update_fields=["last_price"])
@@ -1989,6 +2054,58 @@ def price_alerts_check(request):
     return JsonResponse(price_alerts_json({'triggered': triggered_now}))
 
 
+@require_POST
+def price_alerts_send_test(request):
+    """Sends a one-off WhatsApp test message to every registered number (default + all
+    AlertRecipients) so the user can confirm the messaging pipeline is actually working
+    right now, instead of only finding out the next time a real alert silently fails.
+    Numbers are de-duplicated (e.g. a recipient sharing the same number as the default)
+    so each real phone only ever gets one test message, not one per matching label.
+    """
+    targets = []
+    default_number = (settings.WHATSAPP_TARGET_NUMBER or "").strip()
+    if default_number:
+        targets.append({"label": "Default number", "phone_number": default_number})
+    for recipient in AlertRecipient.objects.all():
+        targets.append({"label": recipient.name, "phone_number": recipient.phone_number})
+
+    if not targets:
+        return JsonResponse({
+            "success": False,
+            "message": "No WhatsApp numbers are registered yet - add a recipient or set WHATSAPP_TARGET_NUMBER.",
+            "results": [],
+        }, status=400)
+
+    deduped = {}
+    for target in targets:
+        digits = "".join(ch for ch in target["phone_number"] if ch.isdigit())
+        if not digits:
+            continue
+        if digits in deduped:
+            deduped[digits]["label"] += f", {target['label']}"
+        else:
+            deduped[digits] = {"label": target["label"], "phone_number": target["phone_number"]}
+
+    timestamp = timezone.now().strftime("%Y-%m-%d %H:%M")
+    text = (
+        f"\u2705 AllDash test message - messaging system check at {timestamp}. "
+        "If you got this, price alerts will reach you."
+    )
+
+    results = []
+    sent_count = 0
+    for target in deduped.values():
+        ok = send_whatsapp_message(text, phone_number=target["phone_number"])
+        sent_count += 1 if ok else 0
+        results.append({"label": target["label"], "phone_number": target["phone_number"], "sent": ok})
+
+    return JsonResponse({
+        "success": sent_count > 0,
+        "message": f"Sent test message to {sent_count} of {len(results)} number(s).",
+        "results": results,
+    })
+
+
 def nepse_live_data(request):
     """Proxy live NEPSE data from the Mac mini's REST API for the stock dashboard.
 
@@ -1996,14 +2113,30 @@ def nepse_live_data(request):
     5 fresh uncached requests) since this view is polled every ~15s by the browser -
     without the cache, a slow/unreachable Mac mini stalls a request this often forever.
     """
+    # Each getter now has its own circuit breaker (see `_nepse_get_json`), so one broken
+    # endpoint (e.g. /Summary hanging) must not 502 the whole payload when the other
+    # endpoints are perfectly healthy - fetch each independently and degrade gracefully.
     try:
-        index_data = get_nepse_index_data()
-        summary_data = get_nepse_summary_data()
-        gainers_data = get_nepse_gainers_data()
-        losers_data = get_nepse_losers_data()
         price_map = get_nepse_price_map()
     except (requests.RequestException, ValueError):
         return JsonResponse({"error": "Mac mini NEPSE API is unreachable"}, status=502)
+
+    try:
+        index_data = get_nepse_index_data()
+    except (requests.RequestException, ValueError):
+        index_data = {}
+    try:
+        summary_data = get_nepse_summary_data()
+    except (requests.RequestException, ValueError):
+        summary_data = {}
+    try:
+        gainers_data = get_nepse_gainers_data()
+    except (requests.RequestException, ValueError):
+        gainers_data = []
+    try:
+        losers_data = get_nepse_losers_data()
+    except (requests.RequestException, ValueError):
+        losers_data = []
 
     nepse_index = index_data.get("NEPSE Index", {})
     advances = sum(1 for row in price_map.values() if (row.get("change_percent") or 0) > 0)
